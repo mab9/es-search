@@ -1,4 +1,4 @@
-package ch.mab.search.business;
+package ch.mab.search.ocr.business;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

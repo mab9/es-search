@@ -1,4 +1,4 @@
-package ch.mab.search.api;
+package ch.mab.search.ocr.api;
 
 import java.io.File;
 import java.io.IOException;

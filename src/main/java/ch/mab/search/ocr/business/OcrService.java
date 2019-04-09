@@ -1,6 +1,6 @@
-package ch.mab.search.business;
+package ch.mab.search.ocr.business;
 
-import ch.mab.search.api.Ocr;
+import ch.mab.search.ocr.api.Ocr;
 import org.springframework.stereotype.Service;
 
 import java.io.File;

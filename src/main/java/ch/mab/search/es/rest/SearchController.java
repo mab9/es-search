@@ -1,6 +1,6 @@
-package ch.mab.search.rest;
+package ch.mab.search.es.rest;
 
-import ch.mab.search.business.SearchService;
+import ch.mab.search.es.business.SearchService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;

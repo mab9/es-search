@@ -1,7 +1,7 @@
-package ch.mab.search.business;
+package ch.mab.search.ocr.business;
 
 
-import ch.mab.search.api.Ocr;
+import ch.mab.search.ocr.api.Ocr;
 import org.apache.tika.exception.TikaException;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.parser.ParseContext;

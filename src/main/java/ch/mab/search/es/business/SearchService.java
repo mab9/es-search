@@ -1,4 +1,4 @@
-package ch.mab.search.business;
+package ch.mab.search.es.business;
 
 import org.springframework.stereotype.Service;
 
