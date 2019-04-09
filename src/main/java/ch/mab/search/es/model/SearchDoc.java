@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+
 public class SearchDoc {
 
     // TODO check if ES internal doc have their own IDs.
@@ -41,5 +42,67 @@ public class SearchDoc {
         this.docContent = docContent;
     }
 
+    public UUID getId() {
+        return id;
+    }
 
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
+    public UUID getArchivespaceId() {
+        return archivespaceId;
+    }
+
+    public void setArchivespaceId(UUID archivespaceId) {
+        this.archivespaceId = archivespaceId;
+    }
+
+    public DocState getDocState() {
+        return docState;
+    }
+
+    public void setDocState(DocState docState) {
+        this.docState = docState;
+    }
+
+    public String getDocName() {
+        return docName;
+    }
+
+    public void setDocName(String docName) {
+        this.docName = docName;
+    }
+
+    public Date getUploadDate() {
+        return uploadDate;
+    }
+
+    public void setUploadDate(Date uploadDate) {
+        this.uploadDate = uploadDate;
+    }
+
+    public Date getSignDate() {
+        return signDate;
+    }
+
+    public void setSignDate(Date signDate) {
+        this.signDate = signDate;
+    }
+
+    public List<Metadata> getMetadataList() {
+        return metadataList;
+    }
+
+    public void setMetadataList(List<Metadata> metadataList) {
+        this.metadataList = metadataList;
+    }
+
+    public String getDocContent() {
+        return docContent;
+    }
+
+    public void setDocContent(String docContent) {
+        this.docContent = docContent;
+    }
 }

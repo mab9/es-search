@@ -1,11 +1,15 @@
 package ch.mab.search.es.rest;
 
 import ch.mab.search.es.business.SearchService;
+import ch.mab.search.es.model.SearchDoc;
+import ch.mab.search.secasignbox.model.Archivespace;
+import ch.mab.search.secasignbox.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
 
 @CrossOrigin
 @RestController
@@ -19,5 +23,16 @@ public class SearchController {
     public String saveDoc() {
         searchService.saveDoc("doc-x");
         return "doc-x\n";
+    }
+
+    @PostMapping
+    public ResponseEntity saveDoc(
+            @RequestBody SearchDoc doc) throws IOException {
+
+        Archivespace space = new Archivespace("revisor");
+        space.setId(doc.getArchivespaceId());
+        User user = new User("mab");
+
+        return new ResponseEntity(searchService.createDoc(doc, space, user), HttpStatus.CREATED);
     }
 }

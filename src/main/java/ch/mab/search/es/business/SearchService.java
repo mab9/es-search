@@ -4,13 +4,30 @@ import ch.mab.search.es.model.SearchDoc;
 import ch.mab.search.es.model.SearchQuery;
 import ch.mab.search.secasignbox.model.Archivespace;
 import ch.mab.search.secasignbox.model.User;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.elasticsearch.action.index.IndexRequest;
+import org.elasticsearch.action.index.IndexResponse;
+import org.elasticsearch.client.RequestOptions;
+import org.elasticsearch.client.RestHighLevelClient;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import static org.elasticsearch.action.update.UpdateHelper.ContextFields.INDEX;
+import static org.elasticsearch.cluster.SnapshotsInProgress.TYPE;
 
 @Service
 public class SearchService {
+
+    @Autowired
+    private RestHighLevelClient client;
+
+    private ObjectMapper objectMapper = new ObjectMapper();
 
     public SearchService() {
     }
@@ -20,16 +37,31 @@ public class SearchService {
         return true;
     }
 
-    void saveDoc(SearchDoc searchDoc, Archivespace archivespace, User user) {
+    public String createDoc(SearchDoc doc, Archivespace archivespace, User user) throws IOException {
+        UUID uuid = UUID.randomUUID();
+        doc.setId(uuid);
+
+        Map<String, Object> documentMapper = objectMapper.convertValue(doc, Map.class);
+
+        IndexRequest indexRequest = new IndexRequest(INDEX, TYPE, doc.getId().toString())
+                .source(documentMapper);
+
+        IndexResponse indexResponse = client.index(indexRequest, RequestOptions.DEFAULT);
+
+        return indexResponse
+                .getResult()
+                .name();
     }
 
-    void updateDoc(SearchDoc searchDoc, User user) {
+    public String updateDoc(SearchDoc searchDoc, User user) {
+        return null;
     }
 
-    void deleteDoc(Long docId, User user) {
+    public String deleteDoc(Long docId, User user) {
+        return null;
     }
 
-    List<SearchDoc> searchByQuery(SearchQuery searchQuery, User user) {
+    public List<SearchDoc> searchByQuery(SearchQuery searchQuery, User user) {
         return new ArrayList<>();
     }
 }
