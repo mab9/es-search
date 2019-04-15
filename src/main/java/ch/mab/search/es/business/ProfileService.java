@@ -2,6 +2,7 @@ package ch.mab.search.es.business;
 
 import ch.mab.search.es.document.ProfileDocument;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.client.RequestOptions;
@@ -18,8 +19,7 @@ public class ProfileService {
     @Autowired
     private RestHighLevelClient client;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    private final Gson gson = new Gson();
 
     private static final String INDEX = "lead";
     private static final String TYPE = "lead";
@@ -32,19 +32,10 @@ public class ProfileService {
         UUID uuid = UUID.randomUUID();
         document.setId(uuid.toString());
 
-        //Map<String, Object> documentMapper = objectMapper.convertValue(document, Map.class);
-
-        //IndexRequest request = new IndexRequest(INDEX, TYPE, document.getId())
-                //.source(documentMapper);
-
+        String json = gson.toJson(document);
         IndexRequest request = new IndexRequest("posts");
-        request.id("1");
-        String jsonString = "{" +
-                            "\"user\":\"kimchy\"," +
-                            "\"postDate\":\"2013-01-30\"," +
-                            "\"message\":\"trying out Elasticsearch\"" +
-                            "}";
-        request.source(jsonString, XContentType.JSON);
+        request.id(document.getId());
+        request.source(json, XContentType.JSON);
 
         IndexResponse indexResponse = client.index(request, RequestOptions.DEFAULT);
 
