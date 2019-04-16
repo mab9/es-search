@@ -7,14 +7,18 @@ import org.elasticsearch.action.get.GetRequest;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
+import org.elasticsearch.action.update.UpdateRequest;
+import org.elasticsearch.action.update.UpdateResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.ws.rs.WebApplicationException;
 import java.io.IOException;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -47,9 +51,8 @@ public class ProfileService {
                 .name();
     }
 
-    public ProfileDocument findById(UUID id) {
+    public Optional<ProfileDocument> findById(UUID id) {
         GetRequest getRequest = new GetRequest("posts", id.toString());
-
         GetResponse getResponse = null;
         try {
             getResponse = client.get(getRequest, RequestOptions.DEFAULT);
@@ -57,6 +60,29 @@ public class ProfileService {
             e.printStackTrace();
         }
 
-        return gson.fromJson(getResponse.getSource().toString(), ProfileDocument.class);
+        return Optional.of(gson.fromJson(getResponse.getSource().toString(), ProfileDocument.class));
+    }
+
+    public Optional<String> updateProfile(ProfileDocument document) {
+        Optional<ProfileDocument> current = findById(UUID.fromString(document.getId()));
+
+        if (current.isEmpty()) {
+            return Optional.empty();
+        }
+
+        String json = gson.toJson(document);
+
+        UpdateRequest request = new UpdateRequest("posts", current.get().getId());
+        request.doc(json, XContentType.JSON);
+
+        UpdateResponse updateResponse = null;
+        try {
+            updateResponse = client.update(request, RequestOptions.DEFAULT);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+        return Optional.of(updateResponse.getId());
     }
 }

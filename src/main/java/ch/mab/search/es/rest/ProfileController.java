@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -26,10 +27,19 @@ public class ProfileController {
 
     @GetMapping(value = "{id}")
     public ResponseEntity findById(@PathVariable UUID id) {
-        ProfileDocument document = service.findById(id);
-        if (document != null) {
-            return new ResponseEntity<>(document, HttpStatus.FOUND);
+        Optional<ProfileDocument> result = service.findById(id);
+        if (result.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(result.get(), HttpStatus.OK);
+    }
+
+    @PutMapping
+    public ResponseEntity updateProfile(@RequestBody ProfileDocument document) throws Exception {
+        Optional<String> result = service.updateProfile(document);
+        if (result.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(result.get(), HttpStatus.OK);
     }
 }
