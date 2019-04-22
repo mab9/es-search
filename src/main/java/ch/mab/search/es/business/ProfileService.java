@@ -38,6 +38,8 @@ public class ProfileService {
     @Autowired
     private ObjectMapper objectMapper;
 
+    private final String INDEX = "posts";
+
     public ProfileService() {
     }
 
@@ -47,7 +49,7 @@ public class ProfileService {
 
         String json = gson.toJson(document);
 
-        IndexRequest request = new IndexRequest("posts");
+        IndexRequest request = new IndexRequest(INDEX);
         request.id(document.getId());
         request.source(json, XContentType.JSON);
 
@@ -56,7 +58,7 @@ public class ProfileService {
     }
 
     public Optional<ProfileDocument> findById(UUID id) throws IOException {
-        GetRequest getRequest = new GetRequest("posts", id.toString());
+        GetRequest getRequest = new GetRequest(INDEX, id.toString());
         GetResponse getResponse = client.get(getRequest, RequestOptions.DEFAULT);
 
         if (getResponse.getSource() != null) {
@@ -74,7 +76,7 @@ public class ProfileService {
         }
 
         String json = gson.toJson(document);
-        UpdateRequest request = new UpdateRequest("posts", current.get().getId());
+        UpdateRequest request = new UpdateRequest(INDEX, current.get().getId());
         request.doc(json, XContentType.JSON);
         UpdateResponse updateResponse = client.update(request, RequestOptions.DEFAULT);
 
@@ -126,7 +128,7 @@ public class ProfileService {
             return current;
         }
 
-        DeleteRequest deleteRequest = new DeleteRequest("posts", current.get().getId());
+        DeleteRequest deleteRequest = new DeleteRequest(INDEX, current.get().getId());
         DeleteResponse response = client.delete(deleteRequest, RequestOptions.DEFAULT);
         return current;
     }
