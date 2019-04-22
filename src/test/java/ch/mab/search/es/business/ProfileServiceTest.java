@@ -1,6 +1,7 @@
 package ch.mab.search.es.business;
 
 import ch.mab.search.es.model.ProfileDocument;
+import org.elasticsearch.action.support.master.AcknowledgedResponse;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,5 +34,11 @@ public class ProfileServiceTest {
                                     Collections.emptyList());
         Optional<ProfileDocument> profile = service.createProfile(document);
         Assertions.assertEquals(document, profile.get());
+    }
+
+    @Test
+    public void updateMapping_updateIndex_returnOkResponse() throws Exception {
+        AcknowledgedResponse acknowledgedResponse = service.updateMapping();
+        Assertions.assertTrue(acknowledgedResponse.isAcknowledged());
     }
 }
