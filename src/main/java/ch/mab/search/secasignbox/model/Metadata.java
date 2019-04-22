@@ -3,9 +3,7 @@ package ch.mab.search.secasignbox.model;
 public class Metadata {
 
     private Long index;
-
     private String key;
-
     private String value;
 
     public Metadata() {

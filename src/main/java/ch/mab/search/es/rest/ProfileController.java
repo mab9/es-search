@@ -2,6 +2,7 @@ package ch.mab.search.es.rest;
 
 import ch.mab.search.es.business.ProfileService;
 import ch.mab.search.es.model.ProfileDocument;
+import org.elasticsearch.action.support.master.AcknowledgedResponse;
 import org.elasticsearch.client.indices.CreateIndexResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -73,6 +74,12 @@ public class ProfileController {
     @PostMapping("/index")
     public ResponseEntity<CreateIndexResponse> createProfileIndex() throws IOException {
         CreateIndexResponse profileIndex = service.createProfileIndex();
+        return new ResponseEntity<>(profileIndex, HttpStatus.OK);
+    }
+
+    @PutMapping("/index")
+    public ResponseEntity<AcknowledgedResponse> updateProfileMapping() throws IOException {
+        AcknowledgedResponse profileIndex = service.updateMapping();
         return new ResponseEntity<>(profileIndex, HttpStatus.OK);
     }
 }

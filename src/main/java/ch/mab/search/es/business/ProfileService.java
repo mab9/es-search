@@ -12,12 +12,14 @@ import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.support.master.AcknowledgedResponse;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.action.update.UpdateResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.indices.CreateIndexRequest;
 import org.elasticsearch.client.indices.CreateIndexResponse;
+import org.elasticsearch.client.indices.PutMappingRequest;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
@@ -140,21 +142,33 @@ public class ProfileService {
 
     public CreateIndexResponse createProfileIndex() throws IOException {
         CreateIndexRequest request = new CreateIndexRequest(INDEX);
-        request.settings(Settings.builder()
-                                 .put("index.number_of_shards", 3)
-                                 .put("index.number_of_replicas", 2)
-                        );
+        appendSettings(request);
+        request.mapping(createMappingObject());
+        return client.indices().create(request, RequestOptions.DEFAULT);
+    }
+
+    private XContentBuilder createMappingObject() throws IOException {
         XContentBuilder builder = XContentFactory.jsonBuilder();
-        builder.startObject(); {
+        builder.startObject();
+        {
             builder.startObject("properties");
-                { builder.startObject("firstName"); { builder.field("type", "text"); } builder.endObject(); }
-                { builder.startObject("lastName"); { builder.field("type", "text"); } builder.endObject(); }
-                { builder.startObject("technologies"); { builder.field("type", "nested"); } builder.endObject(); }
+            { builder.startObject("firstName"); { builder.field("type", "text"); } builder.endObject(); }
+            { builder.startObject("lastName"); { builder.field("type", "text"); } builder.endObject(); }
+            { builder.startObject("technologies"); { builder.field("type", "nested"); } builder.endObject(); }
             builder.endObject(); }
         builder.endObject();
-        request.mapping(builder);
-        CreateIndexResponse createIndexResponse = client.indices().create(request, RequestOptions.DEFAULT);
-        return createIndexResponse;
-        //return !createIndexResponse.index().isEmpty();
+        return builder;
+    }
+
+    private void appendSettings(CreateIndexRequest request) {
+        request.settings(Settings.builder()
+                                 .put("index.number_of_shards", 3)
+                                 .put("index.number_of_replicas", 2));
+    }
+
+    public AcknowledgedResponse updateMapping() throws IOException {
+        PutMappingRequest request = new PutMappingRequest(INDEX);
+        request.source(createMappingObject());
+        return client.indices().putMapping(request, RequestOptions.DEFAULT);
     }
 }
