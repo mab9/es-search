@@ -3,6 +3,7 @@ package ch.mab.search.es.business;
 import ch.mab.search.es.document.ProfileDocument;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
+import org.apache.lucene.search.join.ScoreMode;
 import org.elasticsearch.action.get.GetRequest;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequest;
@@ -14,6 +15,7 @@ import org.elasticsearch.action.update.UpdateResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.xcontent.XContentType;
+import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
@@ -35,10 +37,10 @@ public class ProfileService {
     private ObjectMapper objectMapper;
 
     @Autowired
-    public ProfileService() {}
+    public ProfileService() {
+    }
 
     public String createProfile(ProfileDocument document) throws Exception {
-
         UUID uuid = UUID.randomUUID();
         document.setId(uuid.toString());
 
@@ -49,25 +51,21 @@ public class ProfileService {
         request.source(json, XContentType.JSON);
 
         IndexResponse indexResponse = client.index(request, RequestOptions.DEFAULT);
-
-        return indexResponse
-                .getResult()
-                .name();
+        return indexResponse.getResult().name();
     }
 
-    public Optional<ProfileDocument> findById(UUID id) {
+    public Optional<ProfileDocument> findById(UUID id) throws IOException {
         GetRequest getRequest = new GetRequest("posts", id.toString());
-        GetResponse getResponse = null;
-        try {
-            getResponse = client.get(getRequest, RequestOptions.DEFAULT);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        GetResponse getResponse = client.get(getRequest, RequestOptions.DEFAULT);
 
-        return Optional.of(gson.fromJson(getResponse.getSource().toString(), ProfileDocument.class));
+        if (getResponse.getSource() != null) {
+            return Optional.of(gson.fromJson(getResponse.getSource().toString(), ProfileDocument.class));
+        } else {
+            return Optional.empty();
+        }
     }
 
-    public Optional<String> updateProfile(ProfileDocument document) {
+    public Optional<ProfileDocument> updateProfile(ProfileDocument document) throws IOException {
         Optional<ProfileDocument> current = findById(UUID.fromString(document.getId()));
 
         if (current.isEmpty()) {
@@ -75,39 +73,20 @@ public class ProfileService {
         }
 
         String json = gson.toJson(document);
-
         UpdateRequest request = new UpdateRequest("posts", current.get().getId());
         request.doc(json, XContentType.JSON);
+        UpdateResponse updateResponse = client.update(request, RequestOptions.DEFAULT);
 
-        UpdateResponse updateResponse = null;
-        try {
-            updateResponse = client.update(request, RequestOptions.DEFAULT);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-
-        return Optional.of(updateResponse.getId());
+        return findById(UUID.fromString(updateResponse.getId()));
     }
 
-    public List<ProfileDocument> findAll() {
-
-
-            SearchRequest searchRequest = new SearchRequest();
-            SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-            searchSourceBuilder.query(QueryBuilders.matchAllQuery());
-            searchRequest.source(searchSourceBuilder);
-
-        SearchResponse searchResponse = null;
-        try {
-            searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
+    public List<ProfileDocument> findAll() throws IOException {
+        SearchRequest searchRequest = new SearchRequest();
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+        searchSourceBuilder.query(QueryBuilders.matchAllQuery());
+        searchRequest.source(searchSourceBuilder);
+        SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
         return getSearchResult(searchResponse);
-
-
     }
 
     private List<ProfileDocument> getSearchResult(SearchResponse response) {
@@ -116,15 +95,25 @@ public class ProfileService {
         List<ProfileDocument> profileDocuments = new ArrayList<>();
 
         if (searchHit.length > 0) {
-
             Arrays.stream(searchHit)
-                  .forEach(hit -> profileDocuments
-                                   .add(objectMapper
-                                                .convertValue(hit.getSourceAsMap(),
-                                                              ProfileDocument.class))
-                          );
+                  .forEach(hit -> profileDocuments.add(
+                          objectMapper.convertValue(hit.getSourceAsMap(), ProfileDocument.class)));
         }
 
         return profileDocuments;
+    }
+
+    public List<ProfileDocument> searchByTechnology(String technology) throws IOException {
+        SearchRequest searchRequest = new SearchRequest();
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+
+        QueryBuilder queryBuilder = QueryBuilders.boolQuery().must(QueryBuilders.matchQuery("technologies.name", technology));
+
+        searchSourceBuilder.query(QueryBuilders.nestedQuery("technologies", queryBuilder, ScoreMode.Avg));
+        searchRequest.source(searchSourceBuilder);
+
+        SearchResponse response = client.search(searchRequest, RequestOptions.DEFAULT);
+
+        return getSearchResult(response);
     }
 }

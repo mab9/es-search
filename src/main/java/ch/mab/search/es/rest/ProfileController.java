@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -27,8 +28,10 @@ public class ProfileController {
     }
 
     @GetMapping(value = "{id}")
-    public ResponseEntity findById(@PathVariable UUID id) {
-        Optional<ProfileDocument> result = service.findById(id);
+    public ResponseEntity findById(@PathVariable UUID id) throws IOException {
+        Optional<ProfileDocument> result;
+        result = service.findById(id);
+
         if (result.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
@@ -36,8 +39,9 @@ public class ProfileController {
     }
 
     @PutMapping
-    public ResponseEntity updateProfile(@RequestBody ProfileDocument document) throws Exception {
-        Optional<String> result = service.updateProfile(document);
+    public ResponseEntity<ProfileDocument> updateProfile(@RequestBody ProfileDocument document) throws IOException {
+        Optional<ProfileDocument> result;
+            result = service.updateProfile(document);
         if (result.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
@@ -45,8 +49,13 @@ public class ProfileController {
     }
 
     @GetMapping
-    public List<ProfileDocument> findAll() throws Exception {
+    public ResponseEntity<List<ProfileDocument>> findAll() throws Exception {
+        return new ResponseEntity<>(service.findAll(), HttpStatus.OK);
+    }
 
-        return service.findAll();
+    @GetMapping(value = "/search")
+    public ResponseEntity<List<ProfileDocument>> search(@RequestParam(value = "technology") String technology) throws
+            IOException {
+        return new ResponseEntity<>(service.searchByTechnology(technology), HttpStatus.OK);
     }
 }
