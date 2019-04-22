@@ -1,6 +1,6 @@
 package ch.mab.search.es.rest;
 
-import ch.mab.search.es.business.SearchService;
+import ch.mab.search.es.business.SecasignboxService;
 import ch.mab.search.es.model.SecasignboxDocument;
 import ch.mab.search.secasignbox.model.Metadata;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +19,7 @@ import java.util.UUID;
 public class SearchController {
 
     @Autowired
-    private SearchService service;
+    private SecasignboxService service;
 
     @PostMapping
     public ResponseEntity createSecasignboxDocument(@RequestBody SecasignboxDocument document) throws Exception {

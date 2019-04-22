@@ -1,6 +1,5 @@
 package ch.mab.search.es.business;
 
-import ch.mab.search.es.model.ProfileDocument;
 import ch.mab.search.es.model.SecasignboxDocument;
 import ch.mab.search.secasignbox.model.Metadata;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -76,7 +75,8 @@ public class SecasignboxService {
         searchSourceBuilder.query(QueryBuilders.matchAllQuery());
         searchRequest.source(searchSourceBuilder);
         SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
-        return getSearchResult(searchResponse);    }
+        return getSearchResult(searchResponse);
+    }
 
     public List<SecasignboxDocument> searchByMetadata(Metadata metadata) throws IOException {
         SearchRequest searchRequest = new SearchRequest();
