@@ -20,6 +20,7 @@ import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.indices.CreateIndexRequest;
 import org.elasticsearch.client.indices.CreateIndexResponse;
+import org.elasticsearch.client.indices.GetIndexRequest;
 import org.elasticsearch.client.indices.PutMappingRequest;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.xcontent.XContentBuilder;
@@ -176,5 +177,10 @@ public class ProfileService {
     public AcknowledgedResponse deleteIndex() throws IOException {
         DeleteIndexRequest request = new DeleteIndexRequest(INDEX);
         return client.indices().delete(request, RequestOptions.DEFAULT);
+    }
+
+    public boolean getIndex() throws IOException {
+        GetIndexRequest request = new GetIndexRequest(INDEX);
+        return client.indices().exists(request, RequestOptions.DEFAULT);
     }
 }

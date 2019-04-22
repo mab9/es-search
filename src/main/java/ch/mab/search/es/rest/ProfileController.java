@@ -4,6 +4,7 @@ import ch.mab.search.es.business.ProfileService;
 import ch.mab.search.es.model.ProfileDocument;
 import org.elasticsearch.action.support.master.AcknowledgedResponse;
 import org.elasticsearch.client.indices.CreateIndexResponse;
+import org.elasticsearch.client.indices.GetIndexRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -87,5 +88,10 @@ public class ProfileController {
     public ResponseEntity<AcknowledgedResponse> deleteIndex() throws IOException {
         AcknowledgedResponse profileIndex = service.deleteIndex();
         return new ResponseEntity<>(profileIndex, HttpStatus.OK);
+    }
+
+    @GetMapping("/index")
+    public ResponseEntity getIndex() throws IOException {
+        return new ResponseEntity<>(service.getIndex(), HttpStatus.OK);
     }
 }
