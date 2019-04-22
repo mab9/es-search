@@ -16,6 +16,11 @@ import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.action.update.UpdateResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.client.indices.CreateIndexRequest;
+import org.elasticsearch.client.indices.CreateIndexResponse;
+import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -131,5 +136,25 @@ public class ProfileService {
         DeleteRequest deleteRequest = new DeleteRequest(INDEX, current.get().getId());
         DeleteResponse response = client.delete(deleteRequest, RequestOptions.DEFAULT);
         return current;
+    }
+
+    public CreateIndexResponse createProfileIndex() throws IOException {
+        CreateIndexRequest request = new CreateIndexRequest(INDEX);
+        request.settings(Settings.builder()
+                                 .put("index.number_of_shards", 3)
+                                 .put("index.number_of_replicas", 2)
+                        );
+        XContentBuilder builder = XContentFactory.jsonBuilder();
+        builder.startObject(); {
+            builder.startObject("properties");
+                { builder.startObject("firstName"); { builder.field("type", "text"); } builder.endObject(); }
+                { builder.startObject("lastName"); { builder.field("type", "text"); } builder.endObject(); }
+                { builder.startObject("technologies"); { builder.field("type", "nested"); } builder.endObject(); }
+            builder.endObject(); }
+        builder.endObject();
+        request.mapping(builder);
+        CreateIndexResponse createIndexResponse = client.indices().create(request, RequestOptions.DEFAULT);
+        return createIndexResponse;
+        //return !createIndexResponse.index().isEmpty();
     }
 }
