@@ -82,4 +82,10 @@ public class ProfileController {
         AcknowledgedResponse profileIndex = service.updateMapping();
         return new ResponseEntity<>(profileIndex, HttpStatus.OK);
     }
+
+    @DeleteMapping("/index")
+    public ResponseEntity<AcknowledgedResponse> deleteIndex() throws IOException {
+        AcknowledgedResponse profileIndex = service.deleteIndex();
+        return new ResponseEntity<>(profileIndex, HttpStatus.OK);
+    }
 }

@@ -4,6 +4,7 @@ import ch.mab.search.es.model.ProfileDocument;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import org.apache.lucene.search.join.ScoreMode;
+import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
 import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.get.GetRequest;
@@ -170,5 +171,10 @@ public class ProfileService {
         PutMappingRequest request = new PutMappingRequest(INDEX);
         request.source(createMappingObject());
         return client.indices().putMapping(request, RequestOptions.DEFAULT);
+    }
+
+    public AcknowledgedResponse deleteIndex() throws IOException {
+        DeleteIndexRequest request = new DeleteIndexRequest(INDEX);
+        return client.indices().delete(request, RequestOptions.DEFAULT);
     }
 }
