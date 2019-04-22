@@ -1,7 +1,5 @@
 package ch.mab.search.es.document;
 
-import ch.mab.search.es.model.Technology;
-
 import java.util.List;
 
 public class ProfileDocument {

@@ -1,4 +1,4 @@
-package ch.mab.search.es.model;
+package ch.mab.search.es.document;
 
 import ch.mab.search.secasignbox.model.DocState;
 import ch.mab.search.secasignbox.model.Metadata;

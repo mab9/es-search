@@ -1,7 +1,7 @@
 package ch.mab.search.es.rest;
 
 import ch.mab.search.es.business.SearchService;
-import ch.mab.search.es.model.SearchDoc;
+import ch.mab.search.es.document.SearchDoc;
 import ch.mab.search.secasignbox.model.Archivespace;
 import ch.mab.search.secasignbox.model.User;
 import org.springframework.beans.factory.annotation.Autowired;

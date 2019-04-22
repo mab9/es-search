@@ -1,7 +1,7 @@
 package ch.mab.search.es.business;
 
-import ch.mab.search.es.model.SearchDoc;
-import ch.mab.search.es.model.SearchQuery;
+import ch.mab.search.es.document.SearchDoc;
+import ch.mab.search.es.document.SearchQuery;
 import ch.mab.search.secasignbox.model.Archivespace;
 import ch.mab.search.secasignbox.model.User;
 import com.fasterxml.jackson.databind.ObjectMapper;

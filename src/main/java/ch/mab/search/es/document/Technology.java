@@ -1,4 +1,4 @@
-package ch.mab.search.es.model;
+package ch.mab.search.es.document;
 
 public class Technology {
 
