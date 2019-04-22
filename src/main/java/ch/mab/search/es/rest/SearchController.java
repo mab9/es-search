@@ -2,37 +2,69 @@ package ch.mab.search.es.rest;
 
 import ch.mab.search.es.business.SearchService;
 import ch.mab.search.es.model.SecasignboxDocument;
-import ch.mab.search.secasignbox.model.Archivespace;
-import ch.mab.search.secasignbox.model.User;
+import ch.mab.search.secasignbox.model.Metadata;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @CrossOrigin
 @RestController
-@RequestMapping("/search")
+@RequestMapping("/api/v1/secasignbox")
 public class SearchController {
 
     @Autowired
-    private SearchService searchService;
-
-    @GetMapping
-    public String saveDoc() {
-        searchService.saveDoc("doc-x");
-        return "doc-x\n";
-    }
+    private SearchService service;
 
     @PostMapping
-    public ResponseEntity saveDoc(
-            @RequestBody SecasignboxDocument doc) throws IOException {
+    public ResponseEntity createSecasignboxDocument(@RequestBody SecasignboxDocument document) throws Exception {
+        return new ResponseEntity(service.createSecasignboxDocument(document), HttpStatus.CREATED);
+    }
 
-        Archivespace space = new Archivespace("revisor");
-        space.setId(doc.getArchivespaceId());
-        User user = new User("mab");
+    @GetMapping(value = "{id}")
+    public ResponseEntity findById(@PathVariable UUID id) throws IOException {
+        Optional<SecasignboxDocument> result = service.findById(id);
 
-        return new ResponseEntity(searchService.createDoc(doc, space, user), HttpStatus.CREATED);
+        if (result.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(result.get(), HttpStatus.OK);
+    }
+
+    @PutMapping
+    public ResponseEntity<SecasignboxDocument> updateSecasignboxDocument(@RequestBody SecasignboxDocument document) throws IOException {
+        Optional<SecasignboxDocument> result = service.updateSecasignboxDocument(document);
+        if (result.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(result.get(), HttpStatus.OK);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<SecasignboxDocument>> findAll() throws Exception {
+        return new ResponseEntity<>(service.findAll(), HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/search")
+    public ResponseEntity<List<SecasignboxDocument>> search(@RequestParam(value = "metadata") Metadata metadata) throws
+            IOException {
+        return new ResponseEntity<>(service.searchByMetadata(metadata), HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<SecasignboxDocument> deleteSecasignboxDocument(@PathVariable UUID id)
+            throws Exception {
+
+        Optional<SecasignboxDocument>  result = service.deleteSecasignboxDocument(id);
+        if (result.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(result.get(), HttpStatus.OK);
+
     }
 }

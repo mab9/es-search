@@ -29,8 +29,7 @@ public class ProfileController {
 
     @GetMapping(value = "{id}")
     public ResponseEntity findById(@PathVariable UUID id) throws IOException {
-        Optional<ProfileDocument> result;
-        result = service.findById(id);
+        Optional<ProfileDocument> result = service.findById(id);
 
         if (result.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
