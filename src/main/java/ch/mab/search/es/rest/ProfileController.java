@@ -40,8 +40,7 @@ public class ProfileController {
 
     @PutMapping
     public ResponseEntity<ProfileDocument> updateProfile(@RequestBody ProfileDocument document) throws IOException {
-        Optional<ProfileDocument> result;
-            result = service.updateProfile(document);
+        Optional<ProfileDocument> result = service.updateProfile(document);
         if (result.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
@@ -57,5 +56,17 @@ public class ProfileController {
     public ResponseEntity<List<ProfileDocument>> search(@RequestParam(value = "technology") String technology) throws
             IOException {
         return new ResponseEntity<>(service.searchByTechnology(technology), HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ProfileDocument> deleteProfile(@PathVariable UUID id)
+            throws Exception {
+
+        Optional<ProfileDocument>  result = service.deleteProfileDocument(id);
+        if (result.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(result.get(), HttpStatus.OK);
+
     }
 }

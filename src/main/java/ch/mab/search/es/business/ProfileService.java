@@ -4,6 +4,8 @@ import ch.mab.search.es.document.ProfileDocument;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import org.apache.lucene.search.join.ScoreMode;
+import org.elasticsearch.action.delete.DeleteRequest;
+import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.get.GetRequest;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequest;
@@ -107,7 +109,8 @@ public class ProfileService {
         SearchRequest searchRequest = new SearchRequest();
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
 
-        QueryBuilder queryBuilder = QueryBuilders.boolQuery().must(QueryBuilders.matchQuery("technologies.name", technology));
+        QueryBuilder queryBuilder =
+                QueryBuilders.boolQuery().must(QueryBuilders.matchQuery("technologies.name", technology));
 
         searchSourceBuilder.query(QueryBuilders.nestedQuery("technologies", queryBuilder, ScoreMode.Avg));
         searchRequest.source(searchSourceBuilder);
@@ -115,5 +118,17 @@ public class ProfileService {
         SearchResponse response = client.search(searchRequest, RequestOptions.DEFAULT);
 
         return getSearchResult(response);
+    }
+
+    public Optional<ProfileDocument> deleteProfileDocument(UUID id) throws IOException {
+        Optional<ProfileDocument> current = findById(id);
+
+        if (current.isEmpty()) {
+            return current;
+        }
+
+        DeleteRequest deleteRequest = new DeleteRequest("posts", current.get().getId());
+        DeleteResponse response = client.delete(deleteRequest, RequestOptions.DEFAULT);
+        return current;
     }
 }
