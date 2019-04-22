@@ -38,11 +38,10 @@ public class ProfileService {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @Autowired
     public ProfileService() {
     }
 
-    public String createProfile(ProfileDocument document) throws Exception {
+    public Optional<ProfileDocument> createProfile(ProfileDocument document) throws Exception {
         UUID uuid = UUID.randomUUID();
         document.setId(uuid.toString());
 
@@ -53,7 +52,7 @@ public class ProfileService {
         request.source(json, XContentType.JSON);
 
         IndexResponse indexResponse = client.index(request, RequestOptions.DEFAULT);
-        return indexResponse.getResult().name();
+        return findById(UUID.fromString(indexResponse.getId()));
     }
 
     public Optional<ProfileDocument> findById(UUID id) throws IOException {
