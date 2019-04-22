@@ -9,17 +9,11 @@ import java.util.UUID;
 public class SecasignboxDocument {
 
     private UUID id;
-
     private UUID archivespaceId;
-
     private String documentName;
-
     private Date uploadDate;
-
     private Date signDate;
-
-    private List<Metadata> metadataList;
-
+    private List<Metadata> metadatas;
     private String documentContent;
 
     public UUID getId() {
@@ -62,12 +56,12 @@ public class SecasignboxDocument {
         this.signDate = signDate;
     }
 
-    public List<Metadata> getMetadataList() {
-        return metadataList;
+    public List<Metadata> getMetadatas() {
+        return metadatas;
     }
 
-    public void setMetadataList(List<Metadata> metadataList) {
-        this.metadataList = metadataList;
+    public void setMetadatas(List<Metadata> metadatas) {
+        this.metadatas = metadatas;
     }
 
     public String getDocumentContent() {
