@@ -1,16 +1,13 @@
 package ch.mab.search.es.model;
 
-import ch.mab.search.secasignbox.model.DocState;
 import ch.mab.search.secasignbox.model.Metadata;
 
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+public class SecasignboxDocument {
 
-public class SearchDocument {
-
-    // TODO check if ES internal doc have their own IDs.
     private UUID id;
 
     private UUID archivespaceId;
@@ -24,20 +21,6 @@ public class SearchDocument {
     private List<Metadata> metadataList;
 
     private String documentContent;
-
-    public SearchDocument() {
-    }
-
-    public SearchDocument(UUID id, UUID archivespaceId, DocState docState, String documentName, Date uploadDate,
-                          Date signDate, List<Metadata> metadataList, String documentContent) {
-        this.id = id;
-        this.archivespaceId = archivespaceId;
-        this.documentName = documentName;
-        this.uploadDate = uploadDate;
-        this.signDate = signDate;
-        this.metadataList = metadataList;
-        this.documentContent = documentContent;
-    }
 
     public UUID getId() {
         return id;

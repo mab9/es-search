@@ -1,6 +1,6 @@
 package ch.mab.search.es.business;
 
-import ch.mab.search.es.model.SearchDocument;
+import ch.mab.search.es.model.SecasignboxDocument;
 import ch.mab.search.es.model.SearchQuery;
 import ch.mab.search.secasignbox.model.Archivespace;
 import ch.mab.search.secasignbox.model.User;
@@ -37,7 +37,7 @@ public class SearchService {
         return true;
     }
 
-    public String createDoc(SearchDocument doc, Archivespace archivespace, User user) throws IOException {
+    public String createDoc(SecasignboxDocument doc, Archivespace archivespace, User user) throws IOException {
         UUID uuid = UUID.randomUUID();
         doc.setId(uuid);
 
@@ -53,7 +53,7 @@ public class SearchService {
                 .name();
     }
 
-    public String updateDoc(SearchDocument searchDocument, User user) {
+    public String updateDoc(SecasignboxDocument secasignboxDocument, User user) {
         return null;
     }
 
@@ -61,7 +61,7 @@ public class SearchService {
         return null;
     }
 
-    public List<SearchDocument> searchByQuery(SearchQuery searchQuery, User user) {
+    public List<SecasignboxDocument> searchByQuery(SearchQuery searchQuery, User user) {
         return new ArrayList<>();
     }
 }
