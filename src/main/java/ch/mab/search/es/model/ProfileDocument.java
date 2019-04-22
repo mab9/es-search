@@ -1,6 +1,7 @@
 package ch.mab.search.es.model;
 
 import java.util.List;
+import java.util.Objects;
 
 public class ProfileDocument {
 
@@ -57,5 +58,23 @@ public class ProfileDocument {
 
     public void setEmails(List<String> emails) {
         this.emails = emails;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ProfileDocument document = (ProfileDocument) o;
+        return id.equals(document.id) && firstName.equals(document.firstName) && lastName.equals(document.lastName) &&
+               Objects.equals(technologies, document.technologies) && Objects.equals(emails, document.emails);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, firstName, lastName, technologies, emails);
     }
 }

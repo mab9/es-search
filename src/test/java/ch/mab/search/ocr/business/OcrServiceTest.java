@@ -7,11 +7,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import java.io.File;
 import java.io.IOException;
 
-import static junit.framework.TestCase.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 public class OcrServiceTest {
-
 
     @Autowired
     private final OcrService service = new OcrService();
