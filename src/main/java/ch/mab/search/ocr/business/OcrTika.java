@@ -40,7 +40,7 @@ public class OcrTika implements Ocr {
             e.printStackTrace();
         }
 
-        //getting metadata of the document
+        //getting metadata of the model
         System.out.println("Metadata of the PDF:");
         String[] metadataNames = metadata.names();
 

@@ -1,6 +1,6 @@
 package ch.mab.search.es.business;
 
-import ch.mab.search.es.document.ProfileDocument;
+import ch.mab.search.es.model.ProfileDocument;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import org.apache.lucene.search.join.ScoreMode;

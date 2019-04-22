@@ -1,7 +1,7 @@
 package ch.mab.search.es.business;
 
-import ch.mab.search.es.document.SearchDoc;
-import ch.mab.search.es.document.SearchQuery;
+import ch.mab.search.es.model.SearchDocument;
+import ch.mab.search.es.model.SearchQuery;
 import ch.mab.search.secasignbox.model.Archivespace;
 import ch.mab.search.secasignbox.model.User;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -37,7 +37,7 @@ public class SearchService {
         return true;
     }
 
-    public String createDoc(SearchDoc doc, Archivespace archivespace, User user) throws IOException {
+    public String createDoc(SearchDocument doc, Archivespace archivespace, User user) throws IOException {
         UUID uuid = UUID.randomUUID();
         doc.setId(uuid);
 
@@ -53,7 +53,7 @@ public class SearchService {
                 .name();
     }
 
-    public String updateDoc(SearchDoc searchDoc, User user) {
+    public String updateDoc(SearchDocument searchDocument, User user) {
         return null;
     }
 
@@ -61,7 +61,7 @@ public class SearchService {
         return null;
     }
 
-    public List<SearchDoc> searchByQuery(SearchQuery searchQuery, User user) {
+    public List<SearchDocument> searchByQuery(SearchQuery searchQuery, User user) {
         return new ArrayList<>();
     }
 }

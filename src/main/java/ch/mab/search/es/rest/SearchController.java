@@ -1,7 +1,7 @@
 package ch.mab.search.es.rest;
 
 import ch.mab.search.es.business.SearchService;
-import ch.mab.search.es.document.SearchDoc;
+import ch.mab.search.es.model.SearchDocument;
 import ch.mab.search.secasignbox.model.Archivespace;
 import ch.mab.search.secasignbox.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +27,7 @@ public class SearchController {
 
     @PostMapping
     public ResponseEntity saveDoc(
-            @RequestBody SearchDoc doc) throws IOException {
+            @RequestBody SearchDocument doc) throws IOException {
 
         Archivespace space = new Archivespace("revisor");
         space.setId(doc.getArchivespaceId());

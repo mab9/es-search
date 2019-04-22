@@ -1,7 +1,7 @@
 package ch.mab.search.es.rest;
 
 import ch.mab.search.es.business.ProfileService;
-import ch.mab.search.es.document.ProfileDocument;
+import ch.mab.search.es.model.ProfileDocument;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

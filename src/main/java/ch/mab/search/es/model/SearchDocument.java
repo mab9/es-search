@@ -1,4 +1,4 @@
-package ch.mab.search.es.document;
+package ch.mab.search.es.model;
 
 import ch.mab.search.secasignbox.model.DocState;
 import ch.mab.search.secasignbox.model.Metadata;
@@ -8,16 +8,14 @@ import java.util.List;
 import java.util.UUID;
 
 
-public class SearchDoc {
+public class SearchDocument {
 
     // TODO check if ES internal doc have their own IDs.
     private UUID id;
 
     private UUID archivespaceId;
 
-    private DocState docState;
-
-    private String docName;
+    private String documentName;
 
     private Date uploadDate;
 
@@ -25,21 +23,20 @@ public class SearchDoc {
 
     private List<Metadata> metadataList;
 
-    private String docContent;
+    private String documentContent;
 
-    public SearchDoc() {
+    public SearchDocument() {
     }
 
-    public SearchDoc(UUID id, UUID archivespaceId, DocState docState, String docName, Date uploadDate,
-                     Date signDate, List<Metadata> metadataList, String docContent) {
+    public SearchDocument(UUID id, UUID archivespaceId, DocState docState, String documentName, Date uploadDate,
+                          Date signDate, List<Metadata> metadataList, String documentContent) {
         this.id = id;
         this.archivespaceId = archivespaceId;
-        this.docState = docState;
-        this.docName = docName;
+        this.documentName = documentName;
         this.uploadDate = uploadDate;
         this.signDate = signDate;
         this.metadataList = metadataList;
-        this.docContent = docContent;
+        this.documentContent = documentContent;
     }
 
     public UUID getId() {
@@ -58,20 +55,12 @@ public class SearchDoc {
         this.archivespaceId = archivespaceId;
     }
 
-    public DocState getDocState() {
-        return docState;
+    public String getDocumentName() {
+        return documentName;
     }
 
-    public void setDocState(DocState docState) {
-        this.docState = docState;
-    }
-
-    public String getDocName() {
-        return docName;
-    }
-
-    public void setDocName(String docName) {
-        this.docName = docName;
+    public void setDocumentName(String documentName) {
+        this.documentName = documentName;
     }
 
     public Date getUploadDate() {
@@ -98,11 +87,11 @@ public class SearchDoc {
         this.metadataList = metadataList;
     }
 
-    public String getDocContent() {
-        return docContent;
+    public String getDocumentContent() {
+        return documentContent;
     }
 
-    public void setDocContent(String docContent) {
-        this.docContent = docContent;
+    public void setDocumentContent(String documentContent) {
+        this.documentContent = documentContent;
     }
 }
