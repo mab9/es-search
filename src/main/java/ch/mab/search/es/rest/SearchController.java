@@ -3,6 +3,7 @@ package ch.mab.search.es.rest;
 import ch.mab.search.es.business.SecasignboxService;
 import ch.mab.search.es.model.SecasignboxDocument;
 import ch.mab.search.secasignbox.model.Metadata;
+import org.elasticsearch.client.indices.CreateIndexResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -66,5 +67,11 @@ public class SearchController {
         }
         return new ResponseEntity<>(result.get(), HttpStatus.OK);
 
+    }
+
+    @PostMapping("/index")
+    public ResponseEntity<CreateIndexResponse> createSecasignboxIndex() throws IOException {
+        CreateIndexResponse profileIndex = service.createSecasignboxIndex();
+        return new ResponseEntity<>(profileIndex, HttpStatus.OK);
     }
 }

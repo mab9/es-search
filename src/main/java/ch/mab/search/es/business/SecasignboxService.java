@@ -17,6 +17,11 @@ import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.action.update.UpdateResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.client.indices.CreateIndexRequest;
+import org.elasticsearch.client.indices.CreateIndexResponse;
+import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -132,5 +137,35 @@ public class SecasignboxService {
         }
 
         return profileDocuments;
+    }
+
+    public CreateIndexResponse createSecasignboxIndex() throws IOException {
+            CreateIndexRequest request = new CreateIndexRequest(INDEX);
+        appendSettings(request);
+        appendMapping(request);
+        return client.indices().create(request, RequestOptions.DEFAULT);
+    }
+
+    private void appendMapping(CreateIndexRequest request) throws IOException {
+        XContentBuilder builder = XContentFactory.jsonBuilder();
+        builder.startObject();
+        {
+            builder.startObject("properties");
+            { builder.startObject("id"); { builder.field("type", "text"); } builder.endObject(); }
+            { builder.startObject("archivespaceId"); { builder.field("type", "text"); } builder.endObject(); }
+            { builder.startObject("documentName"); { builder.field("type", "text"); } builder.endObject(); }
+            { builder.startObject("uploadDate"); { builder.field("type", "data"); } builder.endObject(); }
+            { builder.startObject("signDate"); { builder.field("type", "date"); } builder.endObject(); }
+            { builder.startObject("metadatas"); { builder.field("type", "nested"); } builder.endObject(); }
+            { builder.startObject("documentContent"); { builder.field("type", "text"); } builder.endObject(); }
+            builder.endObject(); }
+        builder.endObject();
+        request.mapping(builder);
+    }
+
+    private void appendSettings(CreateIndexRequest request) {
+        request.settings(Settings.builder()
+                                 .put("index.number_of_shards", 3)
+                                 .put("index.number_of_replicas", 2));
     }
 }
