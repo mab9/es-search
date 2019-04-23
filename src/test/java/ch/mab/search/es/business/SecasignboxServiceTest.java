@@ -150,11 +150,23 @@ class SecasignboxServiceTest {
         List<Path> files = collectPathsOfPdfTestFiles();
         List<SecasignboxDocument> docs = getSecasignboxDocumentsOfPdfs(files);
         secasignboxService.bulkIndexDocument(INDEX, docs);
-
         TimeUnit.SECONDS.sleep(2);
+
         List<SecasignboxDocument> all = secasignboxService.findAll(INDEX);
         Assertions.assertEquals(docs.size(), all.size());
         Assertions.assertTrue(docs.containsAll(all));
+    }
+
+    @Test
+    void searchByDocumentName_indexedDocuments_returnDocumentWithSameName() throws IOException, InterruptedException {
+        List<Path> files = collectPathsOfPdfTestFiles();
+        List<SecasignboxDocument> docs = getSecasignboxDocumentsOfPdfs(files);
+        secasignboxService.bulkIndexDocument(INDEX, docs);
+        TimeUnit.SECONDS.sleep(2);
+
+        List<SecasignboxDocument> search = secasignboxService.searchByDocumentName(INDEX, "AS_MandelFx.pdf");
+        Assertions.assertEquals(1, search.size());
+        Assertions.assertTrue(docs.contains(search.get(0)));
     }
 
     private List<SecasignboxDocument> getSecasignboxDocumentsOfPdfs(List<Path> pdfs) {

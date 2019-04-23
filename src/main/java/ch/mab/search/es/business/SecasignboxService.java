@@ -20,6 +20,7 @@ import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.common.xcontent.XContentType;
+import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
@@ -28,7 +29,6 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.stream.Stream;
 
 @Service
 public class SecasignboxService extends AbstractIndex {
@@ -94,6 +94,19 @@ public class SecasignboxService extends AbstractIndex {
 
         SearchResponse response = client.search(searchRequest, RequestOptions.DEFAULT);
 
+        return getSearchResult(response);
+    }
+
+    public List<SecasignboxDocument> searchByDocumentName(String index, String documentName) throws IOException {
+        SearchRequest searchRequest = new SearchRequest(index);
+        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+
+        MatchQueryBuilder matchQuery = new MatchQueryBuilder("documentName", documentName);
+
+        sourceBuilder.query(matchQuery);
+        searchRequest.source(sourceBuilder);
+
+        SearchResponse response = client.search(searchRequest, RequestOptions.DEFAULT);
         return getSearchResult(response);
     }
 
