@@ -31,9 +31,6 @@ class IndexServiceTest {
     private IndexService indexService;
 
     @Autowired
-    private SecasignboxService secasignboxService;
-
-    @Autowired
     private ProfileService profileService;
 
     @BeforeEach
