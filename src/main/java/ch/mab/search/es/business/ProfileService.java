@@ -93,7 +93,7 @@ public class ProfileService {
     }
 
     public List<ProfileDocument> findAll() throws IOException {
-        SearchRequest searchRequest = new SearchRequest();
+        SearchRequest searchRequest = new SearchRequest(INDEX);
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         searchSourceBuilder.query(QueryBuilders.matchAllQuery());
         searchRequest.source(searchSourceBuilder);
@@ -113,6 +113,15 @@ public class ProfileService {
         }
 
         return profileDocuments;
+    }
+
+    public long getTotalHits() throws IOException {
+        SearchRequest searchRequest = new SearchRequest(INDEX);
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+        searchSourceBuilder.query(QueryBuilders.matchAllQuery());
+        searchRequest.source(searchSourceBuilder);
+        SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
+        return searchResponse.getHits().getTotalHits().value;
     }
 
     public List<ProfileDocument> searchByTechnology(String technology) throws IOException {
