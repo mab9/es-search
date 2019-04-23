@@ -134,4 +134,9 @@ class SecasignboxServiceTest {
         Assertions.assertEquals(document1, expected.get());
     }
 
+    @Test
+    void findByFuzzy_returnDocumentsContainingX() {
+
+    }
+
 }
