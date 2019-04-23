@@ -1,4 +1,4 @@
-package ch.mab.search.secasignbox.model;
+package ch.mab.search.es.model;
 
 public class Metadata {
 

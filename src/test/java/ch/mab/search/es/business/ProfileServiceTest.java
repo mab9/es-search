@@ -1,7 +1,6 @@
 package ch.mab.search.es.business;
 
 import ch.mab.search.es.model.ProfileDocument;
-import org.apache.tomcat.jni.Time;
 import org.elasticsearch.action.support.master.AcknowledgedResponse;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -63,8 +62,8 @@ public class ProfileServiceTest {
 
         for (int i = 0; i < amount; i++) {
             ProfileDocument document =
-                    new ProfileDocument(UUID.randomUUID().toString(), "mabambam-" + UUID.randomUUID().toString(), "mabam", Collections.emptyList(),
-                                        Collections.emptyList());
+                    new ProfileDocument(UUID.randomUUID().toString(), "mabambam-" + UUID.randomUUID().toString(),
+                                        "mabam", Collections.emptyList(), Collections.emptyList());
             service.createProfile(document);
         }
 

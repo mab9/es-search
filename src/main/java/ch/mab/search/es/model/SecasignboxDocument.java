@@ -1,7 +1,5 @@
 package ch.mab.search.es.model;
 
-import ch.mab.search.secasignbox.model.Metadata;
-
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -15,6 +13,7 @@ public class SecasignboxDocument {
     private Date signDate;
     private List<Metadata> metadatas;
     private String documentContent;
+    private DocumentState documentState;
 
     public UUID getId() {
         return id;
@@ -70,5 +69,13 @@ public class SecasignboxDocument {
 
     public void setDocumentContent(String documentContent) {
         this.documentContent = documentContent;
+    }
+
+    public DocumentState getDocumentState() {
+        return documentState;
+    }
+
+    public void setDocumentState(DocumentState documentState) {
+        this.documentState = documentState;
     }
 }

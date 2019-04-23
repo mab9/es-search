@@ -2,7 +2,7 @@ package ch.mab.search.es.rest;
 
 import ch.mab.search.es.business.SecasignboxService;
 import ch.mab.search.es.model.SecasignboxDocument;
-import ch.mab.search.secasignbox.model.Metadata;
+import ch.mab.search.es.model.Metadata;
 import org.elasticsearch.client.indices.CreateIndexResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

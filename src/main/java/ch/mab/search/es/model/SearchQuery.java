@@ -1,7 +1,5 @@
 package ch.mab.search.es.model;
 
-import ch.mab.search.secasignbox.model.DocState;
-
 import java.util.Date;
 import java.util.UUID;
 
@@ -13,7 +11,7 @@ public class SearchQuery {
 
     Date toDate;
 
-    DocState docState;
+    DocumentState documentState;
 
     String documentContent;
 
@@ -22,11 +20,11 @@ public class SearchQuery {
     public SearchQuery() {
     }
 
-    public SearchQuery(UUID archivespaceId, Date fromDate, Date toDate, DocState docState, String documentContent, String documentMetadata) {
+    public SearchQuery(UUID archivespaceId, Date fromDate, Date toDate, DocumentState documentState, String documentContent, String documentMetadata) {
         this.archivespaceId = archivespaceId;
         this.fromDate = fromDate;
         this.toDate = toDate;
-        this.docState = docState;
+        this.documentState = documentState;
         this.documentContent = documentContent;
         this.documentMetadata = documentMetadata;
     }
@@ -55,12 +53,12 @@ public class SearchQuery {
         this.toDate = toDate;
     }
 
-    public DocState getDocState() {
-        return docState;
+    public DocumentState getDocumentState() {
+        return documentState;
     }
 
-    public void setDocState(DocState docState) {
-        this.docState = docState;
+    public void setDocumentState(DocumentState documentState) {
+        this.documentState = documentState;
     }
 
     public String getDocumentContent() {
