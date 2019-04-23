@@ -90,7 +90,7 @@ class IndexServiceTest {
     void getTotalHits_indexedDocuments_amountOfIndexedDocuments() throws IOException, InterruptedException {
         indexService.updateMapping(INDEX, profileService.createMappingObject());
         ProfileDocument document =
-                new ProfileDocument("rabar", "barbara", "papap", Collections.emptyList(), Collections.emptyList());
+                new ProfileDocument("rabar", "barbara", Collections.emptyList(), Collections.emptyList());
         profileService.createProfile(INDEX, document);
         profileService.createProfile(INDEX, document);
         profileService.createProfile(INDEX, document);

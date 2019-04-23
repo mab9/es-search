@@ -35,13 +35,9 @@ public class ProfileService extends AbstractIndex {
     }
 
     public Optional<ProfileDocument> createProfile(String index, ProfileDocument document) throws IOException {
-        UUID uuid = UUID.randomUUID();
-        document.setId(uuid.toString());
-
         String json = gson.toJson(document);
-
         IndexRequest request = new IndexRequest(index);
-        request.id(document.getId());
+        request.id(document.getId().toString());
         request.source(json, XContentType.JSON);
 
         IndexResponse indexResponse = client.index(request, RequestOptions.DEFAULT);
@@ -60,14 +56,14 @@ public class ProfileService extends AbstractIndex {
     }
 
     public Optional<ProfileDocument> updateProfile(String index, ProfileDocument document) throws IOException {
-        Optional<ProfileDocument> current = findById(index, UUID.fromString(document.getId()));
+        Optional<ProfileDocument> current = findById(index, document.getId());
 
         if (current.isEmpty()) {
             return Optional.empty();
         }
 
         String json = gson.toJson(document);
-        UpdateRequest request = new UpdateRequest(INDEX, current.get().getId());
+        UpdateRequest request = new UpdateRequest(INDEX, current.get().getId().toString());
         request.doc(json, XContentType.JSON);
         UpdateResponse updateResponse = client.update(request, RequestOptions.DEFAULT);
 
@@ -119,7 +115,7 @@ public class ProfileService extends AbstractIndex {
             return current;
         }
 
-        DeleteRequest deleteRequest = new DeleteRequest(INDEX, current.get().getId());
+        DeleteRequest deleteRequest = new DeleteRequest(INDEX, current.get().getId().toString());
         DeleteResponse response = client.delete(deleteRequest, RequestOptions.DEFAULT);
         return current;
     }

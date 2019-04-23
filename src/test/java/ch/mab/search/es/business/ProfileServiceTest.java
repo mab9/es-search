@@ -36,16 +36,10 @@ public class ProfileServiceTest {
     @Test
     public void createProfile_createDocument_returnCreatedDocument() throws Exception {
         ProfileDocument document =
-                new ProfileDocument(UUID.randomUUID().toString(), "mabambam", "mabam", Collections.emptyList(),
+                new ProfileDocument( "mabambam", "mabam", Collections.emptyList(),
                                     Collections.emptyList());
         Optional<ProfileDocument> profile = profileService.createProfile(INDEX, document);
         Assertions.assertEquals(document, profile.get());
-    }
-
-    @Test
-    public void updateMapping_updateIndex_returnOkResponse() throws Exception {
-        //AcknowledgedResponse acknowledgedResponse = indexService.updateMapping();
-        //Assertions.assertTrue(acknowledgedResponse.isAcknowledged());
     }
 
     @Test
@@ -57,7 +51,7 @@ public class ProfileServiceTest {
 
         for (int i = 0; i < amount; i++) {
             ProfileDocument document =
-                    new ProfileDocument(UUID.randomUUID().toString(), "mabambam-" + UUID.randomUUID().toString(),
+                    new ProfileDocument( "mabambam-" + UUID.randomUUID().toString(),
                                         "mabam", Collections.emptyList(), Collections.emptyList());
             profileService.createProfile(INDEX, document);
         }
@@ -66,5 +60,15 @@ public class ProfileServiceTest {
         TimeUnit.SECONDS.sleep(2);
         long totalHits = indexService.getTotalHits(INDEX);
         Assertions.assertEquals(amount, totalHits);
+    }
+
+    @Test
+    void findById_profileDocument_findExpectedDocument() throws IOException {
+        ProfileDocument document = new ProfileDocument( "mabambam-" + UUID.randomUUID().toString(),
+                                    "mabam", Collections.emptyList(), Collections.emptyList());
+        profileService.createProfile(INDEX, document);
+        Optional<ProfileDocument> expectedDocument = profileService.findById(INDEX, document.getId());
+
+        Assertions.assertEquals(document, expectedDocument.get());
     }
 }

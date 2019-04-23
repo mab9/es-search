@@ -22,6 +22,11 @@ public class IndexService {
     @Autowired
     private RestHighLevelClient client;
 
+    public GetIndexResponse getIndex(String index) throws IOException {
+        GetIndexRequest request = new GetIndexRequest(index);
+        return client.indices().get(request, RequestOptions.DEFAULT);
+    }
+
     public long getTotalHits(String index) throws IOException {
         SearchRequest searchRequest = new SearchRequest(index);
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();

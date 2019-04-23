@@ -2,30 +2,25 @@ package ch.mab.search.es.model;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 public class ProfileDocument {
 
-    private String id;
+    private final UUID id = UUID.randomUUID();
     private String firstName;
     private String lastName;
     private List<Technology> technologies;
     private List<String> emails;
 
-    public ProfileDocument(String id, String firstName, String lastName, List<Technology> technologies,
-                           List<String> emails) {
-        this.id = id;
+    public ProfileDocument(String firstName, String lastName, List<Technology> technologies, List<String> emails) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.technologies = technologies;
         this.emails = emails;
     }
 
-    public String getId() {
+    public UUID getId() {
         return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
     }
 
     public String getFirstName() {
