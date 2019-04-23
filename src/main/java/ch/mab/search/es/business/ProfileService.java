@@ -34,7 +34,7 @@ public class ProfileService extends AbstractIndex {
     public ProfileService() {
     }
 
-    public Optional<ProfileDocument> createProfile(String index, ProfileDocument document) throws Exception {
+    public Optional<ProfileDocument> createProfile(String index, ProfileDocument document) throws IOException {
         UUID uuid = UUID.randomUUID();
         document.setId(uuid.toString());
 
