@@ -6,11 +6,14 @@ import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.indices.CreateIndexResponse;
 import org.elasticsearch.client.indices.GetIndexRequest;
+import org.elasticsearch.client.indices.GetIndexResponse;
+import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 
@@ -97,5 +100,16 @@ class IndexServiceTest {
 
         TimeUnit.SECONDS.sleep(2);
         Assertions.assertEquals(3, indexService.getTotalHits(INDEX));
+    }
+
+    @Test
+    void getIndex_indexDetails_returnAllDetailsAboutTheIndex() throws IOException {
+        indexService.updateMapping(INDEX, profileService.createMappingObject());
+        GetIndexResponse index = indexService.getIndex(INDEX);
+
+        System.out.println(index);
+        Assertions.assertEquals(index.getIndices().length, 1);
+        Assertions.assertEquals(index.getIndices()[0], INDEX);
+        index.getMappings().get(INDEX).getSourceAsMap().values().containsAll(Arrays.asList("technologies", "firstName", "lastName"));
     }
 }
