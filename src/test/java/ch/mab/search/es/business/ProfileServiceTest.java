@@ -1,7 +1,6 @@
 package ch.mab.search.es.business;
 
 import ch.mab.search.es.model.ProfileDocument;
-import org.elasticsearch.action.support.master.AcknowledgedResponse;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,7 +30,7 @@ public class ProfileServiceTest {
         if (indexService.isIndexExisting(INDEX)) {
             indexService.deleteIndex(INDEX);
         }
-        indexService.createIndex(INDEX);
+        indexService.createIndex(INDEX, profileService.createMappingObject());
     }
 
     @Test
@@ -48,7 +47,6 @@ public class ProfileServiceTest {
         //AcknowledgedResponse acknowledgedResponse = indexService.updateMapping();
         //Assertions.assertTrue(acknowledgedResponse.isAcknowledged());
     }
-
 
     @Test
     public void findeAll_profileDocuments_returnAllCreatedDocuments() throws Exception {

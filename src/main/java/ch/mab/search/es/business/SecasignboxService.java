@@ -1,9 +1,8 @@
 package ch.mab.search.es.business;
 
-import ch.mab.search.es.model.SecasignboxDocument;
+import ch.mab.search.es.api.AbstractIndex;
 import ch.mab.search.es.model.Metadata;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
+import ch.mab.search.es.model.SecasignboxDocument;
 import org.apache.lucene.search.join.ScoreMode;
 import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.delete.DeleteResponse;
@@ -16,10 +15,6 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.action.update.UpdateResponse;
 import org.elasticsearch.client.RequestOptions;
-import org.elasticsearch.client.RestHighLevelClient;
-import org.elasticsearch.client.indices.CreateIndexRequest;
-import org.elasticsearch.client.indices.CreateIndexResponse;
-import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.common.xcontent.XContentType;
@@ -27,22 +22,13 @@ import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.*;
 
 @Service
-public class SecasignboxService {
-
-    @Autowired
-    private RestHighLevelClient client;
-
-    private final Gson gson = new Gson();
-
-    @Autowired
-    private ObjectMapper objectMapper;
+public class SecasignboxService extends AbstractIndex {
 
     private final String INDEX = "secasignbox";
 
@@ -139,14 +125,8 @@ public class SecasignboxService {
         return profileDocuments;
     }
 
-    public CreateIndexResponse createSecasignboxIndex() throws IOException {
-            CreateIndexRequest request = new CreateIndexRequest(INDEX);
-        appendSettings(request);
-        appendMapping(request);
-        return client.indices().create(request, RequestOptions.DEFAULT);
-    }
-
-    private void appendMapping(CreateIndexRequest request) throws IOException {
+    @Override
+    public XContentBuilder createMappingObject() throws IOException {
         XContentBuilder builder = XContentFactory.jsonBuilder();
         builder.startObject();
         {
@@ -160,12 +140,6 @@ public class SecasignboxService {
             { builder.startObject("documentContent"); { builder.field("type", "text"); } builder.endObject(); }
             builder.endObject(); }
         builder.endObject();
-        request.mapping(builder);
-    }
-
-    private void appendSettings(CreateIndexRequest request) {
-        request.settings(Settings.builder()
-                                 .put("index.number_of_shards", 3)
-                                 .put("index.number_of_replicas", 2));
+        return builder;
     }
 }

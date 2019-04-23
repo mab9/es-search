@@ -1,6 +1,5 @@
 package ch.mab.search.es.business;
 
-import com.google.gson.Gson;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;

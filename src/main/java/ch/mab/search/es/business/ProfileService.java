@@ -1,8 +1,7 @@
 package ch.mab.search.es.business;
 
+import ch.mab.search.es.api.AbstractIndex;
 import ch.mab.search.es.model.ProfileDocument;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
 import org.apache.lucene.search.join.ScoreMode;
 import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.delete.DeleteResponse;
@@ -15,7 +14,6 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.action.update.UpdateResponse;
 import org.elasticsearch.client.RequestOptions;
-import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.common.xcontent.XContentType;
@@ -23,22 +21,13 @@ import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.*;
 
 @Service
-public class ProfileService {
-
-    @Autowired
-    private RestHighLevelClient client;
-
-    private final Gson gson = new Gson();
-
-    @Autowired
-    private ObjectMapper objectMapper;
+public class ProfileService extends AbstractIndex {
 
     private final String INDEX = "posts";
 
@@ -56,11 +45,11 @@ public class ProfileService {
         request.source(json, XContentType.JSON);
 
         IndexResponse indexResponse = client.index(request, RequestOptions.DEFAULT);
-        return findById(UUID.fromString(indexResponse.getId()));
+        return findById(index, UUID.fromString(indexResponse.getId()));
     }
 
-    public Optional<ProfileDocument> findById(UUID id) throws IOException {
-        GetRequest getRequest = new GetRequest(INDEX, id.toString());
+    public Optional<ProfileDocument> findById(String index, UUID id) throws IOException {
+        GetRequest getRequest = new GetRequest(index, id.toString());
         GetResponse getResponse = client.get(getRequest, RequestOptions.DEFAULT);
 
         if (getResponse.getSource() != null) {
@@ -70,8 +59,8 @@ public class ProfileService {
         }
     }
 
-    public Optional<ProfileDocument> updateProfile(ProfileDocument document) throws IOException {
-        Optional<ProfileDocument> current = findById(UUID.fromString(document.getId()));
+    public Optional<ProfileDocument> updateProfile(String index, ProfileDocument document) throws IOException {
+        Optional<ProfileDocument> current = findById(index, UUID.fromString(document.getId()));
 
         if (current.isEmpty()) {
             return Optional.empty();
@@ -82,7 +71,7 @@ public class ProfileService {
         request.doc(json, XContentType.JSON);
         UpdateResponse updateResponse = client.update(request, RequestOptions.DEFAULT);
 
-        return findById(UUID.fromString(updateResponse.getId()));
+        return findById(index, UUID.fromString(updateResponse.getId()));
     }
 
     public List<ProfileDocument> findAll(String index) throws IOException {
@@ -123,8 +112,8 @@ public class ProfileService {
         return getSearchResult(response);
     }
 
-    public Optional<ProfileDocument> deleteProfileDocument(UUID id) throws IOException {
-        Optional<ProfileDocument> current = findById(id);
+    public Optional<ProfileDocument> deleteProfileDocument(String index, UUID id) throws IOException {
+        Optional<ProfileDocument> current = findById(index, id);
 
         if (current.isEmpty()) {
             return current;

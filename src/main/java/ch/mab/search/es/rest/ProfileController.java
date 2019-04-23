@@ -1,10 +1,7 @@
 package ch.mab.search.es.rest;
 
-import ch.mab.search.es.business.IndexService;
 import ch.mab.search.es.business.ProfileService;
 import ch.mab.search.es.model.ProfileDocument;
-import org.elasticsearch.action.support.master.AcknowledgedResponse;
-import org.elasticsearch.client.indices.CreateIndexResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,9 +17,6 @@ import java.util.UUID;
 public class ProfileController {
 
     @Autowired
-    private IndexService indexService;
-
-    @Autowired
     private ProfileService service;
 
     public ProfileController() {
@@ -35,7 +29,7 @@ public class ProfileController {
 
     @GetMapping(value = "{id}")
     public ResponseEntity findById(@PathVariable UUID id) throws IOException {
-        Optional<ProfileDocument> result = service.findById(id);
+        Optional<ProfileDocument> result = service.findById("profile", id);
 
         if (result.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -45,7 +39,7 @@ public class ProfileController {
 
     @PutMapping
     public ResponseEntity<ProfileDocument> updateProfile(@RequestBody ProfileDocument document) throws IOException {
-        Optional<ProfileDocument> result = service.updateProfile(document);
+        Optional<ProfileDocument> result = service.updateProfile("profile", document);
         if (result.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
@@ -64,37 +58,11 @@ public class ProfileController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<ProfileDocument> deleteProfile(@PathVariable UUID id)
-            throws Exception {
-
-        Optional<ProfileDocument>  result = service.deleteProfileDocument(id);
+    public ResponseEntity<ProfileDocument> deleteProfile(@PathVariable UUID id) throws Exception {
+        Optional<ProfileDocument> result = service.deleteProfileDocument("profile", id);
         if (result.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         return new ResponseEntity<>(result.get(), HttpStatus.OK);
-
-    }
-
-    @PostMapping("/index")
-    public ResponseEntity<CreateIndexResponse> createProfileIndex() throws IOException {
-        CreateIndexResponse profileIndex = indexService.createIndex("profile");
-        return new ResponseEntity<>(profileIndex, HttpStatus.OK);
-    }
-
-    @PutMapping("/index")
-    public ResponseEntity<AcknowledgedResponse> updateProfileMapping() throws IOException {
-        AcknowledgedResponse profileIndex = indexService.updateMapping("profile", service.createMappingObject());
-        return new ResponseEntity<>(profileIndex, HttpStatus.OK);
-    }
-
-    @DeleteMapping("/index")
-    public ResponseEntity<AcknowledgedResponse> deleteIndex() throws IOException {
-        AcknowledgedResponse profileIndex = indexService.deleteIndex("profile");
-        return new ResponseEntity<>(profileIndex, HttpStatus.OK);
-    }
-
-    @GetMapping("/index")
-    public ResponseEntity getIndex() throws IOException {
-        return new ResponseEntity<>(indexService.isIndexExisting("profile"), HttpStatus.OK);
     }
 }
