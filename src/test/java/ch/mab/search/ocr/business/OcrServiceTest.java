@@ -12,28 +12,28 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @SpringBootTest
 public class OcrServiceTest {
 
-    private final String pathToPdfResources = "src/test/resources/pdf";
+    private final String PATH_TO_PDF_RESOURCES = "src/test/resources/pdf";
 
     @Autowired
     private final OcrService service = new OcrService();
 
     @Test
     public void extractTextFromFile_pdfWithoutImage_fullText() throws IOException {
-        File file = new File(pathToPdfResources + "/futurama.pdf");
+        File file = new File(PATH_TO_PDF_RESOURCES + "/futurama.pdf");
         String txt = service.extractTextFromFile(file);
         assertTrue(txt.contains("Are you, by any chance, interested in becoming my new spaceship crew?"));
     }
 
     @Test
     public void extractTextFromFile_pdfWithImageComputerLetters_fullText() throws IOException {
-        File file = new File(pathToPdfResources + "/LE_Tasks.pdf");
+        File file = new File(PATH_TO_PDF_RESOURCES + "/LE_Tasks.pdf");
         String txt = service.extractTextFromFile(file);
         assertTrue(!txt.isEmpty());
     }
 
     @Test
     public void extractTextFromFile_pdfWithImageHandWrittenLetters_fullText() throws IOException {
-        File file = new File(pathToPdfResources + "/04 SOLID Prinzipien 19F 4Ia.pdf");
+        File file = new File(PATH_TO_PDF_RESOURCES + "/04 SOLID Prinzipien 19F 4Ia.pdf");
         String txt = service.extractTextFromFile(file);
         assertTrue(!txt.isEmpty());
     }

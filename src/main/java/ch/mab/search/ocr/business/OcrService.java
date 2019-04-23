@@ -13,7 +13,7 @@ public class OcrService {
     @Autowired
     private final Ocr ocr = new OcrTika();
 
-    String extractTextFromFile(File file) throws IOException {
+    public String extractTextFromFile(File file) throws IOException {
         return ocr.extractText(file);
     }
 }

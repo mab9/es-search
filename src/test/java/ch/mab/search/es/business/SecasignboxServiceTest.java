@@ -2,20 +2,28 @@ package ch.mab.search.es.business;
 
 import ch.mab.search.es.model.DocumentState;
 import ch.mab.search.es.model.SecasignboxDocument;
+import ch.mab.search.ocr.business.OcrService;
+import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.indices.GetIndexRequest;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.IOException;
+import java.nio.file.*;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @SpringBootTest
 class SecasignboxServiceTest {
 
+    private final String PATH_TO_PDF_RESOURCES = "src/test/resources/pdf";
     private final String INDEX = this.getClass().getName().toLowerCase();
 
     @Autowired
@@ -26,6 +34,9 @@ class SecasignboxServiceTest {
 
     @Autowired
     private SecasignboxService secasignboxService;
+
+    @Autowired
+    private OcrService ocrService;
 
     @BeforeEach
     void setUp() throws IOException {
@@ -135,7 +146,40 @@ class SecasignboxServiceTest {
     }
 
     @Test
-    void findByFuzzy_returnDocumentsContainingX() {
+    void bulkIndexDocument_createBulkOfDocuments_returnOk() throws IOException {
+        List<Path> files = collectPathsOfPdfTestFiles();
+        List<SecasignboxDocument> docs = getSecasignboxDocumentsOfPdfs(files);
+        BulkResponse bulkResponse = secasignboxService.bulkIndexDocument(INDEX, docs);
+        Assertions.assertEquals(bulkResponse.status(), "OK");
+    }
+
+    private List<SecasignboxDocument> getSecasignboxDocumentsOfPdfs(List<Path> pdfs) {
+        return pdfs.stream().map(pdf -> {
+            try {
+                String text = ocrService.extractTextFromFile(pdf.toFile());
+                return createDocument(pdf.getFileName(), text);
+            } catch (IOException e) {
+                return null;
+            }
+        }).collect(Collectors.toList());
+    }
+
+    private SecasignboxDocument createDocument(Path fileName, String documentContent) {
+        return new SecasignboxDocument(UUID.randomUUID(), fileName.toString(), new Date(), new Date(),
+                                       Collections.emptyList(),
+                                       documentContent,
+                                       DocumentState.SIGNED);
+    }
+
+    private List<Path> collectPathsOfPdfTestFiles() throws IOException {
+        Path roote = Paths.get(PATH_TO_PDF_RESOURCES);
+        PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:*.{pdf}");
+
+
+        return Files.walk(roote)
+                         .filter(Files::isRegularFile)
+                         .filter(f -> matcher.matches(f.getFileName()))
+                         .collect(Collectors.toList());
 
     }
 

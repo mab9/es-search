@@ -4,6 +4,8 @@ import ch.mab.search.es.api.AbstractIndex;
 import ch.mab.search.es.model.Metadata;
 import ch.mab.search.es.model.SecasignboxDocument;
 import org.apache.lucene.search.join.ScoreMode;
+import org.elasticsearch.action.bulk.BulkRequest;
+import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.get.GetRequest;
@@ -26,6 +28,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Stream;
 
 @Service
 public class SecasignboxService extends AbstractIndex {
@@ -34,14 +37,29 @@ public class SecasignboxService extends AbstractIndex {
     }
 
     public Optional<SecasignboxDocument> indexDocument(String index, SecasignboxDocument document) throws IOException {
-        String json = gson.toJson(document);
-
-        IndexRequest request = new IndexRequest(index);
-        request.id(document.getId().toString());
-        request.source(json, XContentType.JSON);
-
+        IndexRequest request = createIndexRequest(index, document);
         IndexResponse indexResponse = client.index(request, RequestOptions.DEFAULT);
         return findById(index, UUID.fromString(indexResponse.getId()));
+    }
+
+    public BulkResponse bulkIndexDocument(String index, Collection<SecasignboxDocument> documents) throws
+            IOException {
+
+        BulkRequest bulkRequest = new BulkRequest();
+        documents.forEach(document -> {
+            IndexRequest indexRequest = createIndexRequest(index, document);
+            bulkRequest.add(indexRequest);
+        });
+
+        return client.bulk(bulkRequest, RequestOptions.DEFAULT);
+    }
+
+    private IndexRequest createIndexRequest(String index, SecasignboxDocument document) {
+        IndexRequest request = new IndexRequest(index);
+        request.id(document.getId().toString());
+        String json = gson.toJson(document);
+        request.source(json, XContentType.JSON);
+        return request;
     }
 
     public Optional<SecasignboxDocument> findById(String index, UUID id) throws IOException {
