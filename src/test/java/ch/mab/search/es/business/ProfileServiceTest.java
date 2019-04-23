@@ -18,17 +18,20 @@ import java.util.concurrent.TimeUnit;
 @SpringBootTest
 public class ProfileServiceTest {
 
+    private final String INDEX = this.getClass().getName().toLowerCase();
+
     @Autowired
-    private ProfileService service;
+    private ProfileService profileService;
+
+    @Autowired
+    private IndexService indexService;
 
     @BeforeEach
     public void setUp() throws IOException {
-        boolean indexExists = service.getIndex();
-        if (indexExists) {
-            service.deleteIndex();
+        if (indexService.isIndexExisting(INDEX)) {
+            indexService.deleteIndex(INDEX);
         }
-
-        service.createProfileIndex();
+        indexService.createIndex(INDEX);
     }
 
     @Test
@@ -36,40 +39,34 @@ public class ProfileServiceTest {
         ProfileDocument document =
                 new ProfileDocument(UUID.randomUUID().toString(), "mabambam", "mabam", Collections.emptyList(),
                                     Collections.emptyList());
-        Optional<ProfileDocument> profile = service.createProfile(document);
+        Optional<ProfileDocument> profile = profileService.createProfile(INDEX, document);
         Assertions.assertEquals(document, profile.get());
     }
 
     @Test
     public void updateMapping_updateIndex_returnOkResponse() throws Exception {
-        AcknowledgedResponse acknowledgedResponse = service.updateMapping();
-        Assertions.assertTrue(acknowledgedResponse.isAcknowledged());
+        //AcknowledgedResponse acknowledgedResponse = indexService.updateMapping();
+        //Assertions.assertTrue(acknowledgedResponse.isAcknowledged());
     }
 
-    @Test
-    public void deleteIndex_index_noExistingIndex() throws Exception {
-        Assertions.assertTrue(service.getIndex());
-        service.deleteIndex();
-        Assertions.assertFalse(service.getIndex());
-    }
 
     @Test
     public void findeAll_profileDocuments_returnAllCreatedDocuments() throws Exception {
-        List<ProfileDocument> all = service.findAll();
+        List<ProfileDocument> all = profileService.findAll(INDEX);
         Assertions.assertTrue(all.isEmpty());
 
-        int amount = 500;
+        int amount = 100;
 
         for (int i = 0; i < amount; i++) {
             ProfileDocument document =
                     new ProfileDocument(UUID.randomUUID().toString(), "mabambam-" + UUID.randomUUID().toString(),
                                         "mabam", Collections.emptyList(), Collections.emptyList());
-            service.createProfile(document);
+            profileService.createProfile(INDEX, document);
         }
 
         // elastic search is indexing async
         TimeUnit.SECONDS.sleep(2);
-        long totalHits = service.getTotalHits();
+        long totalHits = indexService.getTotalHits(INDEX);
         Assertions.assertEquals(amount, totalHits);
     }
 }

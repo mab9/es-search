@@ -1,10 +1,10 @@
 package ch.mab.search.es.rest;
 
+import ch.mab.search.es.business.IndexService;
 import ch.mab.search.es.business.ProfileService;
 import ch.mab.search.es.model.ProfileDocument;
 import org.elasticsearch.action.support.master.AcknowledgedResponse;
 import org.elasticsearch.client.indices.CreateIndexResponse;
-import org.elasticsearch.client.indices.GetIndexRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +20,9 @@ import java.util.UUID;
 public class ProfileController {
 
     @Autowired
+    private IndexService indexService;
+
+    @Autowired
     private ProfileService service;
 
     public ProfileController() {
@@ -27,7 +30,7 @@ public class ProfileController {
 
     @PostMapping
     public ResponseEntity createProfile(@RequestBody ProfileDocument document) throws Exception {
-        return new ResponseEntity(service.createProfile(document), HttpStatus.CREATED);
+        return new ResponseEntity(service.createProfile("profile", document), HttpStatus.CREATED);
     }
 
     @GetMapping(value = "{id}")
@@ -51,7 +54,7 @@ public class ProfileController {
 
     @GetMapping
     public ResponseEntity<List<ProfileDocument>> findAll() throws Exception {
-        return new ResponseEntity<>(service.findAll(), HttpStatus.OK);
+        return new ResponseEntity<>(service.findAll("profile"), HttpStatus.OK);
     }
 
     @GetMapping(value = "/search")
@@ -74,24 +77,24 @@ public class ProfileController {
 
     @PostMapping("/index")
     public ResponseEntity<CreateIndexResponse> createProfileIndex() throws IOException {
-        CreateIndexResponse profileIndex = service.createProfileIndex();
+        CreateIndexResponse profileIndex = indexService.createIndex("profile");
         return new ResponseEntity<>(profileIndex, HttpStatus.OK);
     }
 
     @PutMapping("/index")
     public ResponseEntity<AcknowledgedResponse> updateProfileMapping() throws IOException {
-        AcknowledgedResponse profileIndex = service.updateMapping();
+        AcknowledgedResponse profileIndex = indexService.updateMapping("profile", service.createMappingObject());
         return new ResponseEntity<>(profileIndex, HttpStatus.OK);
     }
 
     @DeleteMapping("/index")
     public ResponseEntity<AcknowledgedResponse> deleteIndex() throws IOException {
-        AcknowledgedResponse profileIndex = service.deleteIndex();
+        AcknowledgedResponse profileIndex = indexService.deleteIndex("profile");
         return new ResponseEntity<>(profileIndex, HttpStatus.OK);
     }
 
     @GetMapping("/index")
     public ResponseEntity getIndex() throws IOException {
-        return new ResponseEntity<>(service.getIndex(), HttpStatus.OK);
+        return new ResponseEntity<>(indexService.isIndexExisting("profile"), HttpStatus.OK);
     }
 }
