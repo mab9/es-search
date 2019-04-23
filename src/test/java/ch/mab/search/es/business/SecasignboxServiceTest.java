@@ -146,11 +146,15 @@ class SecasignboxServiceTest {
     }
 
     @Test
-    void bulkIndexDocument_createBulkOfDocuments_returnOk() throws IOException {
+    void bulkIndexDocument_createBulkOfDocuments_returnOk() throws IOException, InterruptedException {
         List<Path> files = collectPathsOfPdfTestFiles();
         List<SecasignboxDocument> docs = getSecasignboxDocumentsOfPdfs(files);
-        BulkResponse bulkResponse = secasignboxService.bulkIndexDocument(INDEX, docs);
-        Assertions.assertEquals(bulkResponse.status(), "OK");
+        secasignboxService.bulkIndexDocument(INDEX, docs);
+
+        TimeUnit.SECONDS.sleep(2);
+        List<SecasignboxDocument> all = secasignboxService.findAll(INDEX);
+        Assertions.assertEquals(docs.size(), all.size());
+        Assertions.assertTrue(docs.containsAll(all));
     }
 
     private List<SecasignboxDocument> getSecasignboxDocumentsOfPdfs(List<Path> pdfs) {
