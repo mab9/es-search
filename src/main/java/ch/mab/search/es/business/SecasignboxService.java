@@ -33,7 +33,7 @@ public class SecasignboxService extends AbstractIndex {
     public SecasignboxService() {
     }
 
-    public Optional<SecasignboxDocument> indexSecasignboxDocument(String index, SecasignboxDocument document) throws IOException {
+    public Optional<SecasignboxDocument> indexDocument(String index, SecasignboxDocument document) throws IOException {
         String json = gson.toJson(document);
 
         IndexRequest request = new IndexRequest(index);
@@ -79,7 +79,7 @@ public class SecasignboxService extends AbstractIndex {
         return getSearchResult(response);
     }
 
-    public Optional<SecasignboxDocument> deleteSecasignboxDocument(String index, UUID id) throws IOException {
+    public Optional<SecasignboxDocument> deleteDocument(String index, UUID id) throws IOException {
         Optional<SecasignboxDocument> current = findById(index, id);
 
         if (current.isEmpty()) {
@@ -91,7 +91,7 @@ public class SecasignboxService extends AbstractIndex {
         return current;
     }
 
-    public Optional<SecasignboxDocument> updateSecasignboxDocument(String index, SecasignboxDocument document) throws IOException {
+    public Optional<SecasignboxDocument> updateDocument(String index, SecasignboxDocument document) throws IOException {
         Optional<SecasignboxDocument> current = findById(index, document.getId());
 
         if (current.isEmpty()) {
