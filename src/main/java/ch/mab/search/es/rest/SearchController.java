@@ -23,7 +23,7 @@ public class SearchController {
 
     @PostMapping
     public ResponseEntity createSecasignboxDocument(@RequestBody SecasignboxDocument document) throws Exception {
-        return new ResponseEntity(service.createSecasignboxDocument("secasignbox", document), HttpStatus.CREATED);
+        return new ResponseEntity(service.indexSecasignboxDocument("secasignbox", document), HttpStatus.CREATED);
     }
 
     @GetMapping(value = "{id}")
@@ -47,7 +47,7 @@ public class SearchController {
 
     @GetMapping
     public ResponseEntity<List<SecasignboxDocument>> findAll() throws Exception {
-        return new ResponseEntity<>(service.findAll(), HttpStatus.OK);
+        return new ResponseEntity<>(service.findAll("secasignbox"), HttpStatus.OK);
     }
 
     @GetMapping(value = "/search")

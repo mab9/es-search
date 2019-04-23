@@ -1,13 +1,10 @@
 package ch.mab.search.es.business;
 
 import ch.mab.search.es.model.DocumentState;
-import ch.mab.search.es.model.ProfileDocument;
 import ch.mab.search.es.model.SecasignboxDocument;
-import org.elasticsearch.action.support.master.AcknowledgedResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.indices.GetIndexRequest;
-import org.elasticsearch.client.indices.GetIndexResponse;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,7 +12,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 @SpringBootTest
 class SecasignboxServiceTest {
@@ -36,7 +32,7 @@ class SecasignboxServiceTest {
         if (indexService.isIndexExisting(INDEX)) {
             indexService.deleteIndex(INDEX);
         }
-        indexService.createIndex(INDEX);
+        indexService.createIndex(INDEX, secasignboxService.createMappingObject());
     }
 
     /*
@@ -64,17 +60,35 @@ class SecasignboxServiceTest {
     }
 
     @Test
-    public void createSecasignboxDocument_createDocument_returnCreatedDocument() throws Exception {
-        indexService.updateMapping(INDEX, secasignboxService.createMappingObject());
-        SecasignboxDocument document = createDocument();
-        Optional<SecasignboxDocument> result = secasignboxService.createSecasignboxDocument(INDEX, document);
+    void createSecasignboxDocument_createDocument_returnCreatedDocument() throws Exception {
+        SecasignboxDocument document = createDocument("Donald Duck und seine Taler");
+        Optional<SecasignboxDocument> result = secasignboxService.indexSecasignboxDocument(INDEX, document);
         Assertions.assertEquals(document, result.get());
     }
 
-    private SecasignboxDocument createDocument() {
-        return new SecasignboxDocument(UUID.randomUUID(), "Donald Duck und seine Taler", new Date(), new Date(),
+    private SecasignboxDocument createDocument(String name) {
+        return new SecasignboxDocument(UUID.randomUUID(), name, new Date(), new Date(),
                                        Collections.emptyList(),
                                        "Der Glückstaler ist Onkel Dagoberts erste selbstverdiente Münze",
                                        DocumentState.SIGNED);
     }
+
+    @Test
+    void findAll_indexedDocuments_expectingCreatedDocuments () throws IOException, InterruptedException {
+        List<SecasignboxDocument> all = secasignboxService.findAll(INDEX);
+        Assertions.assertTrue(all.isEmpty());
+
+        SecasignboxDocument document1 = createDocument("Donald Duck und seinen Glückstaler");
+        SecasignboxDocument document2 = createDocument("Donald Duck und seine 3 Neffen");
+        secasignboxService.indexSecasignboxDocument(INDEX, document1);
+        secasignboxService.indexSecasignboxDocument(INDEX, document2);
+
+        // elastic search is indexing async
+        TimeUnit.SECONDS.sleep(2);
+        all = secasignboxService.findAll(INDEX);
+        Assertions.assertEquals(2, all.size());
+        Assertions.assertTrue(all.contains(document1));
+        Assertions.assertTrue(all.contains(document2));
+    }
+
 }

@@ -33,7 +33,7 @@ public class SecasignboxService extends AbstractIndex {
     public SecasignboxService() {
     }
 
-    public Optional<SecasignboxDocument> createSecasignboxDocument(String index, SecasignboxDocument document) throws IOException {
+    public Optional<SecasignboxDocument> indexSecasignboxDocument(String index, SecasignboxDocument document) throws IOException {
         String json = gson.toJson(document);
 
         IndexRequest request = new IndexRequest(index);
@@ -55,8 +55,8 @@ public class SecasignboxService extends AbstractIndex {
         }
     }
 
-    public List<SecasignboxDocument> findAll() throws IOException {
-        SearchRequest searchRequest = new SearchRequest();
+    public List<SecasignboxDocument> findAll(String index) throws IOException {
+        SearchRequest searchRequest = new SearchRequest(index);
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         searchSourceBuilder.query(QueryBuilders.matchAllQuery());
         searchRequest.source(searchSourceBuilder);
