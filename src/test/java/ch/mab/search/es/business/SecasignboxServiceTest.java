@@ -169,6 +169,8 @@ class SecasignboxServiceTest {
         Assertions.assertTrue(docs.contains(search.get(0)));
     }
 
+    // TODO IMPLEMENT SOME MORE SEARCHES: https://www.elastic.co/guide/en/elasticsearch/client/java-rest/current/java-rest-high-search.html
+
     private List<SecasignboxDocument> getSecasignboxDocumentsOfPdfs(List<Path> pdfs) {
         return pdfs.stream().map(pdf -> {
             try {
