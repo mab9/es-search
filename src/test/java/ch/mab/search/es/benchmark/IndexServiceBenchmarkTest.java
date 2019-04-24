@@ -5,18 +5,15 @@ import ch.mab.search.es.business.IndexService;
 import ch.mab.search.es.business.SecasignboxService;
 import ch.mab.search.es.model.SecasignboxDocument;
 import org.elasticsearch.client.RestHighLevelClient;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.IOException;
-import java.lang.instrument.Instrumentation;
 import java.nio.channels.FileChannel;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 @SpringBootTest
 public class IndexServiceBenchmarkTest {
@@ -57,9 +54,54 @@ public class IndexServiceBenchmarkTest {
         long finish = System.currentTimeMillis();
         long timeElapsed = finish - start;
 
+        printSystemInfos();
+        printResults(files, totalFileSize, timeElapsed);
+    }
+
+    @Test
+    void benchmark_bulkIndex_200_documents() throws InterruptedException, IOException {
+        List<Path> files = testService.collectPathsOfPdfTestFiles();
+        files = files.subList(0, 200);
+        long totalFileSize = calculateTotalFileSize(files);
+        List<SecasignboxDocument> docs = testService.getSecasignboxDocumentsOfPdfs(files);
+
+        long start = System.currentTimeMillis();
+        secasignboxService.bulkIndexDocument(INDEX, docs);
+        long finish = System.currentTimeMillis();
+        long timeElapsed = finish - start;
+
+        printSystemInfos();
+        printResults(files, totalFileSize, timeElapsed);
+    }
+
+    @Test
+    void benchmark_bulkIndex_400_documents() throws InterruptedException, IOException {
+        List<Path> files = testService.collectPathsOfPdfTestFiles();
+        files = files.subList(0, 400);
+        long totalFileSize = calculateTotalFileSize(files);
+        List<SecasignboxDocument> docs = testService.getSecasignboxDocumentsOfPdfs(files);
+
+        long start = System.currentTimeMillis();
+        secasignboxService.bulkIndexDocument(INDEX, docs);
+        long finish = System.currentTimeMillis();
+        long timeElapsed = finish - start;
+
+        printSystemInfos();
+        printResults(files, totalFileSize, timeElapsed);
+    }
+
+    private void printResults(List<Path> files, long totalFileSize, long timeElapsed) {
         System.out.println("elapsed time in milli seconds: " + timeElapsed);
         System.out.println("Amount of files used for the bulk index : " + files.size());
         System.out.println("Total file size of pdfs (not secasignbox documents) in bytes : " + totalFileSize);
+    }
+
+    private void printSystemInfos() {
+        System.out.println("java.version: " + System.getProperties().get("java.version"));
+        System.out.println("java.vm.name: " + System.getProperties().get("java.vm.name"));
+        System.out.println("java.runtime.version: " + System.getProperties().get("java.runtime.version"));
+        System.out.println("os.name: " + System.getProperties().get("os.name"));
+        System.out.println("Available processors: " + Runtime.getRuntime().availableProcessors());
     }
 
     private long calculateTotalFileSize(List<Path> files) throws IOException {
