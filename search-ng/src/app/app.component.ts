@@ -16,6 +16,6 @@ import {CONTACT_DATA} from "./data/contact-data";
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
-  contacts: Contact[] = CONTACT_DATA;
+  contacts = CONTACT_DATA;
   trackByContacts(index: number, contact: Contact): number | string { return contact.id; }
 }
