@@ -2,7 +2,6 @@ package ch.mab.search.es.rest;
 
 import ch.mab.search.es.business.IndexService;
 import ch.mab.search.es.business.ProfileService;
-import ch.mab.search.es.model.ProfileDocument;
 import org.elasticsearch.action.support.master.AcknowledgedResponse;
 import org.elasticsearch.client.indices.CreateIndexResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,9 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/indices")

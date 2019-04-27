@@ -14,7 +14,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Objects;
 
-
 @Component
 public class OcrTika implements Ocr {
 

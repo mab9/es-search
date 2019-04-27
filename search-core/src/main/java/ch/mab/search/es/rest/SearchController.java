@@ -50,7 +50,7 @@ public class SearchController {
         return new ResponseEntity<>(service.findAll("secasignbox"), HttpStatus.OK);
     }
 
-    @GetMapping(value = "/search")
+    @GetMapping(value = "/ch/mab/search")
     public ResponseEntity<List<SecasignboxDocument>> search(@RequestParam(value = "metadata") Metadata metadata) throws
             IOException {
         return new ResponseEntity<>(service.searchByMetadata("secasignbox", metadata), HttpStatus.OK);

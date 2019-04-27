@@ -1,5 +1,7 @@
 package ch.mab.search.es.business;
 
+import ch.mab.search.es.business.IndexService;
+import ch.mab.search.es.business.ProfileService;
 import ch.mab.search.es.model.ProfileDocument;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;

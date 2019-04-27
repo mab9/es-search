@@ -51,7 +51,7 @@ public class ProfileController {
         return new ResponseEntity<>(service.findAll("profile"), HttpStatus.OK);
     }
 
-    @GetMapping(value = "/search")
+    @GetMapping(value = "/ch/mab/search")
     public ResponseEntity<List<ProfileDocument>> search(@RequestParam(value = "technology") String technology) throws
             IOException {
         return new ResponseEntity<>(service.searchByTechnology(technology), HttpStatus.OK);

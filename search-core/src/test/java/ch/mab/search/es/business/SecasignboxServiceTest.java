@@ -1,9 +1,10 @@
 package ch.mab.search.es.business;
 
 import ch.mab.search.es.TestHelperService;
+import ch.mab.search.es.business.IndexService;
+import ch.mab.search.es.business.SecasignboxService;
 import ch.mab.search.es.model.DocumentState;
 import ch.mab.search.es.model.SecasignboxDocument;
-import ch.mab.search.ocr.business.OcrService;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
@@ -13,10 +14,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.IOException;
-import java.nio.file.*;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 @SpringBootTest
 class SecasignboxServiceTest {

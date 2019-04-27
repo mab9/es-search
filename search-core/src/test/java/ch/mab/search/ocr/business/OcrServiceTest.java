@@ -1,5 +1,6 @@
 package ch.mab.search.ocr.business;
 
+import ch.mab.search.ocr.business.OcrService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
