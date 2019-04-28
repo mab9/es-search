@@ -1,9 +1,9 @@
 import {Component, OnInit} from '@angular/core';
 import {EventBusService} from "../../event-bus.service";
 import {merge, Observable, Subject} from "rxjs";
-import {Contact} from "../../contacts/contact";
-import {ContactsService} from "../../contacts/contacts.service";
 import {debounceTime, delay, distinctUntilChanged, switchMap, takeUntil} from "rxjs/operators";
+import {DocumentService} from "../document.service";
+import {Document} from "../document";
 
 @Component({
   selector: 'app-document-search',
@@ -14,32 +14,43 @@ import {debounceTime, delay, distinctUntilChanged, switchMap, takeUntil} from "r
           <input matInput type="text" (input)="terms$.next($event.target.value)"></mat-form-field>
         <mat-icon color="accent">search</mat-icon>
       </mat-toolbar>
+
+      <mat-list>
+        <mat-list>
+          <a mat-list-item [routerLink]="['/document', item?.id]"
+             *ngFor="let item of documents | async; trackBy: trackByContacts">
+            <h3 mat-line>{{ item?.documentName}}</h3>
+          </a>
+        </mat-list>
+      </mat-list>
+
+
     </div>`,
   styleUrls: ['./document-search.component.scss']
 })
 export class DocumentSearchComponent implements OnInit {
 
-  contacts$: Observable<Array<Contact>>;
+  documents: Observable<Array<Document>>;
   terms$ = new Subject<string>();
 
-  constructor(private contactService: ContactsService, private eventBusService: EventBusService) {
+  constructor(private documentService: DocumentService, private eventBusService: EventBusService) {
   }
 
   ngOnInit() {
-    const contactSearch$ = this.terms$.pipe(
+    const documentSearch$ = this.terms$.pipe(
       debounceTime(400),
       distinctUntilChanged(),
-      switchMap(x => this.contactService.search(x))
+      switchMap(x => this.documentService.search(x))
     );
 
-    this.contacts$ = merge(
-      contactSearch$,
-      this.contactService.getContacts().pipe(delay(2000), takeUntil(this.terms$)));
+    this.documents = merge(
+      documentSearch$,
+      this.documentService.getDocuments().pipe(delay(2000), takeUntil(this.terms$)));
 
     this.eventBusService.emit('appTitleChange', `Documents`);
   }
 
-  trackByContacts(index: number, contact: Contact): number | string {
+  trackByContacts(index: number, contact: Document): number | string {
     return contact.id;
   }
 

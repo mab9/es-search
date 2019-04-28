@@ -1,6 +1,8 @@
 package ch.mab.search.es.rest;
 
 import ch.mab.search.es.business.SecasignboxService;
+import ch.mab.search.es.model.Documents;
+import ch.mab.search.es.model.Items;
 import ch.mab.search.es.model.Metadata;
 import ch.mab.search.es.model.SecasignboxDocument;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,11 +48,12 @@ public class SearchController {
     }
 
     @GetMapping
-    public ResponseEntity<List<SecasignboxDocument>> findAll() throws Exception {
-        return new ResponseEntity<>(service.findAll("secasignbox"), HttpStatus.OK);
+//    public ResponseEntity<List<SecasignboxDocument>> findAll() throws Exception {
+    public ResponseEntity<Documents> findAll() throws Exception {
+        return new ResponseEntity<>(new Documents(service.findAll("secasignbox")), HttpStatus.OK);
     }
 
-    @GetMapping(value = "/ch/mab/search")
+    @GetMapping(value = "/search")
     public ResponseEntity<List<SecasignboxDocument>> search(@RequestParam(value = "metadata") Metadata metadata) throws
             IOException {
         return new ResponseEntity<>(service.searchByMetadata("secasignbox", metadata), HttpStatus.OK);

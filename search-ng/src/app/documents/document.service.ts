@@ -5,11 +5,11 @@ import {Observable} from "rxjs";
 import {debounceTime, distinctUntilChanged, map, switchMap} from "rxjs/operators";
 
 interface DocumentResponse {
-  item: Document
+  doc: Document
 }
 
 interface DocumentResponse {
-  items: Document[]
+  docs: Document[]
 }
 
 @Injectable()
@@ -21,28 +21,21 @@ export class DocumentService {
   }
 
   getDocuments(): Observable<Array<Document>> {
-    return this.http.get<DocumentResponse>(this.API_ENDPOINT + '/documents').pipe(map((data) => data.items));
+    return this.http.get<DocumentResponse>(this.API_ENDPOINT + '/documents').pipe(map((data) => data.docs));
   }
 
   getDocument(id: string): Observable<Document> {
-    return this.http.get<DocumentResponse>(`${this.API_ENDPOINT}/documents/${id}`).pipe(map((data) => data.item));
+    return this.http.get<DocumentResponse>(`${this.API_ENDPOINT}/documents/${id}`).pipe(map((data) => data.doc));
   }
 
   search(term: string): Observable<Array<Document>> {
     let url = `${this.API_ENDPOINT}/documents/search?term=${term}`;
-    return this.http.get<DocumentResponse>(url).pipe(map((data) => data.items));
-  }
-
-  rawSearch(terms: Observable<string>, debounceMs = 400) : Observable<Array<Document>> {
-    return terms.pipe(
-      debounceTime(debounceMs),
-      distinctUntilChanged(),
-      switchMap(x => this.search(x))
-    );
+    //return this.http.get<DocumentResponse>(url).pipe(map((data) => data.docs));
+    return null;
   }
 
   updateDocument(contact: Document): Observable<Document> {
     let url = `${this.API_ENDPOINT}/documents/${contact.id}`;
-    return this.http.put<DocumentResponse>(url, contact).pipe(map((data) => data.item));
+    return this.http.put<DocumentResponse>(url, contact).pipe(map((data) => data.doc));
   }
 }

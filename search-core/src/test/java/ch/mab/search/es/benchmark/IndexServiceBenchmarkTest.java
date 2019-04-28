@@ -40,6 +40,22 @@ public class IndexServiceBenchmarkTest {
         indexService.createIndex(INDEX, secasignboxService.createMappingObject());
     }
 
+    @Test
+    void frontend_tests_gen_20_docs() throws InterruptedException, IOException {
+        List<Path> files = testService.collectPathsOfPdfTestFiles();
+        files = files.subList(0, 20);
+        long totalFileSize = calculateTotalFileSize(files);
+        List<SecasignboxDocument> docs = testService.getSecasignboxDocumentsOfPdfs(files);
+
+        long start = System.currentTimeMillis();
+        secasignboxService.bulkIndexDocument("secasignbox", docs);
+        long finish = System.currentTimeMillis();
+        long timeElapsed = finish - start;
+
+        printSystemInfos();
+        printResults(files, totalFileSize, timeElapsed);
+    }
+
     // TODO WRITE ALL SYSTEM INFOS AND TEST RESULTS INTO RESULT FILE
 
     @Test

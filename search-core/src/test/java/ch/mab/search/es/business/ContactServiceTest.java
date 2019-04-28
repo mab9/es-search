@@ -36,8 +36,8 @@ public class ContactServiceTest {
     @Test
     public void createProfile_createDocument_returnCreatedDocument() throws Exception {
         ContactDocument document = createContact();
-        Optional<ContactDocument> profile = contactService.createContact(INDEX, document);
-        Assertions.assertEquals(document, profile.get());
+        Optional<ContactDocument> contact = contactService.createContact(INDEX, document);
+        Assertions.assertEquals(document, contact.get());
     }
 
     private ContactDocument createContact() {

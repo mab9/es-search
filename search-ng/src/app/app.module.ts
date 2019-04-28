@@ -19,6 +19,7 @@ import { AboutComponent } from './about/about.component';
 import { TabComponent } from './shared/tab/tab.component';
 import { TabsComponent } from './shared/tabs/tabs.component';
 import { DocumentSearchComponent } from './documents/document-search/document-search.component';
+import {DocumentService} from "./documents/document.service";
 
 @NgModule({
   declarations: [
@@ -44,7 +45,7 @@ import { DocumentSearchComponent } from './documents/document-search/document-se
     RouterModule.forRoot(APP_ROUTES)
   ],
   providers: [
-    ContactsService, ContactsListComponent, ContactsDetailComponent, ContactsDetailViewComponent, ContactsEditorComponent,
+    ContactsService, ContactsListComponent, ContactsDetailComponent, ContactsDetailViewComponent, ContactsEditorComponent, DocumentSearchComponent, DocumentService,
     {provide: 'API_ENDPOINT', useValue: 'http://localhost:4201/api'},
   ],
   bootstrap: [AppComponent]
