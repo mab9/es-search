@@ -1,5 +1,4 @@
 import {Inject, Injectable} from '@angular/core';
-import {CONTACT_DATA} from "./data/contact-data";
 import {HttpClient} from "@angular/common/http";
 import {Contact} from "./models/contact";
 import {Observable} from "rxjs";
@@ -16,17 +15,13 @@ interface ContactsResponse {
 @Injectable()
 export class ContactsService {
 
-  contacts = CONTACT_DATA;
   private API_ENDPOINT: string = 'http://localhost:8080/api/v1';
 
   constructor(private http: HttpClient, @Inject('API_ENDPOINT') private apiEndpoint: String) {
   }
 
   getContacts(): Observable<Array<Contact>> {
-    return this.http.get<ContactsResponse>(this.API_ENDPOINT + '/contacts').pipe(map((data) => {
-      console.info(data);
-      return data.items
-    }));
+    return this.http.get<ContactsResponse>(this.API_ENDPOINT + '/contacts').pipe(map((data) => data.items));
   }
 
   getContact(id: string): Observable<Contact> {

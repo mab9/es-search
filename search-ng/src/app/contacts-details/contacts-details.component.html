@@ -1,17 +1,20 @@
 <div class="trm-contacts-detail">
-  <mat-card>
+  <mat-card *ngIf="contact$ | async as contact; else loading">
     <mat-card-title-group class="fullBleed">
-      <!-- <img mat-card-md-image [src]="contact?.image"> -->
-      <mat-card-title>{{contact?.name}}</mat-card-title>
-      <mat-card-subtitle>̣{{ contact?.email}}</mat-card-subtitle>
+      <mat-card-title>{{contact?.name || ''}}</mat-card-title>
+      <mat-card-title>{{contact?.email  || 'No email address'}}</mat-card-title>
     </mat-card-title-group>
     <mat-card-content>
       <dl>
-        <dt>Phone:</dt> <dd>{{contact?.phone}}</dd>
+        <dt>Phone:</dt> <dd>{{contact?.phone || ''}}</dd>
       </dl>
     </mat-card-content>
     <mat-card-actions fxLayout fxLayoutAlign="center center">
       <a mat-button [routerLink]="['/contact']" title="Go back to list">Go Back</a>
     </mat-card-actions>
+    <ng-template #loading="">
+      Loading contact...
+    </ng-template>
   </mat-card>
 </div>
+
