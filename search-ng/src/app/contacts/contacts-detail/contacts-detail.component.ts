@@ -1,5 +1,5 @@
 import {Component, EventEmitter, Input, Output} from '@angular/core';
-import {Contact} from "../models/contact";
+import {Contact} from "../contact";
 
 @Component({
   selector: 'trm-contacts-detail',

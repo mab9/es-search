@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import {Contact} from "../models/contact";
+import {Contact} from "../contact";
 import {Observable} from "rxjs";
 import {ActivatedRoute, Router} from "@angular/router";
 import {ContactsService} from "../contacts.service";
-import {EventBusService} from "../event-bus.service";
+import {EventBusService} from "../../event-bus.service";
 
 @Component({
   selector: 'trm-contacts-detail-view',

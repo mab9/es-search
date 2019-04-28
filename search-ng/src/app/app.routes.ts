@@ -1,6 +1,6 @@
-import {ContactsDetailViewComponent} from "./contacts-detail-view/contacts-detail-view.component";
-import {ContactsEditorComponent} from "./contacts-editor/contacts-editor.component";
-import {ContactsDashboardComponent} from "./contacts-dashboard/contacts-dashboard.component";
+import {ContactsDetailViewComponent} from "./contacts/contacts-detail-view/contacts-detail-view.component";
+import {ContactsEditorComponent} from "./contacts/contacts-editor/contacts-editor.component";
+import {ContactsDashboardComponent} from "./contacts/contacts-dashboard/contacts-dashboard.component";
 import {AboutComponent} from "./about/about.component";
 
 

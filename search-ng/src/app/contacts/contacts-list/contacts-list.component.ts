@@ -1,9 +1,9 @@
 import {Component, OnInit} from '@angular/core';
-import {Contact} from "../models/contact";
+import {Contact} from "../contact";
 import {ContactsService} from "../contacts.service";
 import {merge, Observable, Subject} from "rxjs";
 import {debounceTime, delay, distinctUntilChanged, switchMap, takeUntil} from "rxjs/operators";
-import {EventBusService} from "../event-bus.service";
+import {EventBusService} from "../../event-bus.service";
 
 @Component({
   selector: 'trm-contacts-list',
