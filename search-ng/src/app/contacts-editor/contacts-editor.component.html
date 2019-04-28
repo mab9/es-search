@@ -2,13 +2,13 @@
   <mat-card>
     <mat-card-title-group class="fullBleed editing">
       <img mat-card-md-image [src]="'assets/images/placeholder.png'">
-      <mat-card-title>{{ contact?.name}}</mat-card-title>
+      <mat-card-title>{{ contact?.firstName}}</mat-card-title>
       <mat-card-subtitle>{{ contact?.email }}</mat-card-subtitle>
     </mat-card-title-group>
     <mat-card-content>
       <div fxLayout="column">
         <mat-form-field fxFlex>
-          <input matInput [(ngModel)]="contact.name" placeholder="Name" name="name">
+          <input matInput [(ngModel)]="contact.firstName" placeholder="Name" name="name">
         </mat-form-field>
 
         <mat-form-field fxFlex>

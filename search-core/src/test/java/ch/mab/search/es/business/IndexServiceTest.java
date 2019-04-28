@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -92,8 +93,7 @@ class IndexServiceTest {
     @Test
     void getTotalHits_indexedDocuments_amountOfIndexedDocuments() throws IOException, InterruptedException {
         indexService.updateMapping(INDEX, contactService.createMappingObject());
-        ContactDocument document =
-                new ContactDocument("rabar", "barbara", Collections.emptyList(), Collections.emptyList());
+        ContactDocument document = createContact();
         contactService.createContact(INDEX, document);
         contactService.createContact(INDEX, document);
         contactService.createContact(INDEX, document);
@@ -101,6 +101,13 @@ class IndexServiceTest {
         TimeUnit.SECONDS.sleep(2);
         Assertions.assertEquals(3, indexService.getTotalHits(INDEX));
     }
+
+
+    private ContactDocument createContact() {
+        return new ContactDocument("mabambam-" + UUID.randomUUID().toString(), "sut", Collections.emptyList(),
+                                   "mab@mab.ch", "079");
+    }
+
 
     @Disabled
     @Test

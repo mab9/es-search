@@ -11,7 +11,7 @@ import {EventBusService} from "../event-bus.service";
 })
 export class ContactsEditorComponent implements OnInit {
 
-  contact: Contact = <Contact>{ address: {}};
+  contact: Contact = <Contact>{ technologies: {}};
 
   constructor(private route: ActivatedRoute,
               private contactService: ContactsService,
@@ -24,7 +24,7 @@ export class ContactsEditorComponent implements OnInit {
     this.contactService.getContact(id)               // or better use async pipe. change contact to type observable, and remove subscribtion bewlow. to display the contact name just getContact(id).pipe(this.eventBus..emit)
       .subscribe(contact => {
         this.contact = contact;
-        this.eventBusService.emit('appTitleChange', `Edit ${contact.name}`);
+        this.eventBusService.emit('appTitleChange', `Edit ${contact.firstName}`);
       });
   }
 

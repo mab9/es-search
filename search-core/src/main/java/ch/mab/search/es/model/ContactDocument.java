@@ -10,13 +10,16 @@ public class ContactDocument {
     private String firstName;
     private String lastName;
     private List<Technology> technologies;
-    private List<String> emails;
+    private String email;
+    private String phone;
 
-    public ContactDocument(String firstName, String lastName, List<Technology> technologies, List<String> emails) {
+    public ContactDocument(String firstName, String lastName, List<Technology> technologies, String email,
+                           String phone) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.technologies = technologies;
-        this.emails = emails;
+        this.email = email;
+        this.phone = phone;
     }
 
     public UUID getId() {
@@ -25,10 +28,6 @@ public class ContactDocument {
 
     public String getFirstName() {
         return firstName;
-    }
-
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
     }
 
     public String getLastName() {
@@ -47,29 +46,19 @@ public class ContactDocument {
         this.technologies = technologies;
     }
 
-    public List<String> getEmails() {
-        return emails;
+    public String getEmail() {
+        return email;
     }
 
-    public void setEmails(List<String> emails) {
-        this.emails = emails;
+    public void setEmail(String email) {
+        this.email = email;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        ContactDocument document = (ContactDocument) o;
-        return id.equals(document.id) && firstName.equals(document.firstName) && lastName.equals(document.lastName) &&
-               Objects.equals(technologies, document.technologies) && Objects.equals(emails, document.emails);
+    public String getPhone() {
+        return phone;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, firstName, lastName, technologies, emails);
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 }

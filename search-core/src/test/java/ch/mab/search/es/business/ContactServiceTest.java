@@ -35,11 +35,14 @@ public class ContactServiceTest {
 
     @Test
     public void createProfile_createDocument_returnCreatedDocument() throws Exception {
-        ContactDocument document =
-                new ContactDocument("mabambam", "mabam", Collections.emptyList(),
-                                    Collections.emptyList());
+        ContactDocument document = createContact();
         Optional<ContactDocument> profile = contactService.createContact(INDEX, document);
         Assertions.assertEquals(document, profile.get());
+    }
+
+    private ContactDocument createContact() {
+        return new ContactDocument("mabambam-" + UUID.randomUUID().toString(), "sut", Collections.emptyList(),
+                                   "mab@mab.ch", "079");
     }
 
     @Test
@@ -50,9 +53,7 @@ public class ContactServiceTest {
         int amount = 100;
 
         for (int i = 0; i < amount; i++) {
-            ContactDocument document =
-                    new ContactDocument("mabambam-" + UUID.randomUUID().toString(),
-                                        "mabam", Collections.emptyList(), Collections.emptyList());
+            ContactDocument document = createContact();
             contactService.createContact(INDEX, document);
         }
 
@@ -64,8 +65,7 @@ public class ContactServiceTest {
 
     @Test
     void findById_profileDocument_findExpectedDocument() throws IOException {
-        ContactDocument document = new ContactDocument("mabambam-" + UUID.randomUUID().toString(),
-                                                       "mabam", Collections.emptyList(), Collections.emptyList());
+        ContactDocument document = createContact();
         contactService.createContact(INDEX, document);
         Optional<ContactDocument> expectedDocument = contactService.findById(INDEX, document.getId());
 

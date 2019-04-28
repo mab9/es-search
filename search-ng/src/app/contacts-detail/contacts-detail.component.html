@@ -1,7 +1,7 @@
 <div class="trm-contacts-details">
   <mat-card *ngIf="contact$ | async as contact; else loading">
     <mat-card-title-group class="fullBleed">
-      <mat-card-title>{{contact?.name || ''}}</mat-card-title>
+      <mat-card-title>{{contact?.firstName || ''}}</mat-card-title>
       <mat-card-title>{{contact?.email  || 'No email address'}}</mat-card-title>
       <img mat-card-md-image [src]="'assets/images/placeholder.png'">
     </mat-card-title-group>
