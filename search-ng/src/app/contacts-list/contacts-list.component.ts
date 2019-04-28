@@ -1,7 +1,8 @@
 import {Component, OnInit} from '@angular/core';
 import {Contact} from "../models/contact";
 import {ContactsService} from "../contacts.service";
-import {Observable} from "rxjs";
+import {Observable, Subject} from "rxjs";
+import {debounceTime, distinctUntilChanged} from "rxjs/operators";
 
 @Component({
   selector: 'trm-contacts-list',
@@ -11,8 +12,7 @@ import {Observable} from "rxjs";
 
       <mat-toolbar>
         <mat-form-field color="accent" class="trm-search-container">
-          <input matInput (input)="search($event.target.value)" type="text">
-        </mat-form-field>
+          <input matInput type="text" (input)="terms$.next($event.target.value)">        </mat-form-field>
         <mat-icon color="accent">search</mat-icon>
       </mat-toolbar>
       
@@ -30,15 +30,21 @@ export class ContactsListComponent implements OnInit {
 
   contacts$: Observable<Array<Contact>>;
 
-  trackByContacts(index: number, contact: Contact): number | string {
-    return contact.id;
-  }
+  private terms$ = new Subject<string>();
 
   constructor(private contactService: ContactsService) {
   }
 
   ngOnInit() {
     this.contacts$ = this.contactService.getContacts()
+    this.terms$.pipe(
+      debounceTime(400),
+      distinctUntilChanged()
+    ).subscribe(term => this.search(term));
+  }
+
+  trackByContacts(index: number, contact: Contact): number | string {
+    return contact.id;
   }
 
   search(args: string) {
