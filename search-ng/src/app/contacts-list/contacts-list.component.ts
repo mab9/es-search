@@ -8,6 +8,14 @@ import {Observable} from "rxjs";
   template: `
     <div style="text-align:center">
       <mat-toolbar color="warn">Contacts</mat-toolbar>
+
+      <mat-toolbar>
+        <mat-form-field color="accent" class="trm-search-container">
+          <input matInput (input)="search($event.target.value)" type="text">
+        </mat-form-field>
+        <mat-icon color="accent">search</mat-icon>
+      </mat-toolbar>
+      
       <mat-list>
         <a mat-list-item [routerLink]="['/contact', item?.id]"
            *ngFor="let item of contacts$ | async; trackBy: trackByContacts">
@@ -31,5 +39,9 @@ export class ContactsListComponent implements OnInit {
 
   ngOnInit() {
     this.contacts$ = this.contactService.getContacts()
+  }
+
+  search(args: string) {
+    this.contacts$ = this.contactService.search(args)
   }
 }

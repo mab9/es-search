@@ -5,10 +5,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.ws.rs.PathParam;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/contacts")
@@ -38,13 +40,20 @@ public class ContactController {
     }
 
     @GetMapping(value = "/{id}")
-    public ResponseEntity<Item> getContacts(@PathVariable String id) throws IOException {
+    public ResponseEntity<Item> getContacts(@PathVariable String id) {
         Contact result = contacts.stream()
                                  .filter(contact -> contact.id.equals(id))
                                  .findAny()
                                  .orElse(new Contact(UUID.randomUUID().toString(), "Random", "not@found.ch", "079"));
 
         return new ResponseEntity<>(new Item(result), HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/search")
+    public ResponseEntity<Items> search(@RequestParam(value="term") String term) {
+        List<Contact> results = contacts.stream()
+                                 .filter(contact -> contact.name.toLowerCase().contains(term.toLowerCase())).collect(Collectors.toList());
+        return new ResponseEntity<>(new Items(results), HttpStatus.OK);
     }
 }
 
