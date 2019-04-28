@@ -31,4 +31,4 @@ import {
     MatToolbarModule
   ]
 })
-export class DocumentsMaterialModule {}
+export class ContactsMaterialModule {}

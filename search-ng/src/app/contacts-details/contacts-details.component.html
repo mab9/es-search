@@ -1,0 +1,17 @@
+<div class="trm-contacts-detail">
+  <mat-card>
+    <mat-card-title-group class="fullBleed">
+      <!-- <img mat-card-md-image [src]="contact?.image"> -->
+      <mat-card-title>{{contact?.name}}</mat-card-title>
+      <mat-card-subtitle>̣{{ contact?.email}}</mat-card-subtitle>
+    </mat-card-title-group>
+    <mat-card-content>
+      <dl>
+        <dt>Phone:</dt> <dd>{{contact?.phone}}</dd>
+      </dl>
+    </mat-card-content>
+    <mat-card-actions fxLayout fxLayoutAlign="center center">
+      <a mat-button [routerLink]="['/contact']" title="Go back to list">Go Back</a>
+    </mat-card-actions>
+  </mat-card>
+</div>

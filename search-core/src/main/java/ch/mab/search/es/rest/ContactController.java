@@ -33,23 +33,42 @@ public class ContactController {
 
     @CrossOrigin
     @GetMapping
-    public ResponseEntity<Item>getContacts()  {
-        return new ResponseEntity<>(new Item(contacts), HttpStatus.OK);
+    public ResponseEntity<Items>getContacts()  {
+        return new ResponseEntity<>(new Items(contacts), HttpStatus.OK);
     }
 
     @GetMapping(value = "/{id}")
-    public Contact getContacts(@PathVariable String id) throws IOException {
-        return contacts.stream()
-                       .filter(contact -> contact.id.equals(id))
-                       .findAny()
-                       .orElse(new Contact(UUID.randomUUID().toString(), "Random", "not@found.ch", "079"));
+    public ResponseEntity<Item> getContacts(@PathVariable String id) throws IOException {
+        Contact result = contacts.stream()
+                                 .filter(contact -> contact.id.equals(id))
+                                 .findAny()
+                                 .orElse(new Contact(UUID.randomUUID().toString(), "Random", "not@found.ch", "079"));
+
+        return new ResponseEntity<>(new Item(result), HttpStatus.OK);
     }
 }
 
 class Item {
+
+    Contact item;
+
+    public Item(Contact item) {
+        this.item = item;
+    }
+
+    public Contact getItem() {
+        return item;
+    }
+
+    public void setItem(Contact item) {
+        this.item = item;
+    }
+}
+
+class Items {
     List<Contact> items;
 
-    public Item(List<Contact> items) {
+    public Items(List<Contact> items) {
         this.items = items;
     }
 
