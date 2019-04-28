@@ -8,6 +8,12 @@
     <mat-card-content>
       <dl>
         <dt>Phone:</dt> <dd>{{contact?.phone || ''}}</dd>
+
+        <dt> Technologies:</dt>
+        <dd *ngFor="let item of contact.technologies">
+          Name: {{item.name || '-'}} <br>
+          Years of experience: {{item.yearsOfExperience || '-'}}
+        </dd>
       </dl>
     </mat-card-content>
     <button mat-button (click)="edit.emit(contact)">Edit</button>

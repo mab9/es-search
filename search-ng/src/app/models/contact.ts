@@ -7,7 +7,7 @@ export interface Contact {
   id: number | string;
   firstName?: string;
   lastName?: string;
-  technologies?: Technology;
+  technologies?: Technology[];
   email?: string;
   phone?: string | string[];
 }

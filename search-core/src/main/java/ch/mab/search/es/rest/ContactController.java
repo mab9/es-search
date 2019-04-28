@@ -4,6 +4,7 @@ import ch.mab.search.es.business.ContactService;
 import ch.mab.search.es.model.ContactDocument;
 import ch.mab.search.es.model.Item;
 import ch.mab.search.es.model.Items;
+import ch.mab.search.es.model.Technology;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,17 +29,19 @@ public class ContactController {
     }
 
     private void initDummyContacts() {
-        dummyContacts.add(new ContactDocument("Marco", "Sutter", Collections.emptyList(), "marco@sutter.ch", "079"));
+        List<Technology> technologies = Collections.singletonList(new Technology("Angular", "10"));
+
+        dummyContacts.add(new ContactDocument("Marco", "Sutter", technologies, "marco@sutter.ch", "079"));
         dummyContacts.add(
-                new ContactDocument("Florian", "Sutter", Collections.emptyList(), "florian@sutter.ch", "079"));
-        dummyContacts.add(new ContactDocument("Ladina", "Sutter", Collections.emptyList(), "ladina@sutter.ch", "079"));
-        dummyContacts.add(new ContactDocument("Vera", "Sutter", Collections.emptyList(), "vera@sutter.ch", "079"));
+                new ContactDocument("Florian", "Sutter", technologies, "florian@sutter.ch", "079"));
+        dummyContacts.add(new ContactDocument("Ladina", "Sutter", technologies, "ladina@sutter.ch", "079"));
+        dummyContacts.add(new ContactDocument("Vera", "Sutter", technologies, "vera@sutter.ch", "079"));
         dummyContacts.add(
-                new ContactDocument("Hans-Martin", "Sutter", Collections.emptyList(), "hansmartin@sutter.ch", "079"));
-        dummyContacts.add(new ContactDocument("Nele", "Sutter", Collections.emptyList(), "nele@sutter.ch", "079"));
+                new ContactDocument("Hans-Martin", "Sutter", technologies, "hansmartin@sutter.ch", "079"));
+        dummyContacts.add(new ContactDocument("Nele", "Sutter", technologies, "nele@sutter.ch", "079"));
         dummyContacts.add(
-                new ContactDocument("Marc-Antoine", "Sutter", Collections.emptyList(), "marcantoine@sutter.ch", "079"));
-        dummyContacts.add(new ContactDocument("Maja", "Sutter", Collections.emptyList(), "maja@sutter.ch", "079"));
+                new ContactDocument("Marc-Antoine", "Sutter", technologies, "marcantoine@sutter.ch", "079"));
+        dummyContacts.add(new ContactDocument("Maja", "Sutter", technologies, "maja@sutter.ch", "079"));
     }
 
     @PostMapping
@@ -47,12 +50,18 @@ public class ContactController {
     }
 
     @GetMapping(value = "/{id}")
-    public ResponseEntity<Item> findById(@PathVariable UUID id) throws IOException {
+    public ResponseEntity<Item> findById(@PathVariable String id) {
+        ContactDocument dummy =
+                new ContactDocument("Random", "Rando", Collections.emptyList(), "not@found.ch", "079");
+
+        if (id.equals("0")) {
+            return new ResponseEntity<>(new Item(dummy), HttpStatus.OK);
+        }
+
         ContactDocument result = dummyContacts.stream()
-                                              .filter(contact -> contact.getId().equals(id))
+                                              .filter(contact -> contact.getId().equals(UUID.fromString(id)))
                                               .findAny()
-                                              .orElse(new ContactDocument("Random", "Rando", Collections.emptyList(),
-                                                                          "not@found.ch", "079"));
+                                              .orElse(dummy);
 
         return new ResponseEntity<>(new Item(result), HttpStatus.OK);
 

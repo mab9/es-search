@@ -6,19 +6,30 @@
       <mat-card-subtitle>{{ contact?.email }}</mat-card-subtitle>
     </mat-card-title-group>
     <mat-card-content>
-      <div fxLayout="column">
-        <mat-form-field fxFlex>
-          <input matInput [(ngModel)]="contact.firstName" placeholder="Name" name="name">
-        </mat-form-field>
-
-        <mat-form-field fxFlex>
-          <input matInput [(ngModel)]="contact.email" placeholder="Email" name="email">
-        </mat-form-field>
-        <mat-form-field fxFlex>
-          <input matInput [(ngModel)]="contact.phone" placeholder="Phone" name="phone">
-        </mat-form-field>
-      </div>
+       <trm-tabs>
+        <trm-tab title="General" fxLayout="column">
+          <mat-form-field fxFlex>
+            <input matInput [(ngModel)]="contact.firstName" placeholder="First name" name="first name">
+            <input matInput [(ngModel)]="contact.lastName" placeholder="Last name" name="last name">
+          </mat-form-field>
+          <mat-form-field fxFlex>
+            <input matInput [(ngModel)]="contact.email" placeholder="Email" name="email">
+          </mat-form-field>
+          <mat-form-field fxFlex>
+            <input matInput [(ngModel)]="contact.phone" placeholder="Phone" name="phone">
+          </mat-form-field>
+        </trm-tab>
+        <trm-tab title="Technologies" fxLayout="column"  *ngFor="let item of contact.technologies">
+          <mat-form-field fxFlex>
+            <input matInput [(ngModel)]="item.name" placeholder="Technology name" name="technology name">
+          </mat-form-field>
+          <mat-form-field fxFlex>
+            <input matInput [(ngModel)]="item.yearsOfExperience" placeholder="Technology years of experience" name="technolgy years of experience">
+          </mat-form-field>
+        </trm-tab>
+      </trm-tabs>
     </mat-card-content>
+
     <mat-card-actions fxLayout fxLayoutAlign="center center">
       <button mat-button (click)="save(contact)" title="Save contact">Save</button>
       <button mat-button (click)="cancel(contact)" title="Cancel editing">Cancel</button>

@@ -16,6 +16,8 @@ import { ContactsEditorComponent } from './contacts-editor/contacts-editor.compo
 import {FormsModule} from "@angular/forms";
 import { ContactsDashboardComponent } from './contacts-dashboard/contacts-dashboard.component';
 import { AboutComponent } from './about/about.component';
+import { TabComponent } from './shared/tab/tab.component';
+import { TabsComponent } from './shared/tabs/tabs.component';
 
 @NgModule({
   declarations: [
@@ -26,6 +28,8 @@ import { AboutComponent } from './about/about.component';
     ContactsEditorComponent,
     ContactsDashboardComponent,
     AboutComponent,
+    TabComponent,
+    TabsComponent,
   ],
   imports: [
     BrowserModule,
