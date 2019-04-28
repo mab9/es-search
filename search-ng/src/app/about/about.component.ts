@@ -1,10 +1,11 @@
 import { Component, OnInit } from '@angular/core';
+import {EventBusService} from "../event-bus.service";
 
 @Component({
   selector: 'trm-about',
   template: `<div class="trm-about">
     <mat-card fxLayout="column" fxFlex fxLayoutAlign="center center">
-      <h2 mat-card-title>Angular Master Class</h2>
+      <h2 mat-card-title>Mab search tests</h2>
       <mat-card-content>
         <img src="/assets/images/me.jpg" alt="mab">
         <p style="text-align: center;">Created by mab</p>
@@ -25,9 +26,10 @@ import { Component, OnInit } from '@angular/core';
 })
 export class AboutComponent implements OnInit {
 
-  constructor() { }
+  constructor(private eventBusService: EventBusService){ }
 
   ngOnInit() {
+    this.eventBusService.emit('appTitleChange', `About`);
   }
 
 }

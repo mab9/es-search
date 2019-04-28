@@ -8,13 +8,13 @@ import {EventBusService} from "../event-bus.service";
 @Component({
   selector: 'trm-contacts-detail-view',
   template: `
-    <trm-contacts-details [contact$]="contact$"
-                          (edit)="navigateToEditor($event)"
-                          (back)="navigateToList()">
-    </trm-contacts-details>`,
-  styleUrls: ['./contacts-details-view.component.scss']
+    <trm-contacts-detail [contact$]="contact$"
+                         (edit)="navigateToEditor($event)"
+                         (back)="navigateToList()">
+    </trm-contacts-detail>`,
+  styleUrls: ['./contacts-detail-view.component.scss']
 })
-export class ContactsDetailsViewComponent implements OnInit {
+export class ContactsDetailViewComponent implements OnInit {
 
   contact$: Observable<Contact>;
 

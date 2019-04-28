@@ -4,15 +4,18 @@ import {EventBusArgs} from "./models/event-bus-args";
 import {EventBusService} from "./event-bus.service";
 
 @Component({
-  selector: 'trm-root',
+  selector: 'trm-contacts-app',
   template: `
     <mat-toolbar color="primary">
       <span>{{ title$ | async }}</span>
 
       <!-- This fills the remaining space of the current row -->
       <span class="example-fill-remaining-space"></span>
-      
-      <span [routerLink]="['/about']">About</span>
+
+      <span>
+        <span [routerLink]="['/']"> Contacts </span>
+        <span [routerLink]="['/about']">About </span>
+      </span>
     </mat-toolbar>
     <router-outlet></router-outlet>
     `,
