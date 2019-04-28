@@ -18,6 +18,7 @@ import { ContactsDashboardComponent } from './contacts/contacts-dashboard/contac
 import { AboutComponent } from './about/about.component';
 import { TabComponent } from './shared/tab/tab.component';
 import { TabsComponent } from './shared/tabs/tabs.component';
+import { DocumentSearchComponent } from './secasignbox/document-search/document-search.component';
 
 @NgModule({
   declarations: [
@@ -30,6 +31,7 @@ import { TabsComponent } from './shared/tabs/tabs.component';
     AboutComponent,
     TabComponent,
     TabsComponent,
+    DocumentSearchComponent,
   ],
   imports: [
     BrowserModule,

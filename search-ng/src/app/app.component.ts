@@ -13,8 +13,9 @@ import {EventBusService} from "./event-bus.service";
       <span class="example-fill-remaining-space"></span>
 
       <span>
-        <span [routerLink]="['/']"> Contacts </span>
-        <span [routerLink]="['/about']">About </span>
+        <span [routerLink]="['/']"> Contacts |</span>
+        <span [routerLink]="['/secasignbox']"> Secasignbox |</span>
+        <span [routerLink]="['/about']"> About</span>
       </span>
     </mat-toolbar>
     <router-outlet></router-outlet>

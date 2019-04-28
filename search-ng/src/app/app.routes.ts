@@ -2,10 +2,12 @@ import {ContactsDetailViewComponent} from "./contacts/contacts-detail-view/conta
 import {ContactsEditorComponent} from "./contacts/contacts-editor/contacts-editor.component";
 import {ContactsDashboardComponent} from "./contacts/contacts-dashboard/contacts-dashboard.component";
 import {AboutComponent} from "./about/about.component";
+import {DocumentSearchComponent} from "./secasignbox/document-search/document-search.component";
 
 
 export const APP_ROUTES = [
   { path: 'about', component: AboutComponent },
+  { path: 'secasignbox', component: DocumentSearchComponent },
   {
     path: '',
     component: ContactsDashboardComponent,
