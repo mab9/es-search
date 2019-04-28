@@ -15,7 +15,7 @@ import java.util.UUID;
 
 @CrossOrigin
 @RestController
-@RequestMapping("/api/v1/secasignbox")
+@RequestMapping("/api/v1/documents")
 public class SearchController {
 
     @Autowired
