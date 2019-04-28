@@ -18,7 +18,7 @@ import { ContactsDashboardComponent } from './contacts/contacts-dashboard/contac
 import { AboutComponent } from './about/about.component';
 import { TabComponent } from './shared/tab/tab.component';
 import { TabsComponent } from './shared/tabs/tabs.component';
-import { DocumentSearchComponent } from './secasignbox/document-search/document-search.component';
+import { DocumentSearchComponent } from './documents/document-search/document-search.component';
 
 @NgModule({
   declarations: [

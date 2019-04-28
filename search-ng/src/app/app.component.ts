@@ -14,7 +14,7 @@ import {EventBusService} from "./event-bus.service";
 
       <span>
         <span [routerLink]="['/']"> Contacts |</span>
-        <span [routerLink]="['/secasignbox']"> Secasignbox |</span>
+        <span [routerLink]="['/documents']"> Documents |</span>
         <span [routerLink]="['/about']"> About</span>
       </span>
     </mat-toolbar>
