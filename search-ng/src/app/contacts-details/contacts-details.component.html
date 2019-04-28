@@ -12,6 +12,9 @@
     <mat-card-actions fxLayout fxLayoutAlign="center center">
       <a mat-button [routerLink]="['/contact']" title="Go back to list">Go Back</a>
     </mat-card-actions>
+
+    <button mat-button (click)="edit.emit(contact)">Edit</button>
+    <button mat-button (click)="back.emit()">Go Back</button>
     <ng-template #loading="">
       Loading contact...
     </ng-template>

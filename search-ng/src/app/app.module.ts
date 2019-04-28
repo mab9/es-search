@@ -11,12 +11,14 @@ import {HttpClientModule} from "@angular/common/http";
 import {RouterModule} from "@angular/router";
 import {APP_ROUTES} from "./app.routes";
 import { ContactsDetailsComponent } from './contacts-details/contacts-details.component';
+import { ContactsDetailsViewComponent } from './contacts-details-view/contacts-details-view.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     ContactsListComponent,
     ContactsDetailsComponent,
+    ContactsDetailsViewComponent,
   ],
   imports: [
     BrowserModule,
@@ -28,7 +30,7 @@ import { ContactsDetailsComponent } from './contacts-details/contacts-details.co
     RouterModule.forRoot(APP_ROUTES)
   ],
   providers: [
-    ContactsService, ContactsListComponent, ContactsDetailsComponent,
+    ContactsService, ContactsListComponent, ContactsDetailsComponent, ContactsDetailsViewComponent,
     {provide: 'API_ENDPOINT', useValue: 'http://localhost:4201/api'},
   ],
   bootstrap: [AppComponent]
