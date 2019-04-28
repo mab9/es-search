@@ -3,13 +3,12 @@ import {Contact} from "../models/contact";
 import {ContactsService} from "../contacts.service";
 import {merge, Observable, Subject} from "rxjs";
 import {debounceTime, delay, distinctUntilChanged, switchMap, takeUntil} from "rxjs/operators";
+import {EventBusService} from "../event-bus.service";
 
 @Component({
   selector: 'trm-contacts-list',
   template: `
     <div style="text-align:center">
-      <mat-toolbar color="warn">Contacts</mat-toolbar>
-
       <mat-toolbar>
         <mat-form-field color="accent" class="trm-search-container">
           <input matInput type="text" (input)="terms$.next($event.target.value)">        </mat-form-field>
@@ -31,7 +30,8 @@ export class ContactsListComponent implements OnInit {
   contacts$: Observable<Array<Contact>>;
   terms$ = new Subject<string>();
 
-  constructor(private contactService: ContactsService) {
+  constructor(private contactService: ContactsService,
+              private eventBusService: EventBusService) {
   }
 
   ngOnInit() {
@@ -43,7 +43,10 @@ export class ContactsListComponent implements OnInit {
 
     this.contacts$ = merge(
       contactSearch$,
-      this.contactService.getContacts().pipe(delay(5000), takeUntil(this.terms$)));  }
+      this.contactService.getContacts().pipe(delay(5000), takeUntil(this.terms$)));
+
+    this.eventBusService.emit('appTitleChange', 'Contacts')
+  }
 
   trackByContacts(index: number, contact: Contact): number | string {
     return contact.id;
