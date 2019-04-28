@@ -40,4 +40,9 @@ export class ContactsService {
       switchMap(x => this.search(x))
     );
   }
+
+  updateContact(contact: Contact): Observable<Contact> {
+    let url = `${this.API_ENDPOINT}/contacts/${contact.id}`;
+    return this.http.put<ContactResponse>(url, contact).pipe(map((data) => data.item));
+  }
 }

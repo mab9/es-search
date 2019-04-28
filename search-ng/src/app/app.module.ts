@@ -12,6 +12,8 @@ import {RouterModule} from "@angular/router";
 import {APP_ROUTES} from "./app.routes";
 import { ContactsDetailsComponent } from './contacts-details/contacts-details.component';
 import { ContactsDetailsViewComponent } from './contacts-details-view/contacts-details-view.component';
+import { ContactsEditorComponent } from './contacts-editor/contacts-editor.component';
+import {FormsModule} from "@angular/forms";
 
 @NgModule({
   declarations: [
@@ -19,6 +21,7 @@ import { ContactsDetailsViewComponent } from './contacts-details-view/contacts-d
     ContactsListComponent,
     ContactsDetailsComponent,
     ContactsDetailsViewComponent,
+    ContactsEditorComponent,
   ],
   imports: [
     BrowserModule,
@@ -27,10 +30,11 @@ import { ContactsDetailsViewComponent } from './contacts-details-view/contacts-d
     HttpClientModule,
     AppRoutingModule,
     HttpClientModule,
+    FormsModule,
     RouterModule.forRoot(APP_ROUTES)
   ],
   providers: [
-    ContactsService, ContactsListComponent, ContactsDetailsComponent, ContactsDetailsViewComponent,
+    ContactsService, ContactsListComponent, ContactsDetailsComponent, ContactsDetailsViewComponent, ContactsEditorComponent,
     {provide: 'API_ENDPOINT', useValue: 'http://localhost:4201/api'},
   ],
   bootstrap: [AppComponent]

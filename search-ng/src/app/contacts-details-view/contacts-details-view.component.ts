@@ -5,7 +5,7 @@ import {ActivatedRoute, Router} from "@angular/router";
 import {ContactsService} from "../contacts.service";
 
 @Component({
-  selector: 'app-contacts-details-view',
+  selector: 'trm-contacts-detail-view',
   template: `
     <trm-contacts-details [contact$]="contact$"
                           (edit)="navigateToEditor($event)"

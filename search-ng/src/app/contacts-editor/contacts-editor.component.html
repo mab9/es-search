@@ -1,0 +1,27 @@
+<div class="trm-contacts-editor">
+  <mat-card>
+    <mat-card-title-group class="fullBleed editing">
+      <img mat-card-md-image [src]="contact?.image || ''">
+      <mat-card-title>{{ contact?.name}}</mat-card-title>
+      <mat-card-subtitle>{{ contact?.email }}</mat-card-subtitle>
+    </mat-card-title-group>
+    <mat-card-content>
+      <div fxLayout="column">
+        <mat-form-field fxFlex>
+          <input matInput [(ngModel)]="contact.name" placeholder="Name" name="name">
+        </mat-form-field>
+
+        <mat-form-field fxFlex>
+          <input matInput [(ngModel)]="contact.email" placeholder="Email" name="email">
+        </mat-form-field>
+        <mat-form-field fxFlex>
+          <input matInput [(ngModel)]="contact.phone" placeholder="Phone" name="phone">
+        </mat-form-field>
+      </div>
+    </mat-card-content>
+    <mat-card-actions fxLayout fxLayoutAlign="center center">
+      <button mat-button (click)="save(contact)" title="Save contact">Save</button>
+      <button mat-button (click)="cancel(contact)" title="Cancel editing">Cancel</button>
+    </mat-card-actions>
+  </mat-card>
+</div>
