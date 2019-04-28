@@ -14,6 +14,8 @@ import { ContactsDetailsComponent } from './contacts-details/contacts-details.co
 import { ContactsDetailsViewComponent } from './contacts-details-view/contacts-details-view.component';
 import { ContactsEditorComponent } from './contacts-editor/contacts-editor.component';
 import {FormsModule} from "@angular/forms";
+import { ContactsDashboardComponent } from './contacts-dashboard/contacts-dashboard.component';
+import { AboutComponent } from './about/about.component';
 
 @NgModule({
   declarations: [
@@ -22,6 +24,8 @@ import {FormsModule} from "@angular/forms";
     ContactsDetailsComponent,
     ContactsDetailsViewComponent,
     ContactsEditorComponent,
+    ContactsDashboardComponent,
+    AboutComponent,
   ],
   imports: [
     BrowserModule,

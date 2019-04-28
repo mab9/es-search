@@ -5,7 +5,7 @@ import {ContactsService} from "../contacts.service";
 import {EventBusService} from "../event-bus.service";
 
 @Component({
-  selector: 'app-contacts-editor',
+  selector: 'trm-contacts-editor',
   templateUrl: './contacts-editor.component.html',
   styleUrls: ['./contacts-editor.component.scss']
 })

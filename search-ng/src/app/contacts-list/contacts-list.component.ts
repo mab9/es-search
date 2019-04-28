@@ -16,11 +16,13 @@ import {EventBusService} from "../event-bus.service";
       </mat-toolbar>
       
       <mat-list>
-        <a mat-list-item [routerLink]="['/contact', item?.id]"
-           *ngFor="let item of contacts$ | async; trackBy: trackByContacts">
-          <img mat-list-avatar [src]="item?.image" alt="{{item?.name}}">
-          <h3 mat-line>{{ item?.name}}</h3>
-        </a>
+        <mat-list>
+          <a mat-list-item [routerLink]="['/contact', item?.id]"
+             *ngFor="let item of contacts$ | async; trackBy: trackByContacts">
+            <img mat-list-avatar [src]="'assets/images/placeholder.png'" alt="{{item?.name}}">
+            <h3 mat-line>{{ item?.name}}</h3>
+          </a>
+        </mat-list>
       </mat-list>
     </div>`,
   styleUrls: ['./contacts-list.component.scss']

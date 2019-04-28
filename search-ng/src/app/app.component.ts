@@ -4,9 +4,9 @@ import {EventBusArgs} from "./models/event-bus-args";
 import {EventBusService} from "./event-bus.service";
 
 @Component({
-  selector: 'app-root',
+  selector: 'trm-root',
   template: `
-    <mat-toolbar color="warn">{{ title$ | async }}</mat-toolbar>
+    <mat-toolbar color="primary">{{ title$ | async }}</mat-toolbar>
     <router-outlet></router-outlet>
     `,
   styleUrls: ['./app.component.scss']
