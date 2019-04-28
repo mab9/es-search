@@ -1,8 +1,6 @@
 package ch.mab.search.es.business;
 
-import ch.mab.search.es.business.IndexService;
-import ch.mab.search.es.business.ProfileService;
-import ch.mab.search.es.model.ProfileDocument;
+import ch.mab.search.es.model.ContactDocument;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,12 +15,12 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 @SpringBootTest
-public class ProfileServiceTest {
+public class ContactServiceTest {
 
     private final String INDEX = this.getClass().getName().toLowerCase();
 
     @Autowired
-    private ProfileService profileService;
+    private ContactService contactService;
 
     @Autowired
     private IndexService indexService;
@@ -32,30 +30,30 @@ public class ProfileServiceTest {
         if (indexService.isIndexExisting(INDEX)) {
             indexService.deleteIndex(INDEX);
         }
-        indexService.createIndex(INDEX, profileService.createMappingObject());
+        indexService.createIndex(INDEX, contactService.createMappingObject());
     }
 
     @Test
     public void createProfile_createDocument_returnCreatedDocument() throws Exception {
-        ProfileDocument document =
-                new ProfileDocument( "mabambam", "mabam", Collections.emptyList(),
+        ContactDocument document =
+                new ContactDocument("mabambam", "mabam", Collections.emptyList(),
                                     Collections.emptyList());
-        Optional<ProfileDocument> profile = profileService.createProfile(INDEX, document);
+        Optional<ContactDocument> profile = contactService.createContact(INDEX, document);
         Assertions.assertEquals(document, profile.get());
     }
 
     @Test
     public void findeAll_profileDocuments_returnAllCreatedDocuments() throws Exception {
-        List<ProfileDocument> all = profileService.findAll(INDEX);
+        List<ContactDocument> all = contactService.findAll(INDEX);
         Assertions.assertTrue(all.isEmpty());
 
         int amount = 100;
 
         for (int i = 0; i < amount; i++) {
-            ProfileDocument document =
-                    new ProfileDocument( "mabambam-" + UUID.randomUUID().toString(),
+            ContactDocument document =
+                    new ContactDocument("mabambam-" + UUID.randomUUID().toString(),
                                         "mabam", Collections.emptyList(), Collections.emptyList());
-            profileService.createProfile(INDEX, document);
+            contactService.createContact(INDEX, document);
         }
 
         // elastic search is indexing async
@@ -66,10 +64,10 @@ public class ProfileServiceTest {
 
     @Test
     void findById_profileDocument_findExpectedDocument() throws IOException {
-        ProfileDocument document = new ProfileDocument( "mabambam-" + UUID.randomUUID().toString(),
-                                    "mabam", Collections.emptyList(), Collections.emptyList());
-        profileService.createProfile(INDEX, document);
-        Optional<ProfileDocument> expectedDocument = profileService.findById(INDEX, document.getId());
+        ContactDocument document = new ContactDocument("mabambam-" + UUID.randomUUID().toString(),
+                                                       "mabam", Collections.emptyList(), Collections.emptyList());
+        contactService.createContact(INDEX, document);
+        Optional<ContactDocument> expectedDocument = contactService.findById(INDEX, document.getId());
 
         Assertions.assertEquals(document, expectedDocument.get());
     }

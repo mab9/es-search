@@ -1,7 +1,7 @@
 package ch.mab.search.es.rest;
 
 import ch.mab.search.es.business.IndexService;
-import ch.mab.search.es.business.ProfileService;
+import ch.mab.search.es.business.ContactService;
 import org.elasticsearch.action.support.master.AcknowledgedResponse;
 import org.elasticsearch.client.indices.CreateIndexResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +19,7 @@ public class IndexController {
     private IndexService indexService;
 
     @Autowired
-    private ProfileService profileService;
+    private ContactService contactService;
 
     public IndexController() {
     }
@@ -40,7 +40,7 @@ public class IndexController {
      */
     @PutMapping(value = "{index}")
     public ResponseEntity<AcknowledgedResponse> updateIndexMapping(@PathVariable String index) throws IOException {
-        AcknowledgedResponse response = indexService.updateMapping(index, profileService.createMappingObject());
+        AcknowledgedResponse response = indexService.updateMapping(index, contactService.createMappingObject());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 

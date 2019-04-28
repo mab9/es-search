@@ -1,7 +1,7 @@
 package ch.mab.search.es.business;
 
 import ch.mab.search.es.api.AbstractIndex;
-import ch.mab.search.es.model.ProfileDocument;
+import ch.mab.search.es.model.ContactDocument;
 import org.apache.lucene.search.join.ScoreMode;
 import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.delete.DeleteResponse;
@@ -27,14 +27,14 @@ import java.io.IOException;
 import java.util.*;
 
 @Service
-public class ProfileService extends AbstractIndex {
+public class ContactService extends AbstractIndex {
 
-    private final String INDEX = "posts";
+    private final String INDEX = "contacts";
 
-    public ProfileService() {
+    public ContactService() {
     }
 
-    public Optional<ProfileDocument> createProfile(String index, ProfileDocument document) throws IOException {
+    public Optional<ContactDocument> createContact(String index, ContactDocument document) throws IOException {
         String json = gson.toJson(document);
         IndexRequest request = new IndexRequest(index);
         request.id(document.getId().toString());
@@ -44,19 +44,19 @@ public class ProfileService extends AbstractIndex {
         return findById(index, UUID.fromString(indexResponse.getId()));
     }
 
-    public Optional<ProfileDocument> findById(String index, UUID id) throws IOException {
+    public Optional<ContactDocument> findById(String index, UUID id) throws IOException {
         GetRequest getRequest = new GetRequest(index, id.toString());
         GetResponse getResponse = client.get(getRequest, RequestOptions.DEFAULT);
 
         if (getResponse.getSource() != null) {
-            return Optional.of(gson.fromJson(getResponse.getSource().toString(), ProfileDocument.class));
+            return Optional.of(gson.fromJson(getResponse.getSource().toString(), ContactDocument.class));
         } else {
             return Optional.empty();
         }
     }
 
-    public Optional<ProfileDocument> updateProfile(String index, ProfileDocument document) throws IOException {
-        Optional<ProfileDocument> current = findById(index, document.getId());
+    public Optional<ContactDocument> updateContact(String index, ContactDocument document) throws IOException {
+        Optional<ContactDocument> current = findById(index, document.getId());
 
         if (current.isEmpty()) {
             return Optional.empty();
@@ -70,7 +70,7 @@ public class ProfileService extends AbstractIndex {
         return findById(index, UUID.fromString(updateResponse.getId()));
     }
 
-    public List<ProfileDocument> findAll(String index) throws IOException {
+    public List<ContactDocument> findAll(String index) throws IOException {
         SearchRequest searchRequest = new SearchRequest(index);
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         searchSourceBuilder.query(QueryBuilders.matchAllQuery());
@@ -79,21 +79,21 @@ public class ProfileService extends AbstractIndex {
         return getSearchResult(searchResponse);
     }
 
-    private List<ProfileDocument> getSearchResult(SearchResponse response) {
+    private List<ContactDocument> getSearchResult(SearchResponse response) {
         SearchHit[] searchHit = response.getHits().getHits();
 
-        List<ProfileDocument> profileDocuments = new ArrayList<>();
+        List<ContactDocument> contactDocuments = new ArrayList<>();
 
         if (searchHit.length > 0) {
             Arrays.stream(searchHit)
-                  .forEach(hit -> profileDocuments.add(
-                          objectMapper.convertValue(hit.getSourceAsMap(), ProfileDocument.class)));
+                  .forEach(hit -> contactDocuments.add(
+                          objectMapper.convertValue(hit.getSourceAsMap(), ContactDocument.class)));
         }
 
-        return profileDocuments;
+        return contactDocuments;
     }
 
-    public List<ProfileDocument> searchByTechnology(String technology) throws IOException {
+    public List<ContactDocument> searchByTechnology(String technology) throws IOException {
         SearchRequest searchRequest = new SearchRequest();
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
 
@@ -108,8 +108,8 @@ public class ProfileService extends AbstractIndex {
         return getSearchResult(response);
     }
 
-    public Optional<ProfileDocument> deleteProfileDocument(String index, UUID id) throws IOException {
-        Optional<ProfileDocument> current = findById(index, id);
+    public Optional<ContactDocument> deleteContactDocument(String index, UUID id) throws IOException {
+        Optional<ContactDocument> current = findById(index, id);
 
         if (current.isEmpty()) {
             return current;

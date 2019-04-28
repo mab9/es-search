@@ -1,8 +1,6 @@
 package ch.mab.search.es.business;
 
-import ch.mab.search.es.business.IndexService;
-import ch.mab.search.es.business.ProfileService;
-import ch.mab.search.es.model.ProfileDocument;
+import ch.mab.search.es.model.ContactDocument;
 import org.elasticsearch.action.support.master.AcknowledgedResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
@@ -31,7 +29,7 @@ class IndexServiceTest {
     private IndexService indexService;
 
     @Autowired
-    private ProfileService profileService;
+    private ContactService contactService;
 
     @BeforeEach
     void setUp() throws IOException {
@@ -71,7 +69,7 @@ class IndexServiceTest {
         boolean indexExists = client.indices().exists(request, RequestOptions.DEFAULT);
         Assertions.assertFalse(indexExists);
 
-        indexService.createIndex(INDEX, profileService.createMappingObject());
+        indexService.createIndex(INDEX, contactService.createMappingObject());
 
         indexExists = client.indices().exists(request, RequestOptions.DEFAULT);
         Assertions.assertTrue(indexExists);
@@ -80,7 +78,7 @@ class IndexServiceTest {
     @Test
     void updateMapping_updateIndex_returnOkResponse() throws IOException {
         Assertions.assertTrue(indexService.isIndexExisting(INDEX));
-        AcknowledgedResponse acknowledgedResponse = indexService.updateMapping(INDEX, profileService.createMappingObject());
+        AcknowledgedResponse acknowledgedResponse = indexService.updateMapping(INDEX, contactService.createMappingObject());
         Assertions.assertTrue(acknowledgedResponse.isAcknowledged());
     }
 
@@ -93,12 +91,12 @@ class IndexServiceTest {
 
     @Test
     void getTotalHits_indexedDocuments_amountOfIndexedDocuments() throws IOException, InterruptedException {
-        indexService.updateMapping(INDEX, profileService.createMappingObject());
-        ProfileDocument document =
-                new ProfileDocument("rabar", "barbara", Collections.emptyList(), Collections.emptyList());
-        profileService.createProfile(INDEX, document);
-        profileService.createProfile(INDEX, document);
-        profileService.createProfile(INDEX, document);
+        indexService.updateMapping(INDEX, contactService.createMappingObject());
+        ContactDocument document =
+                new ContactDocument("rabar", "barbara", Collections.emptyList(), Collections.emptyList());
+        contactService.createContact(INDEX, document);
+        contactService.createContact(INDEX, document);
+        contactService.createContact(INDEX, document);
 
         TimeUnit.SECONDS.sleep(2);
         Assertions.assertEquals(3, indexService.getTotalHits(INDEX));
@@ -107,7 +105,7 @@ class IndexServiceTest {
     @Disabled
     @Test
     void getIndex_indexDetails_returnAllDetailsAboutTheIndex() throws IOException, InterruptedException {
-        indexService.updateMapping(INDEX, profileService.createMappingObject());
+        indexService.updateMapping(INDEX, contactService.createMappingObject());
         GetIndexResponse index = indexService.getIndex(INDEX);
 
         Assertions.assertEquals(index.getIndices().length, 1);

@@ -1,14 +1,17 @@
 package ch.mab.search.es.rest;
 
+import ch.mab.search.es.business.ContactService;
+import ch.mab.search.es.model.Contact;
+import ch.mab.search.es.model.ContactDocument;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.ws.rs.PathParam;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -18,41 +21,85 @@ import java.util.stream.Collectors;
 public class ContactController {
 
     @Autowired
-    private ProfileController service;
+    private ContactService service;
 
-    private static final List<Contact> contacts = new ArrayList<>();
+    private static final List<Contact> dummyContacts = new ArrayList<>();
 
     public ContactController() {
-        contacts.add(new Contact(UUID.randomUUID().toString(), "Marco", "marco@sutter.ch", "079"));
-        contacts.add(new Contact(UUID.randomUUID().toString(), "Florian", "florian@sutter.ch", "079"));
-        contacts.add(new Contact(UUID.randomUUID().toString(), "Ladina", "ladina@sutter.ch", "079"));
-        contacts.add(new Contact(UUID.randomUUID().toString(), "Vera", "vera@sutter.ch", "079"));
-        contacts.add(new Contact(UUID.randomUUID().toString(), "Hans-Martin", "hansmartin@sutter.ch", "079"));
-        contacts.add(new Contact(UUID.randomUUID().toString(), "Nele", "nele@sutter.ch", "079"));
-        contacts.add(new Contact(UUID.randomUUID().toString(), "Marc-Antoine", "marcantoine@sutter.ch", "079"));
-        contacts.add(new Contact(UUID.randomUUID().toString(), "Maja", "maja@sutter.ch", "079"));
+        initDummyContacts();
     }
 
-    @CrossOrigin
-    @GetMapping
-    public ResponseEntity<Items>getContacts()  {
-        return new ResponseEntity<>(new Items(contacts), HttpStatus.OK);
+    private void initDummyContacts() {
+        dummyContacts.add(new Contact(UUID.randomUUID(), "Marco", "marco@sutter.ch", "079"));
+        dummyContacts.add(new Contact(UUID.randomUUID(), "Florian", "florian@sutter.ch", "079"));
+        dummyContacts.add(new Contact(UUID.randomUUID(), "Ladina", "ladina@sutter.ch", "079"));
+        dummyContacts.add(new Contact(UUID.randomUUID(), "Vera", "vera@sutter.ch", "079"));
+        dummyContacts.add(new Contact(UUID.randomUUID(), "Hans-Martin", "hansmartin@sutter.ch", "079"));
+        dummyContacts.add(new Contact(UUID.randomUUID(), "Nele", "nele@sutter.ch", "079"));
+        dummyContacts.add(new Contact(UUID.randomUUID(), "Marc-Antoine", "marcantoine@sutter.ch", "079"));
+        dummyContacts.add(new Contact(UUID.randomUUID(), "Maja", "maja@sutter.ch", "079"));
+    }
+
+    @PostMapping
+    public ResponseEntity createContact(@RequestBody ContactDocument document) throws Exception {
+        return new ResponseEntity(service.createContact("contacts", document), HttpStatus.CREATED);
     }
 
     @GetMapping(value = "/{id}")
-    public ResponseEntity<Item> getContacts(@PathVariable String id) {
-        Contact result = contacts.stream()
-                                 .filter(contact -> contact.id.equals(id))
-                                 .findAny()
-                                 .orElse(new Contact(UUID.randomUUID().toString(), "Random", "not@found.ch", "079"));
+    public ResponseEntity<Item> findById(@PathVariable UUID id) throws IOException {
+        Contact result = dummyContacts.stream()
+                                      .filter(contact -> contact.getId().equals(id))
+                                      .findAny()
+                                      .orElse(new Contact(UUID.randomUUID(), "Random", "not@found.ch", "079"));
 
         return new ResponseEntity<>(new Item(result), HttpStatus.OK);
+
+        /*
+
+        Optional<ContactDocument> result = service.findById("contacts", id);
+
+        if (result.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(result.get(), HttpStatus.OK);*/
     }
 
+    @PutMapping
+    public ResponseEntity<ContactDocument> updateContact(@RequestBody ContactDocument document) throws IOException {
+        Optional<ContactDocument> result = service.updateContact("contacts", document);
+        if (result.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(result.get(), HttpStatus.OK);
+    }
+
+    @GetMapping
+    //public ResponseEntity<List<ContactDocument>> findAll() throws Exception {
+    public ResponseEntity<Items> findAll() throws Exception {
+        return new ResponseEntity<>(new Items(dummyContacts), HttpStatus.OK);
+//        return new ResponseEntity<>(service.findAll("contacts"), HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ContactDocument> deleteContact(@PathVariable UUID id) throws Exception {
+        Optional<ContactDocument> result = service.deleteContactDocument("contacts", id);
+        if (result.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(result.get(), HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/search2")
+    public ResponseEntity<List<ContactDocument>> search(@RequestParam(value = "technology") String technology) throws
+            IOException {
+        return new ResponseEntity<>(service.searchByTechnology(technology), HttpStatus.OK);
+    }
+
+
     @GetMapping(value = "/search")
-    public ResponseEntity<Items> search(@RequestParam(value="term") String term) {
-        List<Contact> results = contacts.stream()
-                                 .filter(contact -> contact.name.toLowerCase().contains(term.toLowerCase())).collect(Collectors.toList());
+    public ResponseEntity<Items> searchDummies(@RequestParam(value="term") String term) {
+        List<Contact> results = dummyContacts.stream()
+                                 .filter(contact -> contact.getName().toLowerCase().contains(term.toLowerCase())).collect(Collectors.toList());
         return new ResponseEntity<>(new Items(results), HttpStatus.OK);
     }
 }
@@ -87,52 +134,5 @@ class Items {
 
     public void setItems(List<Contact> items) {
         this.items = items;
-    }
-}
-
-class Contact {
-
-    String id;
-    String name;
-    String email;
-    String phone;
-
-    public Contact(String id, String name, String email, String phone) {
-        this.id = id;
-        this.name = name;
-        this.email = email;
-        this.phone = phone;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
     }
 }

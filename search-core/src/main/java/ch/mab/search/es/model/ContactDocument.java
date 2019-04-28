@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
-public class ProfileDocument {
+public class ContactDocument {
 
     private final UUID id = UUID.randomUUID();
     private String firstName;
@@ -12,7 +12,7 @@ public class ProfileDocument {
     private List<Technology> technologies;
     private List<String> emails;
 
-    public ProfileDocument(String firstName, String lastName, List<Technology> technologies, List<String> emails) {
+    public ContactDocument(String firstName, String lastName, List<Technology> technologies, List<String> emails) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.technologies = technologies;
@@ -63,7 +63,7 @@ public class ProfileDocument {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        ProfileDocument document = (ProfileDocument) o;
+        ContactDocument document = (ContactDocument) o;
         return id.equals(document.id) && firstName.equals(document.firstName) && lastName.equals(document.lastName) &&
                Objects.equals(technologies, document.technologies) && Objects.equals(emails, document.emails);
     }
