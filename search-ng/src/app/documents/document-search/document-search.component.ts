@@ -63,7 +63,7 @@ export class DocumentSearchComponent implements OnInit {
   search(newTerm: string) {
     if (newTerm) {
       this.terms.push(newTerm);
-      // todo do search on es
+      this.documents = this.documentService.searchByQuery(newTerm);
     }
   }
 }

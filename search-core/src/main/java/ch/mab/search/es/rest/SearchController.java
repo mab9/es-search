@@ -53,11 +53,13 @@ public class SearchController {
         return new ResponseEntity<>(new Documents(service.findAll("secasignbox")), HttpStatus.OK);
     }
 
-    @GetMapping(value = "/search")
-    public ResponseEntity<List<SecasignboxDocument>> search(@RequestParam(value = "metadata") Metadata metadata) throws
-            IOException {
-        return new ResponseEntity<>(service.searchByMetadata("secasignbox", metadata), HttpStatus.OK);
+    @GetMapping(value = "search/{query}")
+    //    public ResponseEntity<List<SecasignboxDocument>> findAll() throws Exception {
+    public ResponseEntity<Documents> findDocumentsByQuery(@PathVariable String query) throws Exception {
+        // TODO IMPL search by query on es engine
+        return new ResponseEntity<>(new Documents(service.findAll("secasignbox")), HttpStatus.OK);
     }
+
 
     @DeleteMapping("/{id}")
     public ResponseEntity<SecasignboxDocument> deleteSecasignboxDocument(@PathVariable UUID id) throws Exception {
