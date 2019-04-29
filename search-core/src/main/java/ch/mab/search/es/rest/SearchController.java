@@ -2,8 +2,7 @@ package ch.mab.search.es.rest;
 
 import ch.mab.search.es.business.SecasignboxService;
 import ch.mab.search.es.model.Documents;
-import ch.mab.search.es.model.Items;
-import ch.mab.search.es.model.Metadata;
+import ch.mab.search.es.model.DocumentsHighlighted;
 import ch.mab.search.es.model.SecasignboxDocument;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -11,7 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -54,12 +52,14 @@ public class SearchController {
     }
 
     @GetMapping(value = "search/{query}")
-    //    public ResponseEntity<List<SecasignboxDocument>> findAll() throws Exception {
     public ResponseEntity<Documents> findDocumentsByQuery(@PathVariable String query) throws Exception {
-        // TODO IMPL search by query on es engine
-        return new ResponseEntity<>(new Documents(service.findAll("secasignbox")), HttpStatus.OK);
+        return new ResponseEntity<>(new Documents(service.findByQueryInDocumentContent("secasignbox", query)), HttpStatus.OK);
     }
 
+    @GetMapping(value = "search/highlighted/{query}")
+    public ResponseEntity<DocumentsHighlighted> findDocumentsByQueryHighlighted(@PathVariable String query) throws Exception {
+        return new ResponseEntity<>(new DocumentsHighlighted(service.findByQueryInDocumentContentHighlighted("secasignbox", query)), HttpStatus.OK);
+    }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<SecasignboxDocument> deleteSecasignboxDocument(@PathVariable UUID id) throws Exception {

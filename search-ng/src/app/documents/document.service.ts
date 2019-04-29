@@ -39,8 +39,9 @@ export class DocumentService {
     return this.http.get<DocumentResponse>(url).pipe(map((data) => data.docs));
   }
 
-  updateDocument(contact: Document): Observable<Document> {
-    let url = `${this.API_ENDPOINT}/documents/${contact.id}`;
-    return this.http.put<DocumentResponse>(url, contact).pipe(map((data) => data.doc));
+  searchByQueryHighlighted(query: string): Observable<Array<Document>> {
+    let url = `${this.API_ENDPOINT}/documents/search/highlighted/${query}`;
+    return this.http.get<DocumentResponse>(url).pipe(map((data) => data.docs));
   }
+
 }

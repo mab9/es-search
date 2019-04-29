@@ -41,9 +41,9 @@ public class IndexServiceBenchmarkTest {
     }
 
     @Test
-    void frontend_tests_gen_20_docs() throws InterruptedException, IOException {
+    void frontend_tests_gen_all_docs() throws  IOException {
         List<Path> files = testService.collectPathsOfPdfTestFiles();
-        files = files.subList(0, 20);
+        //files = files.subList(0, 20);
         long totalFileSize = calculateTotalFileSize(files);
         List<SecasignboxDocument> docs = testService.getSecasignboxDocumentsOfPdfs(files);
 
