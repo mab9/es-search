@@ -1,10 +1,10 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, ViewChild} from '@angular/core';
 import {EventBusService} from "../../event-bus.service";
 import {merge, Observable, Subject} from "rxjs";
 import {debounceTime, delay, distinctUntilChanged, switchMap, takeUntil} from "rxjs/operators";
 import {DocumentService} from "../document.service";
 import {Document} from "../document";
-import {MatTableDataSource} from "@angular/material";
+import {MatPaginator, MatTableDataSource} from "@angular/material";
 
 @Component({
   selector: 'app-document-search',
@@ -43,7 +43,7 @@ import {MatTableDataSource} from "@angular/material";
       </mat-list>
     -->
   
-      <div class="mat-elevation-z8" style="width: 80%; margin: auto; margin-top: 10px;">
+      <div class="mat-elevation-z8" style="width: 80%; margin: auto; margin-top: 10px; padding-bottom: 20px;">
 
         <mat-toolbar style="width: 95%; margin: auto">
           <mat-form-field color="accent" class="trm-search-container">
@@ -103,6 +103,8 @@ export class DocumentSearchComponent implements OnInit {
   fromDate: Date;
   toDate: Date;
 
+  @ViewChild(MatPaginator) paginator: MatPaginator;
+
   displayedColumns: string[] = ['position', 'name', 'weight', 'symbol'];
   dataSource = new MatTableDataSource<PeriodicElement>(ELEMENT_DATA);
 
@@ -111,6 +113,8 @@ export class DocumentSearchComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.dataSource.paginator = this.paginator;
+
     const documentSearch$ = this.terms$.pipe(
       debounceTime(400),
       distinctUntilChanged(),
