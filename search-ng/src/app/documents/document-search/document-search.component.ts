@@ -57,31 +57,17 @@ import {MatPaginator, MatTableDataSource} from "@angular/material";
         </mat-toolbar>
 
 
-        <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons style="width: 95%; margin: auto"></mat-paginator>
+        <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons style="width: 95%; margin: auto" (page)="pageChanged($event)"></mat-paginator>
         <table mat-table [dataSource]="dataSource" style="width: 95%; margin: auto">
-
-          <!-- Position Column -->
-          <ng-container matColumnDef="position">
-            <th mat-header-cell *matHeaderCellDef> No. </th>
-            <td mat-cell *matCellDef="let element"> {{element.position}} </td>
-          </ng-container>
-
+          
           <!-- Name Column -->
-          <ng-container matColumnDef="name">
-            <th mat-header-cell *matHeaderCellDef> Name </th>
-            <td mat-cell *matCellDef="let element"> {{element.name}} </td>
-          </ng-container>
-
-          <!-- Weight Column -->
-          <ng-container matColumnDef="weight">
-            <th mat-header-cell *matHeaderCellDef> Weight </th>
-            <td mat-cell *matCellDef="let element"> {{element.weight}} </td>
-          </ng-container>
-
-          <!-- Symbol Column -->
-          <ng-container matColumnDef="symbol">
-            <th mat-header-cell *matHeaderCellDef> Symbol </th>
-            <td mat-cell *matCellDef="let element"> {{element.symbol}} </td>
+          <ng-container matColumnDef="documentName">
+            <th mat-header-cell *matHeaderCellDef> Name</th>
+            <td mat-cell *matCellDef="let element"> 
+              <h3>{{element.documentName}}</h3>
+              <p *ngIf="element.highlights" matLine [innerHTML]="element.highlights[0]"></p>
+              <p *ngIf="element.highlights" matLine [innerHTML]="element.highlights[1]"></p>
+              <p *ngIf="element.highlights" matLine [innerHTML]="element.highlights[2]"></p>
           </ng-container>
 
           <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
@@ -105,8 +91,8 @@ export class DocumentSearchComponent implements OnInit {
 
   @ViewChild(MatPaginator) paginator: MatPaginator;
 
-  displayedColumns: string[] = ['position', 'name', 'weight', 'symbol'];
-  dataSource = new MatTableDataSource<PeriodicElement>(ELEMENT_DATA);
+  displayedColumns: string[] = ['documentName'];
+  dataSource = new MatTableDataSource<Document>();
 
 
   constructor(private documentService: DocumentService, private eventBusService: EventBusService) {
@@ -135,8 +121,10 @@ export class DocumentSearchComponent implements OnInit {
   search(newTerm: string) {
     if (newTerm) {
       this.documents = this.documentService.searchByQueryHighlighted(newTerm);
+      this.documents.subscribe(data => this.dataSource.data = data);
     } else {
       this.documents = this.documentService.getDocuments();
+      this.documents.subscribe(data => this.dataSource.data = data);
     }
   }
 
@@ -146,40 +134,19 @@ export class DocumentSearchComponent implements OnInit {
     this.documentNameSearch = false;
     this.fromDate = null;
     this.toDate = null;
+  }
 
+  pageChanged() {
+    // auf welcher Seite befine ich mich gerade. Ausrechnen length / pageSize ...
+    console.info(this.paginator.pageIndex);
+    console.info(this.paginator.pageSize);
+    console.info(this.paginator.length);
+    // downloaden anzahl hits total -> dannach immer beim page wechsel die nächsten docs nachladen.
+
+    this.paginator.length = 100;
   }
 
 }
 
-
-export interface PeriodicElement {
-  name: string;
-  position: number;
-  weight: number;
-  symbol: string;
-}
-
-const ELEMENT_DATA: PeriodicElement[] = [
-  {position: 1, name: 'Hydrogen', weight: 1.0079, symbol: 'H'},
-  {position: 2, name: 'Helium', weight: 4.0026, symbol: 'He'},
-  {position: 3, name: 'Lithium', weight: 6.941, symbol: 'Li'},
-  {position: 4, name: 'Beryllium', weight: 9.0122, symbol: 'Be'},
-  {position: 5, name: 'Boron', weight: 10.811, symbol: 'B'},
-  {position: 6, name: 'Carbon', weight: 12.0107, symbol: 'C'},
-  {position: 7, name: 'Nitrogen', weight: 14.0067, symbol: 'N'},
-  {position: 8, name: 'Oxygen', weight: 15.9994, symbol: 'O'},
-  {position: 9, name: 'Fluorine', weight: 18.9984, symbol: 'F'},
-  {position: 10, name: 'Neon', weight: 20.1797, symbol: 'Ne'},
-  {position: 11, name: 'Sodium', weight: 22.9897, symbol: 'Na'},
-  {position: 12, name: 'Magnesium', weight: 24.305, symbol: 'Mg'},
-  {position: 13, name: 'Aluminum', weight: 26.9815, symbol: 'Al'},
-  {position: 14, name: 'Silicon', weight: 28.0855, symbol: 'Si'},
-  {position: 15, name: 'Phosphorus', weight: 30.9738, symbol: 'P'},
-  {position: 16, name: 'Sulfur', weight: 32.065, symbol: 'S'},
-  {position: 17, name: 'Chlorine', weight: 35.453, symbol: 'Cl'},
-  {position: 18, name: 'Argon', weight: 39.948, symbol: 'Ar'},
-  {position: 19, name: 'Potassium', weight: 39.0983, symbol: 'K'},
-  {position: 20, name: 'Calcium', weight: 40.078, symbol: 'Ca'},
-];
 
 
