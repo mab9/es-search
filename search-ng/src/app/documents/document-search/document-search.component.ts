@@ -17,6 +17,29 @@ import {Document} from "../document";
         <mat-icon color="accent">search</mat-icon>
 
         <button mat-raised-button color="primary" (click)="search(newTerm.value)">Search</button>
+        <button mat-raised-button color="primary" (click)="toggleTools()">Tools</button>
+      </mat-toolbar>
+
+
+      <mat-toolbar *ngIf="showTools">
+        <mat-checkbox [(ngModel)]="fuzzySearch" style="width: 10%;">fuzzy search</mat-checkbox>
+        <mat-checkbox [(ngModel)]="documentNameSearch" style="width: 20%;">only document name search</mat-checkbox>
+
+        <div style="width: 10%; margin-right: 15px">
+          <mat-form-field color="accent">
+            <input matInput [matDatepicker]="picker" placeholder="From date" [(ngModel)]="fromDate">
+            <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+          </mat-form-field>
+        </div>
+
+        <div style="width: 10%;">
+          <mat-form-field color="accent">
+            <input matInput [matDatepicker]="picker2" placeholder="To date" [(ngModel)]="toDate">
+            <mat-datepicker-toggle matSuffix [for]="picker2"></mat-datepicker-toggle>
+            <mat-datepicker #picker2></mat-datepicker>
+          </mat-form-field>
+        </div>
       </mat-toolbar>
       
       <mat-list>
@@ -34,6 +57,11 @@ export class DocumentSearchComponent implements OnInit {
 
   documents: Observable<Array<Document>>;
   terms$ = new Subject<string>();
+  showTools: boolean = false;
+  fuzzySearch: boolean = false;
+  documentNameSearch: boolean = false;
+  fromDate: Date;
+  toDate: Date;
 
   constructor(private documentService: DocumentService, private eventBusService: EventBusService) {
   }
@@ -63,4 +91,14 @@ export class DocumentSearchComponent implements OnInit {
       this.documents = this.documentService.getDocuments();
     }
   }
+
+  toggleTools() {
+    this.showTools = !this.showTools;
+    this.fuzzySearch = false;
+    this.documentNameSearch = false;
+    this.fromDate = null;
+    this.toDate = null;
+
+  }
+
 }

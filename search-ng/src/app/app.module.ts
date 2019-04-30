@@ -4,7 +4,7 @@ import { NgModule } from '@angular/core';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
-import {ContactsMaterialModule} from "./contacts/contacts-material.module";
+import {AppMaterialModule} from "./app-material.module";
 import {ContactsService} from "./contacts/contacts.service";
 import { ContactsListComponent } from './contacts/contacts-list/contacts-list.component';
 import {HttpClientModule} from "@angular/common/http";
@@ -20,6 +20,7 @@ import { TabComponent } from './shared/tab/tab.component';
 import { TabsComponent } from './shared/tabs/tabs.component';
 import { DocumentSearchComponent } from './documents/document-search/document-search.component';
 import {DocumentService} from "./documents/document.service";
+import {MatDatepickerModule, MatFormFieldModule, MatInputModule, MatNativeDateModule} from "@angular/material";
 
 @NgModule({
   declarations: [
@@ -37,7 +38,7 @@ import {DocumentService} from "./documents/document.service";
   imports: [
     BrowserModule,
     BrowserAnimationsModule,
-    ContactsMaterialModule,
+    AppMaterialModule,
     HttpClientModule,
     AppRoutingModule,
     HttpClientModule,
