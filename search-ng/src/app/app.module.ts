@@ -20,6 +20,7 @@ import {TabComponent} from './shared/tab/tab.component';
 import {TabsComponent} from './shared/tabs/tabs.component';
 import {DocumentSearchComponent} from './documents/document-search/document-search.component';
 import {DocumentService} from "./documents/document.service";
+import {MatPaginator, MatPaginatorModule, MatTableDataSource, MatTableModule} from "@angular/material";
 
 @NgModule({
   declarations: [
@@ -42,10 +43,13 @@ import {DocumentService} from "./documents/document.service";
     AppRoutingModule,
     HttpClientModule,
     FormsModule,
-    RouterModule.forRoot(APP_ROUTES)
+    RouterModule.forRoot(APP_ROUTES),
+    MatTableModule,
+    MatPaginatorModule
   ],
   providers: [
-    ContactsService, ContactsListComponent, ContactsDetailComponent, ContactsDetailViewComponent, ContactsEditorComponent, DocumentSearchComponent, DocumentService,
+    ContactsService, ContactsListComponent, ContactsDetailComponent, ContactsDetailViewComponent, ContactsEditorComponent, DocumentSearchComponent, DocumentService, MatTableModule, MatPaginatorModule,
+
     {provide: 'API_ENDPOINT', useValue: 'http://localhost:4201/api'},
   ],
   bootstrap: [AppComponent]
