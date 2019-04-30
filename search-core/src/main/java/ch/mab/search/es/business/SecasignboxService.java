@@ -19,16 +19,17 @@ import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.action.update.UpdateResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.common.text.Text;
+import org.elasticsearch.common.unit.Fuzziness;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.common.xcontent.XContentType;
-import org.elasticsearch.index.query.MatchQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.*;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
+import org.elasticsearch.search.sort.ScoreSortBuilder;
+import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -90,19 +91,39 @@ public class SecasignboxService extends AbstractIndex {
     public List<SearchHighlights> findByQueryInDocumentContentHighlighted(String index, String query) throws IOException {
         SearchRequest searchRequest = new SearchRequest(index);
         SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
-        sourceBuilder.query(QueryBuilders.matchPhrasePrefixQuery("documentContent",query));
+
+        MatchQueryBuilder docContentQuery = new MatchQueryBuilder("documentContent", query);
+        docContentQuery.fuzziness(Fuzziness.AUTO);
+        docContentQuery.prefixLength(3);
+        docContentQuery.maxExpansions(10);
+
+        MatchPhrasePrefixQueryBuilder documentName = QueryBuilders.matchPhrasePrefixQuery("documentName", query);
+        documentName.boost(4.0f);
+
+        BoolQueryBuilder should = QueryBuilders.boolQuery().should(documentName).should(docContentQuery);
+        sourceBuilder.query(should);
         searchRequest.source(sourceBuilder);
 
-        HighlightBuilder highlightBuilder = new HighlightBuilder();
-        HighlightBuilder.Field highlightTitle =
-                new HighlightBuilder.Field("documentContent");
-        highlightTitle.highlighterType("unified");
-        highlightBuilder.field(highlightTitle);
+        // sort descending by score
+        sourceBuilder.sort(new ScoreSortBuilder().order(SortOrder.DESC));
 
+        HighlightBuilder highlightBuilder = createHighlighter("documentContent", "unified");
         sourceBuilder.highlighter(highlightBuilder);
 
         SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
         return getSearchResultHighlighted(searchResponse);
+    }
+
+    private HighlightBuilder createHighlighter(String field, String type) {
+        HighlightBuilder highlightBuilder = new HighlightBuilder();
+        HighlightBuilder.Field hgField = new HighlightBuilder.Field(field);
+        hgField.highlighterType(type);
+        highlightBuilder.field(hgField);
+
+        HighlightBuilder.Field hgField2 = new HighlightBuilder.Field("documentName");
+        hgField2.highlighterType(type);
+        highlightBuilder.field(hgField2);
+        return highlightBuilder;
     }
 
     public List<SecasignboxDocument> findByQueryInDocumentContent(String index, String query) throws IOException {
@@ -176,13 +197,10 @@ public class SecasignboxService extends AbstractIndex {
 
         for (SearchHit hit : searchHit) {
             Map<String, HighlightField> highlightFields = hit.getHighlightFields();
+            List<String> highlights = new ArrayList<>();
+            highlights.addAll(getHighlights(highlightFields, "documentContent"));
+            highlights.addAll(getHighlights(highlightFields, "documentName"));
 
-            HighlightField highlight = highlightFields.get("documentContent");
-            if (highlight == null) {
-                throw new IllegalArgumentException("you missed something");
-            }
-            Text[] fragments = highlight.fragments();
-            List<String> highlights = Arrays.stream(fragments).map(Text::string).collect(Collectors.toList());
             SearchHighlights dto = new SearchHighlights();
             SecasignboxDocument document =
                     objectMapper.convertValue(hit.getSourceAsMap(), SecasignboxDocument.class);
@@ -192,7 +210,17 @@ public class SecasignboxService extends AbstractIndex {
             dtos.add(dto);
         }
 
-        return dtos;
+        return dtos.stream().distinct().collect(Collectors.toList());
+    }
+
+    private List<String> getHighlights(Map<String, HighlightField> highlightFields, String field) {
+        HighlightField highlight = highlightFields.get(field);
+        if (highlight == null) {
+            System.err.println("you missed something");
+            return Collections.emptyList();
+        }
+        Text[] fragments = highlight.fragments();
+        return Arrays.stream(fragments).map(Text::string).collect(Collectors.toList());
     }
 
     private List<String> replaceHighlihtCursivByBold(List<String> highlights) {
