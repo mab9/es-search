@@ -1,10 +1,11 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
+import {Component, OnInit, Query, ViewChild} from '@angular/core';
 import {EventBusService} from "../../event-bus.service";
 import {merge, Observable, Subject} from "rxjs";
 import {debounceTime, delay, distinctUntilChanged, switchMap, takeUntil} from "rxjs/operators";
 import {DocumentService} from "../document.service";
 import {Document} from "../document";
 import {MatPaginator, MatTableDataSource} from "@angular/material";
+import {SearchQuery} from "../searchQuery";
 
 @Component({
   selector: 'app-document-search',
@@ -32,17 +33,6 @@ import {MatPaginator, MatTableDataSource} from "@angular/material";
         </div>
       </mat-toolbar>
       
-      <!--
-      <mat-list>
-        <mat-list-item *ngFor="let item of documents | async; trackBy: trackByDocuments" [routerLink]="['/document', item?.id]">
-          <h3 matLine> {{item.documentName}} </h3>
-          <p *ngIf="item.highlights" matLine [innerHTML]="item.highlights[0]"></p>
-          <p *ngIf="item.highlights" matLine [innerHTML]="item.highlights[1]"></p>
-          <p *ngIf="item.highlights" matLine [innerHTML]="item.highlights[2]"></p>
-        </mat-list-item>
-      </mat-list>
-    -->
-  
       <div class="mat-elevation-z8" style="width: 80%; margin: auto; margin-top: 10px; padding-bottom: 20px;">
 
         <mat-toolbar style="width: 95%; margin: auto">
@@ -104,7 +94,7 @@ export class DocumentSearchComponent implements OnInit {
     const documentSearch$ = this.terms$.pipe(
       debounceTime(400),
       distinctUntilChanged(),
-      switchMap(x => this.documentService.searchByQueryHighlighted(x))
+      switchMap(x => this.documentService.searchByTermHighlighted(x))
     );
 
     this.documents = merge(
@@ -119,12 +109,38 @@ export class DocumentSearchComponent implements OnInit {
   }
 
   search(newTerm: string) {
+    this.documents.subscribe(data => this.dataSource.data = data);
+
     if (newTerm) {
-      this.documents = this.documentService.searchByQueryHighlighted(newTerm);
-      this.documents.subscribe(data => this.dataSource.data = data);
+      if (this.showTools) {
+        this.searchByQuery(newTerm);
+      } else {
+        console.info("hello - yellos");
+
+        this.documents = this.documentService.searchByTermHighlighted(newTerm);
+      }
     } else {
       this.documents = this.documentService.getDocuments();
-      this.documents.subscribe(data => this.dataSource.data = data);
+    }
+  }
+
+  private searchByQuery(newTerm: string) {
+    if (this.showTools) {
+      console.info("hello");
+
+      let searchQuery: SearchQuery = { term: newTerm, fuzzy: this.fuzzySearch, documentName: this.documentNameSearch, fromDate: null, toDate: null};
+
+      if (this.fromDate != null) {
+        searchQuery.fromDate = this.fromDate.getDate();
+      }
+
+      if (this.toDate != null) {
+        searchQuery.toDate = this.toDate.getDate();
+      }
+
+      this.documents = this.documentService.searchByQueryHighlighted(searchQuery);
+    } else {
+      throw new Error("You've done something wrong! Let the quiz begin...")
     }
   }
 

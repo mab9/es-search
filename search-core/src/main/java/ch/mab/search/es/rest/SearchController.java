@@ -3,6 +3,7 @@ package ch.mab.search.es.rest;
 import ch.mab.search.es.business.SecasignboxService;
 import ch.mab.search.es.model.Documents;
 import ch.mab.search.es.model.DocumentsHighlighted;
+import ch.mab.search.es.model.SearchQuery;
 import ch.mab.search.es.model.SecasignboxDocument;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -51,14 +52,14 @@ public class SearchController {
         return new ResponseEntity<>(new Documents(service.findAll("secasignbox")), HttpStatus.OK);
     }
 
-    @GetMapping(value = "search/{query}")
-    public ResponseEntity<Documents> findDocumentsByQuery(@PathVariable String query) throws Exception {
-        return new ResponseEntity<>(new Documents(service.findByQueryInDocumentContent("secasignbox", query)), HttpStatus.OK);
+    @GetMapping(value = "search/{term}")
+    public ResponseEntity<Documents> findDocumentsByTerm(@PathVariable String term) throws Exception {
+        return new ResponseEntity<>(new Documents(service.findByQueryInDocumentContent("secasignbox", term)), HttpStatus.OK);
     }
 
-    @GetMapping(value = "search/highlighted/{query}")
-    public ResponseEntity<DocumentsHighlighted> findDocumentsByQueryHighlighted(@PathVariable String query) throws Exception {
-        return new ResponseEntity<>(new DocumentsHighlighted(service.findByQueryInDocumentContentHighlighted("secasignbox", query)), HttpStatus.OK);
+    @GetMapping(value = "search/highlighted/{term}")
+    public ResponseEntity<DocumentsHighlighted> findDocumentsByTermHighlighted(@PathVariable String term) throws Exception {
+        return new ResponseEntity<>(new DocumentsHighlighted(service.findByTermHighlighted("secasignbox", term)), HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
@@ -69,5 +70,10 @@ public class SearchController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         return new ResponseEntity<>(result.get(), HttpStatus.OK);
+    }
+
+    @PostMapping(value = "search/highlighted/query")
+    public ResponseEntity<DocumentsHighlighted> findDocumentsByQueryHighlighted(@RequestBody SearchQuery query) throws Exception {
+        return new ResponseEntity<>(new DocumentsHighlighted(service.findByQueryHighlighted("secasignbox", query)), HttpStatus.OK);
     }
 }

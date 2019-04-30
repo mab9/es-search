@@ -18,7 +18,8 @@ import java.util.List;
 @SpringBootTest
 public class IndexServiceBenchmarkTest {
 
-    private final String INDEX = this.getClass().getName().toLowerCase();
+    //private final String INDEX = this.getClass().getName().toLowerCase();
+    private final String INDEX = "secasignbox";
 
     @Autowired
     private RestHighLevelClient client;
@@ -48,7 +49,7 @@ public class IndexServiceBenchmarkTest {
         List<SecasignboxDocument> docs = testService.getSecasignboxDocumentsOfPdfs(files);
 
         long start = System.currentTimeMillis();
-        secasignboxService.bulkIndexDocument("secasignbox", docs);
+        secasignboxService.bulkIndexDocument(INDEX, docs);
         long finish = System.currentTimeMillis();
         long timeElapsed = finish - start;
 

@@ -1,79 +1,61 @@
 package ch.mab.search.es.model;
 
-import java.util.Date;
-import java.util.UUID;
-
 public class SearchQuery {
 
-    UUID archivespaceId;
-
-    Date fromDate;
-
-    Date toDate;
-
-    DocumentState documentState;
-
-    String documentContent;
-
-    String documentMetadata;
+    private String term;
+    private boolean fuzzy;
+    private boolean documentName;
+    private long fromDate;
+    private long toDate;
 
     public SearchQuery() {
     }
 
-    public SearchQuery(UUID archivespaceId, Date fromDate, Date toDate, DocumentState documentState, String documentContent, String documentMetadata) {
-        this.archivespaceId = archivespaceId;
+    public SearchQuery(String term, boolean fuzzy, boolean documentName, long fromDate, long toDate) {
+        this.term = term;
+        this.fuzzy = fuzzy;
+        this.documentName = documentName;
         this.fromDate = fromDate;
         this.toDate = toDate;
-        this.documentState = documentState;
-        this.documentContent = documentContent;
-        this.documentMetadata = documentMetadata;
     }
 
-    public UUID getArchivespaceId() {
-        return archivespaceId;
+    public String getTerm() {
+        return term;
     }
 
-    public void setArchivespaceId(UUID archivespaceId) {
-        this.archivespaceId = archivespaceId;
+    public void setTerm(String term) {
+        this.term = term;
     }
 
-    public Date getFromDate() {
+    public boolean isFuzzy() {
+        return fuzzy;
+    }
+
+    public void setFuzzy(boolean fuzzy) {
+        this.fuzzy = fuzzy;
+    }
+
+    public boolean isDocumentName() {
+        return documentName;
+    }
+
+    public void setDocumentName(boolean documentName) {
+        this.documentName = documentName;
+    }
+
+    public long getFromDate() {
         return fromDate;
     }
 
-    public void setFromDate(Date fromDate) {
+    public void setFromDate(long fromDate) {
         this.fromDate = fromDate;
     }
 
-    public Date getToDate() {
+    public long getToDate() {
         return toDate;
     }
 
-    public void setToDate(Date toDate) {
+    public void setToDate(long toDate) {
         this.toDate = toDate;
-    }
-
-    public DocumentState getDocumentState() {
-        return documentState;
-    }
-
-    public void setDocumentState(DocumentState documentState) {
-        this.documentState = documentState;
-    }
-
-    public String getDocumentContent() {
-        return documentContent;
-    }
-
-    public void setDocumentContent(String documentContent) {
-        this.documentContent = documentContent;
-    }
-
-    public String getDocumentMetadata() {
-        return documentMetadata;
-    }
-
-    public void setDocumentMetadata(String documentMetadata) {
-        this.documentMetadata = documentMetadata;
     }
 }

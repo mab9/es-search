@@ -1,8 +1,9 @@
 import {Inject, Injectable} from '@angular/core';
-import {HttpClient} from "@angular/common/http";
+import {HttpClient, HttpParams} from "@angular/common/http";
 import {Document} from "./document";
 import {Observable} from "rxjs";
 import {debounceTime, distinctUntilChanged, map, switchMap} from "rxjs/operators";
+import {SearchQuery} from "./searchQuery";
 
 interface DocumentResponse {
   doc: Document
@@ -34,14 +35,18 @@ export class DocumentService {
     return null;
   }
 
-  searchByQuery(query: string): Observable<Array<Document>> {
-    let url = `${this.API_ENDPOINT}/documents/search/${query}`;
+  searchByTerm(term: string): Observable<Array<Document>> {
+    let url = `${this.API_ENDPOINT}/documents/search/${term}`;
     return this.http.get<DocumentResponse>(url).pipe(map((data) => data.docs));
   }
 
-  searchByQueryHighlighted(query: string): Observable<Array<Document>> {
-    let url = `${this.API_ENDPOINT}/documents/search/highlighted/${query}`;
+  searchByTermHighlighted(term: string): Observable<Array<Document>> {
+    let url = `${this.API_ENDPOINT}/documents/search/highlighted/${term}`;
     return this.http.get<DocumentResponse>(url).pipe(map((data) => data.docs));
   }
 
+  searchByQueryHighlighted(query: SearchQuery): Observable<Array<Document>> {
+    let url = `${this.API_ENDPOINT}/documents/search/highlighted/query`;
+    return this.http.post<DocumentResponse>(url, query).pipe(map((data) => data.docs));
+  }
 }

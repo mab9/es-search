@@ -3,6 +3,7 @@ package ch.mab.search.es.business;
 import ch.mab.search.es.api.AbstractIndex;
 import ch.mab.search.es.model.Metadata;
 import ch.mab.search.es.model.SearchHighlights;
+import ch.mab.search.es.model.SearchQuery;
 import ch.mab.search.es.model.SecasignboxDocument;
 import org.apache.lucene.search.join.ScoreMode;
 import org.elasticsearch.action.bulk.BulkRequest;
@@ -88,16 +89,52 @@ public class SecasignboxService extends AbstractIndex {
         return getSearchResult(searchResponse);
     }
 
-    public List<SearchHighlights> findByQueryInDocumentContentHighlighted(String index, String query) throws IOException {
+    public List<SearchHighlights> findByQueryHighlighted(String index, SearchQuery query) throws IOException {
         SearchRequest searchRequest = new SearchRequest(index);
         SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 
-        MatchQueryBuilder docContentQuery = new MatchQueryBuilder("documentContent", query);
+        MatchQueryBuilder docContentQuery = new MatchQueryBuilder("documentContent", query.getTerm());
+
+        if (query.isFuzzy()) {
+            docContentQuery.fuzziness(Fuzziness.AUTO);
+            docContentQuery.prefixLength(3);
+            docContentQuery.maxExpansions(10);
+        }
+
+        MatchPhrasePrefixQueryBuilder documentName = QueryBuilders.matchPhrasePrefixQuery("documentName", query.getTerm());
+
+        BoolQueryBuilder should;
+        if (query.isDocumentName()) {
+            should = QueryBuilders.boolQuery().should(documentName);
+            HighlightBuilder highlightBuilder = createHighlighter("documentName");
+            sourceBuilder.highlighter(highlightBuilder);
+        } else {
+            documentName.boost(4.0f);
+            should = QueryBuilders.boolQuery().should(documentName).should(docContentQuery);
+            HighlightBuilder highlightBuilder = createHighlighter("documentName", "documentContent");
+            sourceBuilder.highlighter(highlightBuilder);
+        }
+
+
+        sourceBuilder.query(should);
+        searchRequest.source(sourceBuilder);
+
+        // sort descending by score
+        sourceBuilder.sort(new ScoreSortBuilder().order(SortOrder.DESC));
+        SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
+        return getSearchResultHighlighted(searchResponse);
+    }
+
+    public List<SearchHighlights> findByTermHighlighted(String index, String term) throws IOException {
+        SearchRequest searchRequest = new SearchRequest(index);
+        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+
+        MatchQueryBuilder docContentQuery = new MatchQueryBuilder("documentContent", term);
         docContentQuery.fuzziness(Fuzziness.AUTO);
         docContentQuery.prefixLength(3);
         docContentQuery.maxExpansions(10);
 
-        MatchPhrasePrefixQueryBuilder documentName = QueryBuilders.matchPhrasePrefixQuery("documentName", query);
+        MatchPhrasePrefixQueryBuilder documentName = QueryBuilders.matchPhrasePrefixQuery("documentName", term);
         documentName.boost(4.0f);
 
         BoolQueryBuilder should = QueryBuilders.boolQuery().should(documentName).should(docContentQuery);
@@ -107,22 +144,21 @@ public class SecasignboxService extends AbstractIndex {
         // sort descending by score
         sourceBuilder.sort(new ScoreSortBuilder().order(SortOrder.DESC));
 
-        HighlightBuilder highlightBuilder = createHighlighter("documentContent", "unified");
+        HighlightBuilder highlightBuilder = createHighlighter("documentContent");
         sourceBuilder.highlighter(highlightBuilder);
 
         SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
         return getSearchResultHighlighted(searchResponse);
     }
 
-    private HighlightBuilder createHighlighter(String field, String type) {
+    private HighlightBuilder createHighlighter(String... fields) {
         HighlightBuilder highlightBuilder = new HighlightBuilder();
-        HighlightBuilder.Field hgField = new HighlightBuilder.Field(field);
-        hgField.highlighterType(type);
-        highlightBuilder.field(hgField);
 
-        HighlightBuilder.Field hgField2 = new HighlightBuilder.Field("documentName");
-        hgField2.highlighterType(type);
-        highlightBuilder.field(hgField2);
+        Arrays.stream(fields).forEach(field -> {
+            HighlightBuilder.Field hgField2 = new HighlightBuilder.Field(field);
+            hgField2.highlighterType("unified");
+            highlightBuilder.field(hgField2);
+        });
         return highlightBuilder;
     }
 
