@@ -2,8 +2,6 @@ package ch.mab.search.es.rest;
 
 import ch.mab.search.es.business.ContactService;
 import ch.mab.search.es.model.ContactDocument;
-import ch.mab.search.es.model.Item;
-import ch.mab.search.es.model.Items;
 import ch.mab.search.es.model.Technology;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -50,12 +48,12 @@ public class ContactController {
     }
 
     @GetMapping(value = "/{id}")
-    public ResponseEntity<Item> findById(@PathVariable String id) {
+    public ResponseEntity<ContactDocument> findById(@PathVariable String id) {
         ContactDocument dummy =
                 new ContactDocument("Random", "Rando", Collections.emptyList(), "not@found.ch", "079");
 
         if (id.equals("0")) {
-            return new ResponseEntity<>(new Item(dummy), HttpStatus.OK);
+            return new ResponseEntity<>(dummy, HttpStatus.OK);
         }
 
         ContactDocument result = dummyContacts.stream()
@@ -63,7 +61,7 @@ public class ContactController {
                                               .findAny()
                                               .orElse(dummy);
 
-        return new ResponseEntity<>(new Item(result), HttpStatus.OK);
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     @PutMapping
@@ -76,8 +74,8 @@ public class ContactController {
     }
 
     @GetMapping
-    public ResponseEntity<Items> findAll() throws Exception {
-        return new ResponseEntity<>(new Items(dummyContacts), HttpStatus.OK);
+    public ResponseEntity<List<ContactDocument>> findAll() throws Exception {
+        return new ResponseEntity<>(dummyContacts, HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
@@ -96,12 +94,12 @@ public class ContactController {
     }
 
     @GetMapping(value = "/search")
-    public ResponseEntity<Items> searchDummies(@RequestParam(value = "term") String term) {
+    public ResponseEntity<List<ContactDocument>> searchDummies(@RequestParam(value = "term") String term) {
         List<ContactDocument> results = dummyContacts.stream()
                                                      .filter(contact -> contact.getFirstName()
                                                                                .toLowerCase()
                                                                                .contains(term.toLowerCase()))
                                                      .collect(Collectors.toList());
-        return new ResponseEntity<>(new Items(results), HttpStatus.OK);
+        return new ResponseEntity<>(results, HttpStatus.OK);
     }
 }

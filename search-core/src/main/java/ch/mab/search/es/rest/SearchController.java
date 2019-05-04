@@ -1,8 +1,7 @@
 package ch.mab.search.es.rest;
 
 import ch.mab.search.es.business.SecasignboxService;
-import ch.mab.search.es.model.Documents;
-import ch.mab.search.es.model.DocumentsHighlighted;
+import ch.mab.search.es.model.SearchHighlights;
 import ch.mab.search.es.model.SearchQuery;
 import ch.mab.search.es.model.SecasignboxDocument;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -47,18 +47,18 @@ public class SearchController {
     }
 
     @GetMapping
-    public ResponseEntity<Documents> findAll() throws Exception {
-        return new ResponseEntity<>(new Documents(service.findAll("secasignbox")), HttpStatus.OK);
+    public ResponseEntity<List<SecasignboxDocument>> findAll() throws Exception {
+        return new ResponseEntity<>(service.findAll("secasignbox"), HttpStatus.OK);
     }
 
     @GetMapping(value = "search/{term}")
-    public ResponseEntity<Documents> findDocumentsByTerm(@PathVariable String term) throws Exception {
-        return new ResponseEntity<>(new Documents(service.findByTermInDocumentContent("secasignbox", term)), HttpStatus.OK);
+    public ResponseEntity<List<SecasignboxDocument>> findDocumentsByTerm(@PathVariable String term) throws Exception {
+        return new ResponseEntity<>(service.findByTermInDocumentContent("secasignbox", term), HttpStatus.OK);
     }
 
     @GetMapping(value = "search/highlighted/{term}")
-    public ResponseEntity<DocumentsHighlighted> findDocumentsByTermHighlighted(@PathVariable String term) throws Exception {
-        return new ResponseEntity<>(new DocumentsHighlighted(service.findByTermHighlighted("secasignbox", term)), HttpStatus.OK);
+    public ResponseEntity<List<SearchHighlights>> findDocumentsByTermHighlighted(@PathVariable String term) throws Exception {
+        return new ResponseEntity<>(service.findByTermHighlighted("secasignbox", term), HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
@@ -71,7 +71,7 @@ public class SearchController {
     }
 
     @PostMapping(value = "search/highlighted/query")
-    public ResponseEntity<DocumentsHighlighted> findDocumentsByQueryHighlighted(@RequestBody SearchQuery query) throws Exception {
-        return new ResponseEntity<>(new DocumentsHighlighted(service.findByQueryHighlighted("secasignbox", query)), HttpStatus.OK);
+    public ResponseEntity<List<SearchHighlights>> findDocumentsByQueryHighlighted(@RequestBody SearchQuery query) throws Exception {
+        return new ResponseEntity<>(service.findByQueryHighlighted("secasignbox", query), HttpStatus.OK);
     }
 }

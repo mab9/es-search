@@ -4,13 +4,6 @@ import {Contact} from "./contact";
 import {Observable} from "rxjs";
 import {debounceTime, distinctUntilChanged, map, switchMap} from "rxjs/operators";
 
-interface ContactResponse {
-  item: Contact
-}
-
-interface ContactsResponse {
-  items: Contact[]
-}
 
 @Injectable()
 export class ContactsService {
@@ -21,16 +14,16 @@ export class ContactsService {
   }
 
   getContacts(): Observable<Array<Contact>> {
-    return this.http.get<ContactsResponse>(this.API_ENDPOINT + '/contacts').pipe(map((data) => data.items));
+    return this.http.get<Contact[]>(this.API_ENDPOINT + '/contacts').pipe(map((data) => data));
   }
 
   getContact(id: string): Observable<Contact> {
-    return this.http.get<ContactResponse>(`${this.API_ENDPOINT}/contacts/${id}`).pipe(map((data) => data.item));
+    return this.http.get<Contact>(`${this.API_ENDPOINT}/contacts/${id}`).pipe(map((data) => data));
   }
 
   search(term: string): Observable<Array<Contact>> {
     let url = `${this.API_ENDPOINT}/contacts/search?term=${term}`;
-    return this.http.get<ContactsResponse>(url).pipe(map((data) => data.items));
+    return this.http.get<Contact[]>(url).pipe(map((data) => data));
   }
 
   rawSearch(terms: Observable<string>, debounceMs = 400) : Observable<Array<Contact>> {
@@ -43,6 +36,6 @@ export class ContactsService {
 
   updateContact(contact: Contact): Observable<Contact> {
     let url = `${this.API_ENDPOINT}/contacts/${contact.id}`;
-    return this.http.put<ContactResponse>(url, contact).pipe(map((data) => data.item));
+    return this.http.put<Contact>(url, contact).pipe(map((data) => data));
   }
 }
