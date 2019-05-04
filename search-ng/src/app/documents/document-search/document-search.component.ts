@@ -115,8 +115,6 @@ export class DocumentSearchComponent implements OnInit {
       if (this.showTools) {
         this.searchByQuery(newTerm);
       } else {
-        console.info("hello - yellos");
-
         this.documents = this.documentService.searchByTermHighlighted(newTerm);
       }
     } else {
@@ -126,8 +124,6 @@ export class DocumentSearchComponent implements OnInit {
 
   private searchByQuery(newTerm: string) {
     if (this.showTools) {
-      console.info("hello");
-
       let searchQuery: SearchQuery = { term: newTerm, fuzzy: this.fuzzySearch, documentName: this.documentNameSearch, fromDate: null, toDate: null};
 
       if (this.fromDate != null) {
@@ -139,8 +135,6 @@ export class DocumentSearchComponent implements OnInit {
       }
 
       this.documents = this.documentService.searchByQueryHighlighted(searchQuery);
-    } else {
-      throw new Error("You've done something wrong! Let the quiz begin...")
     }
   }
 

@@ -35,9 +35,7 @@ public class TestHelperService {
 
     private SecasignboxDocument createDocument(Path fileName, String documentContent) {
         return new SecasignboxDocument(UUID.randomUUID(), fileName.toString(), new Date(), new Date(),
-                                       Collections.emptyList(),
-                                       documentContent,
-                                       DocumentState.SIGNED);
+                                       documentContent);
     }
 
     public List<Path> collectPathsOfPdfTestFiles() throws IOException {

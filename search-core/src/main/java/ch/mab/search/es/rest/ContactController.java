@@ -64,15 +64,6 @@ public class ContactController {
                                               .orElse(dummy);
 
         return new ResponseEntity<>(new Item(result), HttpStatus.OK);
-
-        /*
-
-        Optional<ContactDocument> result = service.findById("contacts", id);
-
-        if (result.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-        return new ResponseEntity<>(result.get(), HttpStatus.OK);*/
     }
 
     @PutMapping
@@ -85,10 +76,8 @@ public class ContactController {
     }
 
     @GetMapping
-    //public ResponseEntity<List<ContactDocument>> findAll() throws Exception {
     public ResponseEntity<Items> findAll() throws Exception {
         return new ResponseEntity<>(new Items(dummyContacts), HttpStatus.OK);
-        //        return new ResponseEntity<>(service.findAll("contacts"), HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")

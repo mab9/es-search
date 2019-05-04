@@ -1,11 +1,9 @@
 package ch.mab.search.es.business;
 
 import ch.mab.search.es.api.AbstractIndex;
-import ch.mab.search.es.model.Metadata;
 import ch.mab.search.es.model.SearchHighlights;
 import ch.mab.search.es.model.SearchQuery;
 import ch.mab.search.es.model.SecasignboxDocument;
-import org.apache.lucene.search.join.ScoreMode;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.delete.DeleteRequest;
@@ -24,7 +22,10 @@ import org.elasticsearch.common.unit.Fuzziness;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.common.xcontent.XContentType;
-import org.elasticsearch.index.query.*;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.MatchPhrasePrefixQueryBuilder;
+import org.elasticsearch.index.query.MatchQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
@@ -93,24 +94,29 @@ public class SecasignboxService extends AbstractIndex {
         SearchRequest searchRequest = new SearchRequest(index);
         SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 
-        MatchQueryBuilder docContentQuery = new MatchQueryBuilder("documentContent", query.getTerm());
+        MatchQueryBuilder matchDocContent = new MatchQueryBuilder("documentContent", query.getTerm());
+        MatchQueryBuilder matchDocName = new MatchQueryBuilder("documentContent", query.getTerm());
 
         if (query.isFuzzy()) {
-            docContentQuery.fuzziness(Fuzziness.AUTO);
-            docContentQuery.prefixLength(3);
-            docContentQuery.maxExpansions(10);
+            matchDocContent.fuzziness(Fuzziness.AUTO);
+            matchDocContent.prefixLength(3);
+            matchDocContent.maxExpansions(10);
+
+            matchDocName.fuzziness(Fuzziness.AUTO);
+            matchDocName.prefixLength(3);
+            matchDocName.maxExpansions(10);
         }
 
         MatchPhrasePrefixQueryBuilder documentName = QueryBuilders.matchPhrasePrefixQuery("documentName", query.getTerm());
 
         BoolQueryBuilder should;
         if (query.isDocumentName()) {
-            should = QueryBuilders.boolQuery().should(documentName);
+            should = QueryBuilders.boolQuery().must(matchDocName);
             HighlightBuilder highlightBuilder = createHighlighter("documentName");
             sourceBuilder.highlighter(highlightBuilder);
         } else {
             documentName.boost(4.0f);
-            should = QueryBuilders.boolQuery().should(documentName).should(docContentQuery);
+            should = QueryBuilders.boolQuery().should(documentName).should(matchDocContent);
             HighlightBuilder highlightBuilder = createHighlighter("documentName", "documentContent");
             sourceBuilder.highlighter(highlightBuilder);
         }
@@ -162,28 +168,13 @@ public class SecasignboxService extends AbstractIndex {
         return highlightBuilder;
     }
 
-    public List<SecasignboxDocument> findByQueryInDocumentContent(String index, String query) throws IOException {
+    public List<SecasignboxDocument> findByTermInDocumentContent(String index, String term) throws IOException {
         SearchRequest searchRequest = new SearchRequest(index);
         SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
-        sourceBuilder.query(QueryBuilders.matchPhrasePrefixQuery("documentContent",query));
+        sourceBuilder.query(QueryBuilders.matchPhrasePrefixQuery("documentContent",term));
         searchRequest.source(sourceBuilder);
         SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
         return getSearchResult(searchResponse);
-    }
-
-    public List<SecasignboxDocument> searchByMetadata(String index, Metadata metadata) throws IOException {
-        SearchRequest searchRequest = new SearchRequest();
-        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-
-        QueryBuilder queryBuilder =
-                QueryBuilders.boolQuery().must(QueryBuilders.matchQuery("metadata.value", metadata));
-
-        searchSourceBuilder.query(QueryBuilders.nestedQuery("metadata", queryBuilder, ScoreMode.Avg));
-        searchRequest.source(searchSourceBuilder);
-
-        SearchResponse response = client.search(searchRequest, RequestOptions.DEFAULT);
-
-        return getSearchResult(response);
     }
 
     public List<SecasignboxDocument> searchByDocumentName(String index, String documentName) throws IOException {

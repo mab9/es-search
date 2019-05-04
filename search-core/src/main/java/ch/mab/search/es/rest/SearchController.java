@@ -23,7 +23,7 @@ public class SearchController {
     private SecasignboxService service;
 
     @PostMapping
-    public ResponseEntity createSecasignboxDocument(@RequestBody SecasignboxDocument document) throws Exception {
+    public ResponseEntity creatEDocument(@RequestBody SecasignboxDocument document) throws Exception {
         return new ResponseEntity(service.indexDocument("secasignbox", document), HttpStatus.CREATED);
     }
 
@@ -38,7 +38,7 @@ public class SearchController {
     }
 
     @PutMapping
-    public ResponseEntity<SecasignboxDocument> updateSecasignboxDocument(@RequestBody SecasignboxDocument document) throws IOException {
+    public ResponseEntity<SecasignboxDocument> updateDocument(@RequestBody SecasignboxDocument document) throws IOException {
         Optional<SecasignboxDocument> result = service.updateDocument("secasignbox", document);
         if (result.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -47,14 +47,13 @@ public class SearchController {
     }
 
     @GetMapping
-//    public ResponseEntity<List<SecasignboxDocument>> findAll() throws Exception {
     public ResponseEntity<Documents> findAll() throws Exception {
         return new ResponseEntity<>(new Documents(service.findAll("secasignbox")), HttpStatus.OK);
     }
 
     @GetMapping(value = "search/{term}")
     public ResponseEntity<Documents> findDocumentsByTerm(@PathVariable String term) throws Exception {
-        return new ResponseEntity<>(new Documents(service.findByQueryInDocumentContent("secasignbox", term)), HttpStatus.OK);
+        return new ResponseEntity<>(new Documents(service.findByTermInDocumentContent("secasignbox", term)), HttpStatus.OK);
     }
 
     @GetMapping(value = "search/highlighted/{term}")
@@ -63,8 +62,7 @@ public class SearchController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<SecasignboxDocument> deleteSecasignboxDocument(@PathVariable UUID id) throws Exception {
-
+    public ResponseEntity<SecasignboxDocument> deleteDocument(@PathVariable UUID id) throws Exception {
         Optional<SecasignboxDocument> result = service.deleteDocument("secasignbox", id);
         if (result.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
