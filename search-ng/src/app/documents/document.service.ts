@@ -22,12 +22,6 @@ export class DocumentService {
     return this.http.get<Document>(`${this.API_ENDPOINT}/documents/${id}`).pipe(map((data) => data));
   }
 
-  search(term: string): Observable<Array<Document>> {
-    let url = `${this.API_ENDPOINT}/documents/search?term=${term}`;
-    //return this.http.get<DocumentResponse>(url).pipe(map((data) => data.docs));
-    return null;
-  }
-
   searchByTerm(term: string): Observable<Array<Document>> {
     let url = `${this.API_ENDPOINT}/documents/search/${term}`;
     return this.http.get<Document[]>(url).pipe(map((data) => data));

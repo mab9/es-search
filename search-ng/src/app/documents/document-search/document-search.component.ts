@@ -85,31 +85,20 @@ export class DocumentSearchComponent implements OnInit {
   dataSource = new MatTableDataSource<Document>();
 
 
-  constructor(private documentService: DocumentService, private eventBusService: EventBusService) {
-  }
+  constructor(private documentService: DocumentService, private eventBusService: EventBusService) {}
 
   ngOnInit() {
-    this.dataSource.paginator = this.paginator;
-
-    const documentSearch$ = this.terms$.pipe(
-      debounceTime(400),
-      distinctUntilChanged(),
-      switchMap(term => {
-        return this.documentService.searchByTermHighlighted(term);
-      })
-    );
-
-    this.documents = merge(documentSearch$);
-
     this.eventBusService.emit('appTitleChange', `Documents`);
+    this.dataSource.paginator = this.paginator;
+    this.documents = this.documentService.getDocuments();
+    this.documents.subscribe(data => this.dataSource.data = data);
   }
 
   search(newTerm: string) {
     this.documents.subscribe(data => this.dataSource.data = data);
-
     if (newTerm) {
       if (this.showTools) {
-        this.searchByQuery(newTerm);
+        this.documents = this.searchByQuery(newTerm);
       } else {
         this.documents = this.documentService.searchByTermHighlighted(newTerm);
       }
@@ -120,7 +109,13 @@ export class DocumentSearchComponent implements OnInit {
 
   private searchByQuery(newTerm: string) {
     if (this.showTools) {
-      let searchQuery: SearchQuery = { term: newTerm, fuzzy: this.fuzzySearch, documentName: this.documentNameSearch, fromDate: null, toDate: null};
+      let searchQuery: SearchQuery = {
+        term: newTerm,
+        fuzzy: this.fuzzySearch,
+        documentName: this.documentNameSearch,
+        fromDate: null,
+        toDate: null
+      };
 
       if (this.fromDate != null) {
         searchQuery.fromDate = this.fromDate.getDate();
@@ -130,12 +125,17 @@ export class DocumentSearchComponent implements OnInit {
         searchQuery.toDate = this.toDate.getDate();
       }
 
-      this.documents = this.documentService.searchByQueryHighlighted(searchQuery);
+      return this.documentService.searchByQueryHighlighted(searchQuery);
     }
   }
 
+
   toggleTools() {
     this.showTools = !this.showTools;
+    this.resetTools();
+  }
+
+  private resetTools() {
     this.fuzzySearch = false;
     this.documentNameSearch = false;
     this.fromDate = null;
