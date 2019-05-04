@@ -1,0 +1,8 @@
+.tools-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.tools-container > * {
+  width: 100%;
+}

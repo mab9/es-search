@@ -12,11 +12,11 @@ import {SearchQuery} from "../searchQuery";
   template: `
     <div style="text-align:center">
       
-      <mat-toolbar *ngIf="showTools" style="width: 80%; margin: auto">
-        <mat-checkbox [(ngModel)]="fuzzySearch" style="width: 10%;">fuzzy search</mat-checkbox>
-        <mat-checkbox [(ngModel)]="documentNameSearch" style="width: 20%;">only document name search</mat-checkbox>
+      <mat-toolbar class="tools-containe" *ngIf="showTools" style="width: 80%; margin: auto">
+        <mat-checkbox [(ngModel)]="fuzzySearch" style="margin-right: 15px">fuzzy</mat-checkbox>
+        <mat-checkbox [(ngModel)]="documentNameSearch" style="margin-right: 15px">only document name</mat-checkbox>
 
-        <div style="width: 10%; margin-right: 15px">
+        <div style="margin-right: 15px">
           <mat-form-field color="accent">
             <input matInput [matDatepicker]="picker" placeholder="From date" [(ngModel)]="fromDate">
             <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
@@ -24,7 +24,7 @@ import {SearchQuery} from "../searchQuery";
           </mat-form-field>
         </div>
 
-        <div style="width: 10%;">
+        <div>
           <mat-form-field color="accent">
             <input matInput [matDatepicker]="picker2" placeholder="To date" [(ngModel)]="toDate">
             <mat-datepicker-toggle matSuffix [for]="picker2"></mat-datepicker-toggle>
@@ -94,18 +94,14 @@ export class DocumentSearchComponent implements OnInit {
     const documentSearch$ = this.terms$.pipe(
       debounceTime(400),
       distinctUntilChanged(),
-      switchMap(x => this.documentService.searchByTermHighlighted(x))
+      switchMap(term => {
+        return this.documentService.searchByTermHighlighted(term);
+      })
     );
 
-    this.documents = merge(
-      documentSearch$,
-      this.documentService.getDocuments().pipe(delay(0), takeUntil(this.terms$)));
+    this.documents = merge(documentSearch$);
 
     this.eventBusService.emit('appTitleChange', `Documents`);
-  }
-
-  trackByDocuments(index: number, document: Document): number | string {
-    return document.id;
   }
 
   search(newTerm: string) {
