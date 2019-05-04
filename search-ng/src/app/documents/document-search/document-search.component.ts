@@ -113,17 +113,9 @@ export class DocumentSearchComponent implements OnInit {
         term: newTerm,
         fuzzy: this.fuzzySearch,
         documentName: this.documentNameSearch,
-        fromDate: null,
-        toDate: null
+        fromDate: this.fromDate,
+        toDate: this.toDate
       };
-
-      if (this.fromDate != null) {
-        searchQuery.fromDate = this.fromDate.getDate();
-      }
-
-      if (this.toDate != null) {
-        searchQuery.toDate = this.toDate.getDate();
-      }
 
       return this.documentService.searchByQueryHighlighted(searchQuery);
     }

@@ -1,17 +1,19 @@
 package ch.mab.search.es.model;
 
+import java.util.Date;
+
 public class SearchQuery {
 
     private String term;
     private boolean fuzzy;
     private boolean documentName;
-    private long fromDate;
-    private long toDate;
+    private Date fromDate;
+    private Date toDate;
 
     public SearchQuery() {
     }
 
-    public SearchQuery(String term, boolean fuzzy, boolean documentName, long fromDate, long toDate) {
+    public SearchQuery(String term, boolean fuzzy, boolean documentName, Date fromDate, Date toDate) {
         this.term = term;
         this.fuzzy = fuzzy;
         this.documentName = documentName;
@@ -43,19 +45,19 @@ public class SearchQuery {
         this.documentName = documentName;
     }
 
-    public long getFromDate() {
+    public Date getFromDate() {
         return fromDate;
     }
 
-    public void setFromDate(long fromDate) {
+    public void setFromDate(Date fromDate) {
         this.fromDate = fromDate;
     }
 
-    public long getToDate() {
+    public Date getToDate() {
         return toDate;
     }
 
-    public void setToDate(long toDate) {
+    public void setToDate(Date toDate) {
         this.toDate = toDate;
     }
 }
