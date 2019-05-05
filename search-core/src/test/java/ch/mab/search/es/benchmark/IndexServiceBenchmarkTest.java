@@ -4,6 +4,7 @@ import ch.mab.search.es.TestHelperService;
 import ch.mab.search.es.business.IndexService;
 import ch.mab.search.es.business.SecasignboxService;
 import ch.mab.search.es.model.SecasignboxDocument;
+import com.coremedia.iso.boxes.DataEntryUrlBox;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,7 +14,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
 import java.nio.file.Path;
+import java.time.ZonedDateTime;
+import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 @SpringBootTest
 public class IndexServiceBenchmarkTest {
@@ -48,6 +52,8 @@ public class IndexServiceBenchmarkTest {
         long totalFileSize = calculateTotalFileSize(files);
         List<SecasignboxDocument> docs = testService.getSecasignboxDocumentsOfPdfs(files);
 
+        randomizeUploadDateBetweenDates(docs, Date.from(ZonedDateTime.now().minusMonths(1).toInstant()), new Date());
+
         long start = System.currentTimeMillis();
         secasignboxService.bulkIndexDocument(INDEX, docs);
         long finish = System.currentTimeMillis();
@@ -55,6 +61,14 @@ public class IndexServiceBenchmarkTest {
 
         printSystemInfos();
         printResults(files, totalFileSize, timeElapsed);
+    }
+
+    private void randomizeUploadDateBetweenDates(List<SecasignboxDocument> docs, Date startDate, Date endDate) {
+        docs.forEach(doc -> {
+            long random = ThreadLocalRandom.current().nextLong(startDate.getTime(), endDate.getTime());
+            Date date = new Date(random);
+            doc.setUploadDate(date);
+        });
     }
 
     // TODO WRITE ALL SYSTEM INFOS AND TEST RESULTS INTO RESULT FILE
