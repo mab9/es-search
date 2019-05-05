@@ -1,7 +1,6 @@
-import {Component, OnInit, Query, ViewChild} from '@angular/core';
+import {Component, OnInit, ViewChild} from '@angular/core';
 import {EventBusService} from "../../event-bus.service";
-import {merge, Observable, Subject} from "rxjs";
-import {debounceTime, delay, distinctUntilChanged, switchMap, takeUntil} from "rxjs/operators";
+import {Observable, Subject} from "rxjs";
 import {DocumentService} from "../document.service";
 import {Document} from "../document";
 import {MatPaginator, MatTableDataSource} from "@angular/material";
