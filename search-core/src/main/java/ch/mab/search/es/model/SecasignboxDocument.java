@@ -10,14 +10,12 @@ public class SecasignboxDocument {
     private UUID archivespaceId;
     private String documentName;
     private long uploadDate;
-    private long signDate;
     private String documentContent;
 
-    public SecasignboxDocument(UUID archivespaceId, String documentName, Date uploadDate, Date signDate, String documentContent) {
+    public SecasignboxDocument(UUID archivespaceId, String documentName, Date uploadDate, String documentContent) {
         this.archivespaceId = archivespaceId;
         this.documentName = documentName;
         this.uploadDate = uploadDate.getTime();
-        this.signDate = signDate.getTime();
         this.documentContent = documentContent;
     }
 
@@ -49,14 +47,6 @@ public class SecasignboxDocument {
         this.uploadDate = uploadDate.getTime();
     }
 
-    public Date getSignDate() {
-        return new Date(signDate);
-    }
-
-    public void setSignDate(Date signDate) {
-        this.signDate = signDate.getTime();
-    }
-
     public String getDocumentContent() {
         return documentContent;
     }
@@ -76,12 +66,11 @@ public class SecasignboxDocument {
         SecasignboxDocument that = (SecasignboxDocument) o;
         return id.equals(that.id) && archivespaceId.equals(that.archivespaceId) &&
                documentName.equals(that.documentName) && Objects.equals(uploadDate, that.uploadDate) &&
-               Objects.equals(signDate, that.signDate) &&
                documentContent.equals(that.documentContent);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, archivespaceId, documentName, uploadDate, signDate, documentContent);
+        return Objects.hash(id, archivespaceId, documentName, uploadDate, documentContent);
     }
 }

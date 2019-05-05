@@ -75,7 +75,7 @@ class SecasignboxServiceTest {
     }
 
     private SecasignboxDocument createDocument(String name) {
-        return new SecasignboxDocument(UUID.randomUUID(), name, new Date(), new Date(),
+        return new SecasignboxDocument(UUID.randomUUID(), name, new Date(),
                                        "Der Glückstaler ist Onkel Dagoberts erste selbstverdiente Münze");
     }
 

@@ -32,7 +32,7 @@ public class TestHelperService {
     }
 
     private SecasignboxDocument createDocument(Path fileName, String documentContent) {
-        return new SecasignboxDocument(UUID.randomUUID(), fileName.toString(), new Date(), new Date(),
+        return new SecasignboxDocument(UUID.randomUUID(), fileName.toString(), new Date(),
                                        documentContent);
     }
 
