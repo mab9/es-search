@@ -121,7 +121,6 @@ public class ComposQueryService {
         return QueryBuilders.boolQuery().must(matchDocumentName).must(matchRange);
     }
 
-    // todo add should match term!
     private QueryBuilder composeRangeQuery(SearchQuery query) {
         assert query.getFromDate() != null || query.getToDate() != null;
         if (query.getFromDate() != null && query.getToDate() != null) {
@@ -129,25 +128,25 @@ public class ComposQueryService {
         }
 
         RangeQueryBuilder rangeUploadDate = new RangeQueryBuilder(FIELD_UPLOAD_DATE);
+        RangeQueryBuilder range;
 
         if (query.getFromDate() != null && query.getToDate() != null) {
-            return rangeUploadDate.gte(query.getFromDate()).lte(query.getToDate());
+            range = rangeUploadDate.gte(query.getFromDate()).lte(query.getToDate());
+        } else if (query.getFromDate() != null && query.getToDate() == null) {
+            range =  rangeUploadDate.gte(query.getFromDate()).lte(new Date());
+        } else {
+            range = rangeUploadDate.lte(query.getToDate());
         }
 
-        if (query.getFromDate() != null && query.getToDate() == null) {
-            return rangeUploadDate.gte(query.getFromDate()).lte(new Date());
-        }
-
-        return rangeUploadDate.lte(query.getToDate());
+        return QueryBuilders.boolQuery().must(range).should(composeMatchAllQuery(query.getTerm()));
     }
 
-    private QueryBuilder composeMatchAllQuery(String term) {
+    public QueryBuilder composeMatchAllQuery(String term) {
         MatchPhraseQueryBuilder matchPhraseDocName = new MatchPhraseQueryBuilder(FIELD_DOCUMENT_NAME, term);
-        MatchQueryBuilder matchDocContent = new MatchQueryBuilder(FIELD_DOCUMENT_CONTENT, term);
+        MatchPhraseQueryBuilder matchDocContent = new MatchPhraseQueryBuilder(FIELD_DOCUMENT_CONTENT, term);
         MatchQueryBuilder matchDocName = new MatchQueryBuilder(FIELD_DOCUMENT_NAME, term);
 
         // the add of a prefixLength could be a performance improvement but does restrict the search.
-        matchDocContent.maxExpansions(7);
         matchDocName.maxExpansions(7);
         matchDocName.boost(BOOST_DOCUMENT_NAME);
         matchPhraseDocName.boost(BOOST_DOCUMENT_NAME);
