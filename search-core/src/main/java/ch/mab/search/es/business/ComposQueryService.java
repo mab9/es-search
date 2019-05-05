@@ -67,12 +67,15 @@ public class ComposQueryService {
         assert query.isFuzzy() && query.isDocumentName();
 
         MatchQueryBuilder matchDocContent = new MatchQueryBuilder(FIELD_DOCUMENT_CONTENT, query.getTerm());
-        QueryBuilder matchDocName = composeDocumentNameQuery(query);
+        MatchQueryBuilder matchDocName1 = new MatchQueryBuilder(FIELD_DOCUMENT_NAME, query.getTerm());
+        QueryBuilder matchDocName2 = composeDocumentNameQuery(query);
 
+        matchDocName1.maxExpansions(7);
         matchDocContent.maxExpansions(7);
 
-        matchDocName.boost(BOOST_DOCUMENT_NAME);
-        return QueryBuilders.boolQuery().should(matchDocContent).must(matchDocName);
+        matchDocName1.boost(BOOST_DOCUMENT_NAME);
+        matchDocName2.boost(BOOST_DOCUMENT_NAME);
+        return QueryBuilders.boolQuery().should(matchDocContent).should(matchDocName1).should(matchDocName2);
     }
 
     // TODO check if such queries are good.
@@ -83,11 +86,9 @@ public class ComposQueryService {
             assert query.getFromDate().compareTo(query.getToDate()) <= 0;
         }
 
-        QueryBuilder matchFuzzy = composeFuzzyQuery(query);
-        QueryBuilder matchDocumentName = composeDocumentNameQuery(query);
-        matchDocumentName.boost(BOOST_DOCUMENT_NAME);
+        QueryBuilder matchFuzzyAndDocumentName = composeFuzzyDocumentNameQuery(query);
         QueryBuilder matchRange = composeRangeQuery(query);
-        return QueryBuilders.boolQuery().must(matchFuzzy).must(matchRange).should(matchDocumentName);
+        return QueryBuilders.boolQuery().must(matchRange).should(matchFuzzyAndDocumentName);
 
     }
 
@@ -148,7 +149,7 @@ public class ComposQueryService {
 
         // the add of a prefixLength could be a performance improvement but does restrict the search.
         matchDocName.maxExpansions(7);
-        matchDocName.boost(BOOST_DOCUMENT_NAME);
+        matchDocName.boost(BOOST_DOCUMENT_NAME + 4);
         matchPhraseDocName.boost(BOOST_DOCUMENT_NAME);
 
         return QueryBuilders.boolQuery().should(matchDocContent).should(matchDocName).should(matchPhraseDocName);
