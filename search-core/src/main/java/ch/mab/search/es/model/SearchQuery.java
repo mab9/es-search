@@ -4,11 +4,11 @@ import java.util.Date;
 
 public class SearchQuery {
 
-    private String term;
-    private boolean fuzzy;
-    private boolean documentName;
-    private Date fromDate;
-    private Date toDate;
+    private String term = "";
+    private boolean fuzzy = false;
+    private boolean documentName = false;
+    private Date fromDate = null;
+    private Date toDate = null;
 
     public SearchQuery() {
     }

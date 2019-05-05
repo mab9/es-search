@@ -23,7 +23,7 @@ public class SearchController {
     private SecasignboxService service;
 
     @PostMapping
-    public ResponseEntity creatEDocument(@RequestBody SecasignboxDocument document) throws Exception {
+    public ResponseEntity createDocument(@RequestBody SecasignboxDocument document) throws Exception {
         return new ResponseEntity(service.indexDocument("secasignbox", document), HttpStatus.CREATED);
     }
 
@@ -46,21 +46,6 @@ public class SearchController {
         return new ResponseEntity<>(result.get(), HttpStatus.OK);
     }
 
-    @GetMapping
-    public ResponseEntity<List<SecasignboxDocument>> findAll() throws Exception {
-        return new ResponseEntity<>(service.findAll("secasignbox"), HttpStatus.OK);
-    }
-
-    @GetMapping(value = "search/{term}")
-    public ResponseEntity<List<SecasignboxDocument>> findDocumentsByTerm(@PathVariable String term) throws Exception {
-        return new ResponseEntity<>(service.findByTermInDocumentContent("secasignbox", term), HttpStatus.OK);
-    }
-
-    @GetMapping(value = "search/highlighted/{term}")
-    public ResponseEntity<List<SearchHighlights>> findDocumentsByTermHighlighted(@PathVariable String term) throws Exception {
-        return new ResponseEntity<>(service.findByTermHighlighted("secasignbox", term), HttpStatus.OK);
-    }
-
     @DeleteMapping("/{id}")
     public ResponseEntity<SecasignboxDocument> deleteDocument(@PathVariable UUID id) throws Exception {
         Optional<SecasignboxDocument> result = service.deleteDocument("secasignbox", id);
@@ -70,6 +55,22 @@ public class SearchController {
         return new ResponseEntity<>(result.get(), HttpStatus.OK);
     }
 
+    @GetMapping
+    public ResponseEntity<List<SecasignboxDocument>> findAll() throws Exception {
+        return new ResponseEntity<>(service.findAll("secasignbox"), HttpStatus.OK);
+    }
+
+    @GetMapping(value = "search/{term}")
+    public ResponseEntity<List<SearchHighlights>> findDocumentsByTerm(@PathVariable String term) throws Exception {
+        return new ResponseEntity<>(service.findByTermHighlighted("secasignbox", term), HttpStatus.OK);
+    }
+
+    @GetMapping(value = "search/highlighted/{term}")
+    public ResponseEntity<List<SearchHighlights>> findDocumentsByTermHighlighted(@PathVariable String term) throws Exception {
+        return new ResponseEntity<>(service.findByTermHighlighted("secasignbox", term), HttpStatus.OK);
+    }
+
+    // todo check get with payload (frontend)
     @PostMapping(value = "search/highlighted/query")
     public ResponseEntity<List<SearchHighlights>> findDocumentsByQueryHighlighted(@RequestBody SearchQuery query) throws Exception {
         return new ResponseEntity<>(service.findByQueryHighlighted("secasignbox", query), HttpStatus.OK);

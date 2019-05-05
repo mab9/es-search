@@ -54,9 +54,10 @@ import {SearchQuery} from "../searchQuery";
             <th mat-header-cell *matHeaderCellDef> Name</th>
             <td mat-cell *matCellDef="let element"> 
               <h3>{{element.documentName}}</h3>
-              <p *ngIf="element.highlights" matLine [innerHTML]="element.highlights[0]"></p>
-              <p *ngIf="element.highlights" matLine [innerHTML]="element.highlights[1]"></p>
-              <p *ngIf="element.highlights" matLine [innerHTML]="element.highlights[2]"></p>
+              <p style="line-height: 0.7;" *ngIf="element.highlights" matLine [innerHTML]="element.highlights[0]"></p>
+              <p style="line-height: 0.7;" *ngIf="element.highlights" matLine [innerHTML]="element.highlights[1]"></p>
+              <p style="line-height: 0.7;" *ngIf="element.highlights" matLine [innerHTML]="element.highlights[2]"></p>
+              <p style="line-height: 0.7;" *ngIf="element.highlights" matLine [innerHTML]="element.highlights[3]"></p>
           </ng-container>
 
           <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>

@@ -22,16 +22,14 @@ import org.elasticsearch.common.unit.Fuzziness;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.common.xcontent.XContentType;
-import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.MatchPhrasePrefixQueryBuilder;
-import org.elasticsearch.index.query.MatchQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.*;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
 import org.elasticsearch.search.sort.ScoreSortBuilder;
 import org.elasticsearch.search.sort.SortOrder;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -40,6 +38,9 @@ import java.util.stream.Collectors;
 
 @Service
 public class SecasignboxService extends AbstractIndex {
+
+    @Autowired
+    private ComposQueryService composQueryService;
 
     public SecasignboxService() {
     }
@@ -50,8 +51,7 @@ public class SecasignboxService extends AbstractIndex {
         return findById(index, UUID.fromString(indexResponse.getId()));
     }
 
-    public BulkResponse bulkIndexDocument(String index, Collection<SecasignboxDocument> documents) throws
-            IOException {
+    public BulkResponse bulkIndexDocument(String index, Collection<SecasignboxDocument> documents) throws IOException {
 
         BulkRequest bulkRequest = new BulkRequest();
         documents.forEach(document -> {
@@ -68,126 +68,6 @@ public class SecasignboxService extends AbstractIndex {
         String json = gson.toJson(document);
         request.source(json, XContentType.JSON);
         return request;
-    }
-
-    public Optional<SecasignboxDocument> findById(String index, UUID id) throws IOException {
-        GetRequest getRequest = new GetRequest(index, id.toString());
-        GetResponse getResponse = client.get(getRequest, RequestOptions.DEFAULT);
-
-        if (getResponse.getSource() != null) {
-            return Optional.of(gson.fromJson(getResponse.getSourceAsString(), SecasignboxDocument.class));
-        } else {
-            return Optional.empty();
-        }
-    }
-
-    public List<SecasignboxDocument> findAll(String index) throws IOException {
-        SearchRequest searchRequest = new SearchRequest(index);
-        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-        searchSourceBuilder.query(QueryBuilders.matchAllQuery());
-        searchRequest.source(searchSourceBuilder);
-        SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
-        return getSearchResult(searchResponse);
-    }
-
-    public List<SearchHighlights> findByQueryHighlighted(String index, SearchQuery query) throws IOException {
-        SearchRequest searchRequest = new SearchRequest(index);
-        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
-
-        MatchQueryBuilder matchDocContent = new MatchQueryBuilder("documentContent", query.getTerm());
-        MatchQueryBuilder matchDocName = new MatchQueryBuilder("documentContent", query.getTerm());
-
-        if (query.isFuzzy()) {
-            matchDocContent.fuzziness(Fuzziness.AUTO);
-            matchDocContent.prefixLength(3);
-            matchDocContent.maxExpansions(10);
-
-            matchDocName.fuzziness(Fuzziness.AUTO);
-            matchDocName.prefixLength(3);
-            matchDocName.maxExpansions(10);
-        }
-
-        MatchPhrasePrefixQueryBuilder documentName = QueryBuilders.matchPhrasePrefixQuery("documentName", query.getTerm());
-
-        BoolQueryBuilder should;
-        if (query.isDocumentName()) {
-            should = QueryBuilders.boolQuery().must(matchDocName);
-            HighlightBuilder highlightBuilder = createHighlighter("documentName");
-            sourceBuilder.highlighter(highlightBuilder);
-        } else {
-            documentName.boost(4.0f);
-            should = QueryBuilders.boolQuery().should(documentName).should(matchDocContent);
-            HighlightBuilder highlightBuilder = createHighlighter("documentName", "documentContent");
-            sourceBuilder.highlighter(highlightBuilder);
-        }
-
-
-        sourceBuilder.query(should);
-        searchRequest.source(sourceBuilder);
-
-        // sort descending by score
-        sourceBuilder.sort(new ScoreSortBuilder().order(SortOrder.DESC));
-        SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
-        return getSearchResultHighlighted(searchResponse);
-    }
-
-    public List<SearchHighlights> findByTermHighlighted(String index, String term) throws IOException {
-        SearchRequest searchRequest = new SearchRequest(index);
-        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
-
-        MatchQueryBuilder docContentQuery = new MatchQueryBuilder("documentContent", term);
-        docContentQuery.fuzziness(Fuzziness.AUTO);
-        docContentQuery.prefixLength(3);
-        docContentQuery.maxExpansions(10);
-
-        MatchPhrasePrefixQueryBuilder documentName = QueryBuilders.matchPhrasePrefixQuery("documentName", term);
-        documentName.boost(4.0f);
-
-        BoolQueryBuilder should = QueryBuilders.boolQuery().should(documentName).should(docContentQuery);
-        sourceBuilder.query(should);
-        searchRequest.source(sourceBuilder);
-
-        // sort descending by score
-        sourceBuilder.sort(new ScoreSortBuilder().order(SortOrder.DESC));
-
-        HighlightBuilder highlightBuilder = createHighlighter("documentContent");
-        sourceBuilder.highlighter(highlightBuilder);
-
-        SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
-        return getSearchResultHighlighted(searchResponse);
-    }
-
-    private HighlightBuilder createHighlighter(String... fields) {
-        HighlightBuilder highlightBuilder = new HighlightBuilder();
-
-        Arrays.stream(fields).forEach(field -> {
-            HighlightBuilder.Field hgField2 = new HighlightBuilder.Field(field);
-            hgField2.highlighterType("unified");
-            highlightBuilder.field(hgField2);
-        });
-        return highlightBuilder;
-    }
-
-    public List<SecasignboxDocument> findByTermInDocumentContent(String index, String term) throws IOException {
-        SearchRequest searchRequest = new SearchRequest(index);
-        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
-        sourceBuilder.query(QueryBuilders.matchPhrasePrefixQuery("documentContent",term));
-        searchRequest.source(sourceBuilder);
-        SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
-        return getSearchResult(searchResponse);
-    }
-
-    public List<SecasignboxDocument> searchByDocumentName(String index, String documentName) throws IOException {
-        SearchRequest searchRequest = new SearchRequest(index);
-        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
-
-        MatchQueryBuilder matchQuery = new MatchQueryBuilder("documentName", documentName);
-
-        sourceBuilder.query(matchQuery);
-        searchRequest.source(sourceBuilder);
-
-        SearchResponse response = client.search(searchRequest, RequestOptions.DEFAULT);
-        return getSearchResult(response);
     }
 
     public Optional<SecasignboxDocument> deleteDocument(String index, UUID id) throws IOException {
@@ -217,6 +97,71 @@ public class SecasignboxService extends AbstractIndex {
         return findById(index, UUID.fromString(updateResponse.getId()));
     }
 
+    public Optional<SecasignboxDocument> findById(String index, UUID id) throws IOException {
+        GetRequest getRequest = new GetRequest(index, id.toString());
+        GetResponse getResponse = client.get(getRequest, RequestOptions.DEFAULT);
+
+        if (getResponse.getSource() != null) {
+            return Optional.of(gson.fromJson(getResponse.getSourceAsString(), SecasignboxDocument.class));
+        } else {
+            return Optional.empty();
+        }
+    }
+
+    public List<SecasignboxDocument> findAll(String index) throws IOException {
+        SearchRequest searchRequest = new SearchRequest(index);
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+        QueryBuilder query = composQueryService.composeQuery(new SearchQuery());
+        searchSourceBuilder.query(query);
+        searchRequest.source(searchSourceBuilder);
+        SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
+        return getSearchResult(searchResponse);
+    }
+
+    public List<SearchHighlights> findByQueryHighlighted(String index, SearchQuery searchQuery) throws IOException {
+        SearchRequest searchRequest = new SearchRequest(index);
+        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+
+        HighlightBuilder highlightBuilder = createHighlighter("documentName", "documentContent", "uploadDate");
+        sourceBuilder.highlighter(highlightBuilder);
+
+        QueryBuilder query = composQueryService.composeQuery(searchQuery);
+        sourceBuilder.query(query);
+        // sort descending by score
+        sourceBuilder.sort(new ScoreSortBuilder().order(SortOrder.DESC));
+        searchRequest.source(sourceBuilder);
+
+        SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
+        return getSearchResultHighlighted(searchResponse);
+    }
+
+    public List<SearchHighlights> findByTermHighlighted(String index, String term) throws IOException {
+        SearchRequest searchRequest = new SearchRequest(index);
+        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+
+        HighlightBuilder highlightBuilder = createHighlighter("documentContent", "documentName");
+        sourceBuilder.highlighter(highlightBuilder);
+
+        QueryBuilder query = composQueryService.composeMatchAllQuery(term);
+        sourceBuilder.query(query);
+        // sort descending by score
+        sourceBuilder.sort(new ScoreSortBuilder().order(SortOrder.DESC));
+        searchRequest.source(sourceBuilder);
+
+        SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
+        return getSearchResultHighlighted(searchResponse);
+    }
+
+    private HighlightBuilder createHighlighter(String... fields) {
+        HighlightBuilder highlightBuilder = new HighlightBuilder();
+
+        Arrays.stream(fields).forEach(field -> {
+            HighlightBuilder.Field hgField2 = new HighlightBuilder.Field(field);
+            hgField2.highlighterType("unified");
+            highlightBuilder.field(hgField2);
+        });
+        return highlightBuilder;
+    }
     private List<SearchHighlights> getSearchResultHighlighted(SearchResponse response) {
         SearchHit[] searchHit = response.getHits().getHits();
 
@@ -226,11 +171,11 @@ public class SecasignboxService extends AbstractIndex {
             Map<String, HighlightField> highlightFields = hit.getHighlightFields();
             List<String> highlights = new ArrayList<>();
             highlights.addAll(getHighlights(highlightFields, "documentContent"));
-            highlights.addAll(getHighlights(highlightFields, "documentName"));
+            highlights.addAll(0, getHighlights(highlightFields, "documentName"));
+            highlights.addAll(0, getHighlights(highlightFields, "uploadDate"));
 
             SearchHighlights dto = new SearchHighlights();
-            SecasignboxDocument document =
-                    objectMapper.convertValue(hit.getSourceAsMap(), SecasignboxDocument.class);
+            SecasignboxDocument document = objectMapper.convertValue(hit.getSourceAsMap(), SecasignboxDocument.class);
             dto.setDocumentId(document.getId());
             dto.setDocumentName(document.getDocumentName());
             dto.setHighlights(replaceHighlihtCursivByBold(highlights));
@@ -243,7 +188,6 @@ public class SecasignboxService extends AbstractIndex {
     private List<String> getHighlights(Map<String, HighlightField> highlightFields, String field) {
         HighlightField highlight = highlightFields.get(field);
         if (highlight == null) {
-            System.err.println("you missed something");
             return Collections.emptyList();
         }
         Text[] fragments = highlight.fragments();
@@ -272,19 +216,67 @@ public class SecasignboxService extends AbstractIndex {
     public XContentBuilder createMappingObject() throws IOException {
         XContentBuilder builder = XContentFactory.jsonBuilder();
         builder.startObject();
-            { builder.startObject("properties");
-            { builder.startObject("id"); { builder.field("type", "text"); } builder.endObject(); }
-            { builder.startObject("archivespaceId"); { builder.field("type", "text"); } builder.endObject(); }
-            { builder.startObject("documentName"); { builder.field("type", "text"); } builder.endObject(); }
-            { builder.startObject("uploadDate"); { builder.field("type", "date"); } builder.endObject(); }
-            { builder.startObject("signDate"); { builder.field("type", "date"); } builder.endObject(); }
-            { builder.startObject("documentContent"); { builder.field("type", "text"); } builder.endObject(); }
-            { builder.startObject("metadatas"); {
-                builder.startObject("properties");
-                    { builder.startObject("value"); { builder.field("type", "text"); } builder.endObject(); }
-                builder.endObject(); }
-                builder.endObject(); }
-            builder.endObject(); }
+        {
+            builder.startObject("properties");
+            {
+                builder.startObject("id");
+                {
+                    builder.field("type", "text");
+                }
+                builder.endObject();
+            }
+            {
+                builder.startObject("archivespaceId");
+                {
+                    builder.field("type", "text");
+                }
+                builder.endObject();
+            }
+            {
+                builder.startObject("documentName");
+                {
+                    builder.field("type", "text");
+                }
+                builder.endObject();
+            }
+            {
+                builder.startObject("uploadDate");
+                {
+                    builder.field("type", "date");
+                }
+                builder.endObject();
+            }
+            {
+                builder.startObject("signDate");
+                {
+                    builder.field("type", "date");
+                }
+                builder.endObject();
+            }
+            {
+                builder.startObject("documentContent");
+                {
+                    builder.field("type", "text");
+                }
+                builder.endObject();
+            }
+            {
+                builder.startObject("metadatas");
+                {
+                    builder.startObject("properties");
+                    {
+                        builder.startObject("value");
+                        {
+                            builder.field("type", "text");
+                        }
+                        builder.endObject();
+                    }
+                    builder.endObject();
+                }
+                builder.endObject();
+            }
+            builder.endObject();
+        }
         builder.endObject();
         return builder;
     }
