@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 @SpringBootTest
-public class IndexServiceBenchmarkTest {
+public class BenchmarkTest {
 
     //private final String INDEX = this.getClass().getName().toLowerCase();
     private final String INDEX = "secasignbox";
@@ -42,6 +42,23 @@ public class IndexServiceBenchmarkTest {
             indexService.deleteIndex(INDEX);
         }
         indexService.createIndex(INDEX, searchService.createMappingObject());
+    }
+
+    @Test
+    void index_test_set_1() throws  IOException {
+        List<Path> files = testService.collectPathsOfPdfTestFiles("/home/mab/Documents/fhnw/sem-6/ip5/ip5-testdatenset");
+        long totalFileSize = calculateTotalFileSize(files);
+        List<SecasignboxDocument> docs = testService.getSecasignboxDocumentsOfPdfs(files);
+
+        randomizeUploadDateBetweenDates(docs, Date.from(ZonedDateTime.now().minusMonths(1).toInstant()), new Date());
+
+        long start = System.currentTimeMillis();
+        searchService.bulkIndexDocument(INDEX, docs);
+        long finish = System.currentTimeMillis();
+        long timeElapsed = finish - start;
+
+        printSystemInfos();
+        printResults(files, totalFileSize, timeElapsed);
     }
 
     @Test

@@ -17,20 +17,25 @@ import java.util.Objects;
 @Component
 public class OcrTika implements Ocr {
 
+    private final PDFParser pdfparser;
+
+    public OcrTika() {
+        pdfparser = new PDFParser();
+    }
+
     @Override
     public String extractText(File pdf) throws IOException {
         Objects.requireNonNull(pdf);
 
         if(!pdf.canRead()) {
-            throw new IllegalArgumentException("Can not read from the file: " + pdf.getAbsolutePath() +  " where the text should be extracted");
+            throw new IllegalArgumentException("Not able to read from file: " + pdf.getAbsolutePath() +  " , text can not be extracted.");
         }
 
-        BodyContentHandler handler = new BodyContentHandler();
+        BodyContentHandler handler = new BodyContentHandler(-1);
         Metadata metadata = new Metadata();
         FileInputStream inputstream = new FileInputStream(pdf);
         ParseContext pcontext = new ParseContext();
 
-        PDFParser pdfparser = new PDFParser();
         try {
             pdfparser.parse(inputstream, handler, metadata,pcontext);
         } catch (SAXException e) {
@@ -48,6 +53,18 @@ public class OcrTika implements Ocr {
             System.out.println(name+ " : " + metadata.get(name));
         }
 */
-        return handler.toString();
+        return sanitizeExtractedOutput(handler.toString());
+    }
+
+
+    private String sanitizeExtractedOutput(String rawText) {
+        StringBuilder stringBuilder = new StringBuilder(10000);
+        for (String line : rawText.split("\\r?\\n")) {
+            // Only add non blank lines
+            if (line != null && !line.isBlank()) {
+                stringBuilder.append(" ").append(line);
+            }
+        }
+        return stringBuilder.toString();
     }
 }

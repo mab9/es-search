@@ -45,4 +45,14 @@ public class TestHelperService {
                     .collect(Collectors.toList());
 
     }
+
+    public List<Path> collectPathsOfPdfTestFiles(String path) throws IOException {
+        Path roote = Paths.get(path);
+        PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:*.{pdf}");
+        return Files.walk(roote)
+                    .filter(Files::isRegularFile)
+                    .filter(f -> matcher.matches(f.getFileName()))
+                    .collect(Collectors.toList());
+
+    }
 }
