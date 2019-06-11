@@ -35,7 +35,7 @@ public class ContactService extends AbstractIndex {
     }
 
     public Optional<ContactDocument> createContact(String index, ContactDocument document) throws IOException {
-        String json = gson.toJson(document);
+        String json = objectMapper.writeValueAsString(document);
         IndexRequest request = new IndexRequest(index);
         request.id(document.getId().toString());
         request.source(json, XContentType.JSON);
@@ -49,7 +49,7 @@ public class ContactService extends AbstractIndex {
         GetResponse getResponse = client.get(getRequest, RequestOptions.DEFAULT);
 
         if (getResponse.getSource() != null) {
-            return Optional.of(gson.fromJson(getResponse.getSource().toString(), ContactDocument.class));
+            return Optional.of(objectMapper.convertValue(getResponse.getSource().toString(), ContactDocument.class));
         } else {
             return Optional.empty();
         }
@@ -62,7 +62,7 @@ public class ContactService extends AbstractIndex {
             return Optional.empty();
         }
 
-        String json = gson.toJson(document);
+        String json = objectMapper.writeValueAsString(document);
         UpdateRequest request = new UpdateRequest(INDEX, current.get().getId().toString());
         request.doc(json, XContentType.JSON);
         UpdateResponse updateResponse = client.update(request, RequestOptions.DEFAULT);
