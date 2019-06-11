@@ -35,12 +35,12 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-public class SecasignboxService extends AbstractIndex {
+public class SearchService extends AbstractIndex {
 
     @Autowired
     private ComposQueryService composQueryService;
 
-    public SecasignboxService() {
+    public SearchService() {
     }
 
     public Optional<SecasignboxDocument> indexDocument(String index, SecasignboxDocument document) throws IOException {

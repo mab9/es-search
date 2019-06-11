@@ -2,9 +2,8 @@ package ch.mab.search.es.benchmark;
 
 import ch.mab.search.es.TestHelperService;
 import ch.mab.search.es.business.IndexService;
-import ch.mab.search.es.business.SecasignboxService;
+import ch.mab.search.es.business.SearchService;
 import ch.mab.search.es.model.SecasignboxDocument;
-import com.coremedia.iso.boxes.DataEntryUrlBox;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,7 +31,7 @@ public class IndexServiceBenchmarkTest {
     private IndexService indexService;
 
     @Autowired
-    private SecasignboxService secasignboxService;
+    private SearchService searchService;
 
     @Autowired
     private TestHelperService testService;
@@ -42,7 +41,7 @@ public class IndexServiceBenchmarkTest {
         if (indexService.isIndexExisting(INDEX)) {
             indexService.deleteIndex(INDEX);
         }
-        indexService.createIndex(INDEX, secasignboxService.createMappingObject());
+        indexService.createIndex(INDEX, searchService.createMappingObject());
     }
 
     @Test
@@ -55,7 +54,7 @@ public class IndexServiceBenchmarkTest {
         randomizeUploadDateBetweenDates(docs, Date.from(ZonedDateTime.now().minusMonths(1).toInstant()), new Date());
 
         long start = System.currentTimeMillis();
-        secasignboxService.bulkIndexDocument(INDEX, docs);
+        searchService.bulkIndexDocument(INDEX, docs);
         long finish = System.currentTimeMillis();
         long timeElapsed = finish - start;
 
@@ -81,7 +80,7 @@ public class IndexServiceBenchmarkTest {
         List<SecasignboxDocument> docs = testService.getSecasignboxDocumentsOfPdfs(files);
 
         long start = System.currentTimeMillis();
-        secasignboxService.bulkIndexDocument(INDEX, docs);
+        searchService.bulkIndexDocument(INDEX, docs);
         long finish = System.currentTimeMillis();
         long timeElapsed = finish - start;
 
@@ -97,7 +96,7 @@ public class IndexServiceBenchmarkTest {
         List<SecasignboxDocument> docs = testService.getSecasignboxDocumentsOfPdfs(files);
 
         long start = System.currentTimeMillis();
-        secasignboxService.bulkIndexDocument(INDEX, docs);
+        searchService.bulkIndexDocument(INDEX, docs);
         long finish = System.currentTimeMillis();
         long timeElapsed = finish - start;
 
@@ -113,7 +112,7 @@ public class IndexServiceBenchmarkTest {
         List<SecasignboxDocument> docs = testService.getSecasignboxDocumentsOfPdfs(files);
 
         long start = System.currentTimeMillis();
-        secasignboxService.bulkIndexDocument(INDEX, docs);
+        searchService.bulkIndexDocument(INDEX, docs);
         long finish = System.currentTimeMillis();
         long timeElapsed = finish - start;
 

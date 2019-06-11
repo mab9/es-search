@@ -1,8 +1,6 @@
 package ch.mab.search.es.business;
 
 import ch.mab.search.es.TestHelperService;
-import ch.mab.search.es.model.SearchHighlights;
-import ch.mab.search.es.model.SearchQuery;
 import ch.mab.search.es.model.SecasignboxDocument;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.client.RequestOptions;
@@ -21,7 +19,7 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 @SpringBootTest
-class SecasignboxServiceTest {
+class SearchServiceTest {
 
     private final String INDEX = this.getClass().getName().toLowerCase();
 
@@ -32,7 +30,7 @@ class SecasignboxServiceTest {
     private IndexService indexService;
 
     @Autowired
-    private SecasignboxService secasignboxService;
+    private SearchService searchService;
 
     @Autowired
     private TestHelperService testService;
@@ -42,7 +40,7 @@ class SecasignboxServiceTest {
         if (indexService.isIndexExisting(INDEX)) {
             indexService.deleteIndex(INDEX);
         }
-        indexService.createIndex(INDEX, secasignboxService.createMappingObject());
+        indexService.createIndex(INDEX, searchService.createMappingObject());
     }
 
     /*
@@ -63,7 +61,7 @@ class SecasignboxServiceTest {
         boolean indexExists = client.indices().exists(request, RequestOptions.DEFAULT);
         Assertions.assertFalse(indexExists);
 
-        indexService.createIndex(INDEX, secasignboxService.createMappingObject());
+        indexService.createIndex(INDEX, searchService.createMappingObject());
 
         indexExists = client.indices().exists(request, RequestOptions.DEFAULT);
         Assertions.assertTrue(indexExists);
@@ -72,7 +70,7 @@ class SecasignboxServiceTest {
     @Test
     void indexDocument_createDocument_returnCreatedDocument() throws Exception {
         SecasignboxDocument document = createDocument("Donald Duck und seine Taler");
-        Optional<SecasignboxDocument> result = secasignboxService.indexDocument(INDEX, document);
+        Optional<SecasignboxDocument> result = searchService.indexDocument(INDEX, document);
         Assertions.assertEquals(document, result.get());
     }
 
@@ -83,17 +81,17 @@ class SecasignboxServiceTest {
 
     @Test
     void findAll_indexedDocuments_expectingCreatedDocuments () throws IOException, InterruptedException {
-        List<SecasignboxDocument> all = secasignboxService.findAll(INDEX);
+        List<SecasignboxDocument> all = searchService.findAll(INDEX);
         Assertions.assertTrue(all.isEmpty());
 
         SecasignboxDocument document1 = createDocument("Donald Duck und seinen Glückstaler");
         SecasignboxDocument document2 = createDocument("Donald Duck und seine 3 Neffen");
-        secasignboxService.indexDocument(INDEX, document1);
-        secasignboxService.indexDocument(INDEX, document2);
+        searchService.indexDocument(INDEX, document1);
+        searchService.indexDocument(INDEX, document2);
 
         // elastic search is indexing async
         TimeUnit.SECONDS.sleep(2);
-        all = secasignboxService.findAll(INDEX);
+        all = searchService.findAll(INDEX);
         Assertions.assertEquals(2, all.size());
         Assertions.assertTrue(all.contains(document1));
         Assertions.assertTrue(all.contains(document2));
@@ -103,12 +101,12 @@ class SecasignboxServiceTest {
     void findById_indexedDocuments_expectingCreatedDocuments () throws IOException, InterruptedException {
         SecasignboxDocument document1 = createDocument("Donald Duck und seinen Glückstaler");
         SecasignboxDocument document2 = createDocument("Donald Duck und seine 3 Neffen");
-        secasignboxService.indexDocument(INDEX, document1);
-        secasignboxService.indexDocument(INDEX, document2);
+        searchService.indexDocument(INDEX, document1);
+        searchService.indexDocument(INDEX, document2);
 
         // elastic search is indexing async
         TimeUnit.SECONDS.sleep(2);
-        Optional<SecasignboxDocument> expected = secasignboxService.findById(INDEX, document1.getId());
+        Optional<SecasignboxDocument> expected = searchService.findById(INDEX, document1.getId());
         Assertions.assertEquals(document1, expected.get());
     }
 
@@ -116,30 +114,14 @@ class SecasignboxServiceTest {
     void deleteDocument_indexedDocuments_expectingCreatedDocuments () throws IOException, InterruptedException {
         SecasignboxDocument document1 = createDocument("Donald Duck und seinen Glückstaler");
         SecasignboxDocument document2 = createDocument("Donald Duck und seine 3 Neffen");
-        secasignboxService.indexDocument(INDEX, document1);
-        secasignboxService.indexDocument(INDEX, document2);
-        secasignboxService.deleteDocument(INDEX, document1.getId());
+        searchService.indexDocument(INDEX, document1);
+        searchService.indexDocument(INDEX, document2);
+        searchService.deleteDocument(INDEX, document1.getId());
 
         // elastic search is indexing async
         TimeUnit.SECONDS.sleep(2);
-        Optional<SecasignboxDocument> expected = secasignboxService.findById(INDEX, document1.getId());
+        Optional<SecasignboxDocument> expected = searchService.findById(INDEX, document1.getId());
         Assertions.assertTrue(expected.isEmpty());
-    }
-
-    @Test
-    void updateDocument_indexedDocuments_expectingCreatedDocuments () throws IOException, InterruptedException {
-        SecasignboxDocument document1 = createDocument("Donald Duck und sein Glückstaler");
-        SecasignboxDocument document2 = createDocument("Donald Duck und seine 3 Neffen");
-        secasignboxService.indexDocument(INDEX, document1);
-        secasignboxService.indexDocument(INDEX, document2);
-
-        document1.setDocumentName("Donald Duck und seinen Glückstaler");
-        secasignboxService.updateDocument(INDEX, document1);
-
-        // elastic search is indexing async
-        TimeUnit.SECONDS.sleep(2);
-        Optional<SecasignboxDocument> expected = secasignboxService.findById(INDEX, document1.getId());
-        Assertions.assertEquals(document1, expected.get());
     }
 
     // findAll returns per default 10 documents
@@ -148,10 +130,10 @@ class SecasignboxServiceTest {
     void bulkIndexDocument_createBulkOfDocuments_returnOk() throws IOException, InterruptedException {
         List<Path> files = testService.collectPathsOfPdfTestFiles();
         List<SecasignboxDocument> docs = testService.getSecasignboxDocumentsOfPdfs(files);
-        BulkResponse bulkItemResponses = secasignboxService.bulkIndexDocument(INDEX, docs);
+        BulkResponse bulkItemResponses = searchService.bulkIndexDocument(INDEX, docs);
         TimeUnit.SECONDS.sleep(4);
 
-        List<SecasignboxDocument> all = secasignboxService.findAll(INDEX);
+        List<SecasignboxDocument> all = searchService.findAll(INDEX);
         Assertions.assertEquals(docs.size(), all.size());
         Assertions.assertTrue(docs.containsAll(all));
     }
@@ -161,7 +143,7 @@ class SecasignboxServiceTest {
     void searchByDocumentName_indexedDocuments_returnDocumentWithSameName() throws IOException, InterruptedException {
         List<Path> files = testService.collectPathsOfPdfTestFiles();
         List<SecasignboxDocument> docs = testService.getSecasignboxDocumentsOfPdfs(files);
-        secasignboxService.bulkIndexDocument(INDEX, docs);
+        searchService.bulkIndexDocument(INDEX, docs);
         TimeUnit.SECONDS.sleep(2);
 
         List<SecasignboxDocument> search = null; // secasignboxService.searchByDocumentName(INDEX, "AS_MandelFx.pdf");

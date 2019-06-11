@@ -1,6 +1,6 @@
 package ch.mab.search.es.rest;
 
-import ch.mab.search.es.business.SecasignboxService;
+import ch.mab.search.es.business.SearchService;
 import ch.mab.search.es.model.SearchHighlights;
 import ch.mab.search.es.model.SearchQuery;
 import ch.mab.search.es.model.SecasignboxDocument;
@@ -20,7 +20,7 @@ import java.util.UUID;
 public class SearchController {
 
     @Autowired
-    private SecasignboxService service;
+    private SearchService service;
 
     @PostMapping
     public ResponseEntity createDocument(@RequestBody SecasignboxDocument document) throws Exception {
