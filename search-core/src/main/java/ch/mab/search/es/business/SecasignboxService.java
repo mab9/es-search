@@ -4,6 +4,7 @@ import ch.mab.search.es.api.AbstractIndex;
 import ch.mab.search.es.model.SearchHighlights;
 import ch.mab.search.es.model.SearchQuery;
 import ch.mab.search.es.model.SecasignboxDocument;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.delete.DeleteRequest;
@@ -14,15 +15,12 @@ import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.action.update.UpdateRequest;
-import org.elasticsearch.action.update.UpdateResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.common.text.Text;
-import org.elasticsearch.common.unit.Fuzziness;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.common.xcontent.XContentType;
-import org.elasticsearch.index.query.*;
+import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
@@ -65,7 +63,12 @@ public class SecasignboxService extends AbstractIndex {
     private IndexRequest createIndexRequest(String index, SecasignboxDocument document) {
         IndexRequest request = new IndexRequest(index);
         request.id(document.getId().toString());
-        String json = gson.toJson(document);
+        String json = null;
+        try {
+            json = objectMapper.writeValueAsString(document);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
         request.source(json, XContentType.JSON);
         return request;
     }
@@ -82,27 +85,12 @@ public class SecasignboxService extends AbstractIndex {
         return current;
     }
 
-    public Optional<SecasignboxDocument> updateDocument(String index, SecasignboxDocument document) throws IOException {
-        Optional<SecasignboxDocument> current = findById(index, document.getId());
-
-        if (current.isEmpty()) {
-            return Optional.empty();
-        }
-
-        String json = gson.toJson(document);
-        UpdateRequest request = new UpdateRequest(index, current.get().getId().toString());
-        request.doc(json, XContentType.JSON);
-        UpdateResponse updateResponse = client.update(request, RequestOptions.DEFAULT);
-
-        return findById(index, UUID.fromString(updateResponse.getId()));
-    }
-
     public Optional<SecasignboxDocument> findById(String index, UUID id) throws IOException {
         GetRequest getRequest = new GetRequest(index, id.toString());
         GetResponse getResponse = client.get(getRequest, RequestOptions.DEFAULT);
 
         if (getResponse.getSource() != null) {
-            return Optional.of(gson.fromJson(getResponse.getSourceAsString(), SecasignboxDocument.class));
+            return Optional.of(objectMapper.convertValue(getResponse.getSourceAsString(), SecasignboxDocument.class));
         } else {
             return Optional.empty();
         }

@@ -12,8 +12,6 @@ import java.io.IOException;
 @Component
 public abstract class AbstractIndex {
 
-    protected final Gson gson = new Gson();
-
     @Autowired
     public ObjectMapper objectMapper;
 
