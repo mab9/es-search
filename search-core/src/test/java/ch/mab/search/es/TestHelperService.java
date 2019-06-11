@@ -32,27 +32,26 @@ public class TestHelperService {
     }
 
     private SecasignboxDocument createDocument(Path fileName, String documentContent) {
-        return new SecasignboxDocument(UUID.randomUUID(), fileName.toString(), new Date(),
+        return new SecasignboxDocument(fileName.toString(), new Date(),
                                        documentContent);
     }
 
     public List<Path> collectPathsOfPdfTestFiles() throws IOException {
         Path roote = Paths.get(PATH_TO_PDF_RESOURCES);
-        PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:*.{pdf}");
-        return Files.walk(roote)
-                    .filter(Files::isRegularFile)
-                    .filter(f -> matcher.matches(f.getFileName()))
-                    .collect(Collectors.toList());
-
+        return getPaths(roote);
     }
+
 
     public List<Path> collectPathsOfPdfTestFiles(String path) throws IOException {
         Path roote = Paths.get(path);
+        return getPaths(roote);
+    }
+
+    private List<Path> getPaths(Path roote) throws IOException {
         PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:*.{pdf}");
         return Files.walk(roote)
                     .filter(Files::isRegularFile)
                     .filter(f -> matcher.matches(f.getFileName()))
                     .collect(Collectors.toList());
-
     }
 }

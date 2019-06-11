@@ -203,67 +203,27 @@ public class SearchService extends AbstractIndex {
     @Override
     public XContentBuilder createMappingObject() throws IOException {
         XContentBuilder builder = XContentFactory.jsonBuilder();
-        builder.startObject();
-        {
-            builder.startObject("properties");
-            {
-                builder.startObject("id");
-                {
+        builder.startObject();{
+            builder.startObject("properties");{
+                builder.startObject("documentId");{
                     builder.field("type", "text");
-                }
-                builder.endObject();
+                }builder.endObject();
             }
             {
-                builder.startObject("archivespaceId");
-                {
+                builder.startObject("documentName");{
                     builder.field("type", "text");
-                }
-                builder.endObject();
+                }builder.endObject();
             }
             {
-                builder.startObject("documentName");
-                {
-                    builder.field("type", "text");
-                }
-                builder.endObject();
-            }
-            {
-                builder.startObject("uploadDate");
-                {
+                builder.startObject("uploadDate");{
                     builder.field("type", "date");
-                }
-                builder.endObject();
+                }builder.endObject();
             }
             {
-                builder.startObject("signDate");
-                {
-                    builder.field("type", "date");
-                }
-                builder.endObject();
-            }
-            {
-                builder.startObject("documentContent");
-                {
+                builder.startObject("documentContent");{
                     builder.field("type", "text");
-                }
-                builder.endObject();
-            }
-            {
-                builder.startObject("metadatas");
-                {
-                    builder.startObject("properties");
-                    {
-                        builder.startObject("value");
-                        {
-                            builder.field("type", "text");
-                        }
-                        builder.endObject();
-                    }
-                    builder.endObject();
-                }
-                builder.endObject();
-            }
-            builder.endObject();
+                }builder.endObject();
+            }builder.endObject();
         }
         builder.endObject();
         return builder;
