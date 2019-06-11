@@ -37,15 +37,6 @@ public class SearchController {
         return new ResponseEntity<>(result.get(), HttpStatus.OK);
     }
 
-    @PutMapping
-    public ResponseEntity<SecasignboxDocument> updateDocument(@RequestBody SecasignboxDocument document) throws IOException {
-        Optional<SecasignboxDocument> result = service.updateDocument("secasignbox", document);
-        if (result.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-        return new ResponseEntity<>(result.get(), HttpStatus.OK);
-    }
-
     @DeleteMapping("/{id}")
     public ResponseEntity<SecasignboxDocument> deleteDocument(@PathVariable UUID id) throws Exception {
         Optional<SecasignboxDocument> result = service.deleteDocument("secasignbox", id);
