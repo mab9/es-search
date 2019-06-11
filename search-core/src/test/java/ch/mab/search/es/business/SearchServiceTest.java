@@ -75,7 +75,7 @@ class SearchServiceTest {
     }
 
     private SecasignboxDocument createDocument(String name) {
-        return new SecasignboxDocument(UUID.randomUUID(), name, new Date(),
+        return new SecasignboxDocument(name, new Date(),
                                        "Der Glückstaler ist Onkel Dagoberts erste selbstverdiente Münze");
     }
 
@@ -106,7 +106,7 @@ class SearchServiceTest {
 
         // elastic search is indexing async
         TimeUnit.SECONDS.sleep(2);
-        Optional<SecasignboxDocument> expected = searchService.findById(INDEX, document1.getId());
+        Optional<SecasignboxDocument> expected = searchService.findById(INDEX, document1.getDocumentId());
         Assertions.assertEquals(document1, expected.get());
     }
 
@@ -116,11 +116,11 @@ class SearchServiceTest {
         SecasignboxDocument document2 = createDocument("Donald Duck und seine 3 Neffen");
         searchService.indexDocument(INDEX, document1);
         searchService.indexDocument(INDEX, document2);
-        searchService.deleteDocument(INDEX, document1.getId());
+        searchService.deleteDocument(INDEX, document1.getDocumentId());
 
         // elastic search is indexing async
         TimeUnit.SECONDS.sleep(2);
-        Optional<SecasignboxDocument> expected = searchService.findById(INDEX, document1.getId());
+        Optional<SecasignboxDocument> expected = searchService.findById(INDEX, document1.getDocumentId());
         Assertions.assertTrue(expected.isEmpty());
     }
 

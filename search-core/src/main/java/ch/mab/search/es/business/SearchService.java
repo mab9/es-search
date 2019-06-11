@@ -62,7 +62,7 @@ public class SearchService extends AbstractIndex {
 
     private IndexRequest createIndexRequest(String index, SecasignboxDocument document) {
         IndexRequest request = new IndexRequest(index);
-        request.id(document.getId().toString());
+        request.id(document.getDocumentId().toString());
         String json = null;
         try {
             json = objectMapper.writeValueAsString(document);
@@ -80,7 +80,7 @@ public class SearchService extends AbstractIndex {
             return current;
         }
 
-        DeleteRequest deleteRequest = new DeleteRequest(index, current.get().getId().toString());
+        DeleteRequest deleteRequest = new DeleteRequest(index, current.get().getDocumentId().toString());
         DeleteResponse response = client.delete(deleteRequest, RequestOptions.DEFAULT);
         return current;
     }
@@ -164,7 +164,7 @@ public class SearchService extends AbstractIndex {
 
             SearchHighlights dto = new SearchHighlights();
             SecasignboxDocument document = objectMapper.convertValue(hit.getSourceAsMap(), SecasignboxDocument.class);
-            dto.setDocumentId(document.getId());
+            dto.setDocumentId(document.getDocumentId());
             dto.setDocumentName(document.getDocumentName());
             dto.setHighlights(replaceHighlihtCursivByBold(highlights));
             dtos.add(dto);

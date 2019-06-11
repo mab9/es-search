@@ -6,29 +6,19 @@ import java.util.UUID;
 
 public class SecasignboxDocument {
 
-    private final UUID id = UUID.randomUUID();
-    private UUID archivespaceId;
+    private final UUID documentId = UUID.randomUUID();
     private String documentName;
     private long uploadDate;
     private String documentContent;
 
-    public SecasignboxDocument(UUID archivespaceId, String documentName, Date uploadDate, String documentContent) {
-        this.archivespaceId = archivespaceId;
+    public SecasignboxDocument(String documentName, Date uploadDate, String documentContent) {
         this.documentName = documentName;
         this.uploadDate = uploadDate.getTime();
         this.documentContent = documentContent;
     }
 
-    public UUID getId() {
-        return id;
-    }
-
-    public UUID getArchivespaceId() {
-        return archivespaceId;
-    }
-
-    public void setArchivespaceId(UUID archivespaceId) {
-        this.archivespaceId = archivespaceId;
+    public UUID getDocumentId() {
+        return documentId;
     }
 
     public String getDocumentName() {
@@ -64,13 +54,13 @@ public class SecasignboxDocument {
             return false;
         }
         SecasignboxDocument that = (SecasignboxDocument) o;
-        return id.equals(that.id) && archivespaceId.equals(that.archivespaceId) &&
+        return documentId.equals(that.documentId) &&
                documentName.equals(that.documentName) && Objects.equals(uploadDate, that.uploadDate) &&
                documentContent.equals(that.documentContent);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, archivespaceId, documentName, uploadDate, documentContent);
+        return Objects.hash(documentId, documentName, uploadDate, documentContent);
     }
 }
