@@ -49,6 +49,13 @@ public class IndexService {
         return client.indices().create(request, RequestOptions.DEFAULT);
     }
 
+    public CreateIndexResponse createIndex(String index, XContentBuilder builder, Settings settings) throws IOException {
+        CreateIndexRequest request = new CreateIndexRequest(index);
+        request.settings(settings);
+        request.mapping(builder);
+        return client.indices().create(request, RequestOptions.DEFAULT);
+    }
+
     private void appendSettings(CreateIndexRequest request) {
         request.settings(Settings.builder()
                                  .put("index.number_of_shards", 3)

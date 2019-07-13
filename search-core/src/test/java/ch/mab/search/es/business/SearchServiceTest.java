@@ -7,7 +7,10 @@ import org.elasticsearch.action.admin.indices.analyze.AnalyzeResponse;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.client.indices.CreateIndexRequest;
 import org.elasticsearch.client.indices.GetIndexRequest;
+import org.elasticsearch.client.indices.GetIndexResponse;
+import org.elasticsearch.common.settings.Settings;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -16,9 +19,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 @SpringBootTest
@@ -57,7 +58,22 @@ class SearchServiceTest {
     }
 
     @Test
-    void testAnalyzer() throws IOException {
+    void analyze_addAnalyzerToSettings_shouldCreateIndex() throws IOException {
+        Settings settings = Settings.builder()
+                                       .put("analysis.analyzer",
+                                            " \"std_english\": {\n" +
+                                            "\"type\":      \"standard\",\n" +
+                                            "\"stopwords\": \"_english_\"\n}")
+                                       .put("index.number_of_shards", 3)
+                                       .put("index.number_of_replicas", 2).build();
+        if (indexService.isIndexExisting(INDEX)) indexService.deleteIndex(INDEX);
+        indexService.createIndex(INDEX, searchService.createMappingObject(), settings);
+        GetIndexResponse index = indexService.getIndex(INDEX);
+        Assertions.assertTrue(index.getSetting(this.getClass().getName().toLowerCase(), "index.analysis.analyzer").contains("english"));
+    }
+
+    @Test
+    void analyze_language_returnTokensAnalzyedByStandardTokenizer() throws IOException {
         testService.initIndexIfNotExisting(INDEX, searchService.createMappingObject());
         AnalyzeRequest request = new AnalyzeRequest();
         request.text("Some text to analyze", "Some more text to analyze");
@@ -75,6 +91,48 @@ class SearchServiceTest {
         response = client.indices().analyze(request, RequestOptions.DEFAULT);
         tokens = response.getTokens();
         System.out.println("German: Etwas Text zum analysieren\", \"Etwas mehr Text zum analysieren");
+        tokens.forEach(token -> System.out.println(token.getTerm()));
+    }
+
+    @Disabled(
+            "Open bug from Elastic Search, patch follows in 7.3.0: https://github.com/elastic/elasticsearch/issues/39670")
+    @Test
+    void analyze_charGroupAnalyze_returnTokensSplittedByChar() throws IOException {
+        testService.initIndexIfNotExisting(INDEX, searchService.createMappingObject());
+        /*AnalyzeRequest request = new AnalyzeRequest();
+
+        Map<String, Object> charGroup = new HashMap<>();
+        charGroup.put("type", "simple_pattern_split");
+        charGroup.put("pattern", "_");
+        request.tokenizer(charGroup);
+
+
+                charGroup.put("type", "char_group");
+        charGroup.put("tokenize_on_chars", "_");
+         */
+
+        /*
+         "type": "simple_pattern_split",
+          "pattern": "_"
+
+
+        request.text("20191206_mobi_guthaben_wohnung", "Etwas text um mehr bessere Resultate zu erzielen.");
+        request.analyzer("german");
+*/
+
+        AnalyzeRequest request = new AnalyzeRequest();
+        request.text("<b>Some text to analyze</b>");
+        request.addCharFilter("html_strip");
+        request.tokenizer("standard");
+        request.addTokenFilter("lowercase");
+
+        Map<String, Object> stopFilter = new HashMap<>();
+        stopFilter.put("type", "stop");
+        stopFilter.put("stopwords", new String[] { "to" });
+        request.addTokenFilter(stopFilter);
+
+        AnalyzeResponse response = client.indices().analyze(request, RequestOptions.DEFAULT);
+        List<AnalyzeResponse.AnalyzeToken> tokens = response.getTokens();
         tokens.forEach(token -> System.out.println(token.getTerm()));
     }
 

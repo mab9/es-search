@@ -5,6 +5,8 @@ import ch.mab.search.es.model.SearchHighlights;
 import ch.mab.search.es.model.SearchQuery;
 import ch.mab.search.es.model.SecasignboxDocument;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import org.elasticsearch.action.admin.indices.analyze.AnalyzeRequest;
+import org.elasticsearch.action.admin.indices.analyze.AnalyzeResponse;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.delete.DeleteRequest;
@@ -202,8 +204,14 @@ public class SearchService extends AbstractIndex {
 
     @Override
     public XContentBuilder createMappingObject() throws IOException {
+        return createDefaultMappingObject();
+        //return createShingleMappingObject();
+    }
+
+    private XContentBuilder createDefaultMappingObject() throws IOException {
         XContentBuilder builder = XContentFactory.jsonBuilder();
-        builder.startObject();{
+        builder.startObject();
+        {
             builder.startObject("properties");{
                 builder.startObject("documentId");{
                     builder.field("type", "text");
@@ -223,6 +231,36 @@ public class SearchService extends AbstractIndex {
                 builder.startObject("documentContent");{
                     builder.field("type", "text");
                 }builder.endObject();
+            }builder.endObject();
+        }
+        builder.endObject();
+        return builder;
+    }
+
+    public XContentBuilder createShingleMappingObject() throws IOException {
+        XContentBuilder builder = XContentFactory.jsonBuilder();
+        builder.startObject();{
+            builder.startObject("properties");{
+                builder.startObject("documentId");{
+                    builder.field("type", "text");
+                }builder.endObject();
+            }
+            {
+                builder.startObject("documentName");{
+                builder.field("search_analyzer", "analyzer_shingle");
+                builder.field("index_analyzer", "analyzer_shingle");
+                builder.field("type", "text");
+            }builder.endObject();
+            }
+            {
+                builder.startObject("uploadDate");{
+                builder.field("type", "date");
+            }builder.endObject();
+            }
+            {
+                builder.startObject("documentContent");{
+                builder.field("type", "text");
+            }builder.endObject();
             }builder.endObject();
         }
         builder.endObject();
