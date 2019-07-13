@@ -204,10 +204,9 @@ public class SearchService extends AbstractIndex {
     @Override
     public XContentBuilder createMappingObject() throws IOException {
         return createDefaultMappingObject();
-        //return createShingleMappingObject();
     }
 
-    private XContentBuilder createDefaultMappingObject() throws IOException {
+    public XContentBuilder createDefaultMappingObject() throws IOException {
         XContentBuilder builder = XContentFactory.jsonBuilder();
         builder.startObject();
         {
@@ -230,6 +229,37 @@ public class SearchService extends AbstractIndex {
                 builder.startObject("documentContent");{
                     builder.field("type", "text");
                 }builder.endObject();
+            }builder.endObject();
+        }
+        builder.endObject();
+        return builder;
+    }
+
+    private XContentBuilder createMappingObjectWithAnalyzers() throws IOException {
+        XContentBuilder builder = XContentFactory.jsonBuilder();
+        builder.startObject();
+        {
+            builder.startObject("properties");{
+            builder.startObject("documentId");{
+                builder.field("type", "text");
+            }builder.endObject();
+        }
+            {
+                builder.startObject("documentName");{
+                builder.field("type", "text");
+                builder.field("analyzer", "underscore_analyzer");
+            }builder.endObject();
+            }
+            {
+                builder.startObject("uploadDate");{
+                builder.field("type", "date");
+            }builder.endObject();
+            }
+            {
+                builder.startObject("documentContent");{
+                builder.field("type", "text");
+                builder.field("analyzer", "english");
+            }builder.endObject();
             }builder.endObject();
         }
         builder.endObject();

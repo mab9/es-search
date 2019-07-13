@@ -50,7 +50,20 @@ public class IndexService {
 
     public CreateIndexResponse createIndex(String index, XContentBuilder builder) throws IOException {
         CreateIndexRequest request = new CreateIndexRequest(index);
-        appendSettings(request);
+        request.mapping(builder);
+        return client.indices().create(request, RequestOptions.DEFAULT);
+    }
+
+    public CreateIndexResponse createIndex(String index, XContentBuilder mapping, XContentBuilder settings) throws IOException {
+        CreateIndexRequest request = new CreateIndexRequest(index);
+        request.settings(settings);
+        request.mapping(mapping);
+        return client.indices().create(request, RequestOptions.DEFAULT);
+    }
+
+    public CreateIndexResponse createIndex(String index, XContentBuilder builder, Settings settings) throws IOException {
+        CreateIndexRequest request = new CreateIndexRequest(index);
+        request.settings(settings);
         request.mapping(builder);
         return client.indices().create(request, RequestOptions.DEFAULT);
     }

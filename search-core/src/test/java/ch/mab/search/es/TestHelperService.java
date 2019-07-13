@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.nio.file.*;
 import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.fail;
@@ -27,18 +26,20 @@ public class TestHelperService {
 
     private final String PATH_TO_PDF_RESOURCES = "src/test/resources/pdf";
 
+
+
     public List<SecasignboxDocument> getSecasignboxDocumentsOfPdfs(List<Path> pdfs) {
         return pdfs.stream().map(pdf -> {
             try {
                 String text = ocrService.extractTextFromFile(pdf.toFile());
-                return createDocument(pdf.getFileName(), text);
+                return createSecasignDocument(pdf.getFileName(), text);
             } catch (IOException e) {
                 return null;
             }
         }).collect(Collectors.toList());
     }
 
-    private SecasignboxDocument createDocument(Path fileName, String documentContent) {
+    public SecasignboxDocument createSecasignDocument(Path fileName, String documentContent) {
         return new SecasignboxDocument(fileName.toString(), new Date(),
                                        documentContent);
     }

@@ -2,6 +2,7 @@ package ch.mab.search.es.business;
 
 import ch.mab.search.es.TestHelperService;
 import ch.mab.search.es.model.ContactDocument;
+import ch.mab.search.es.model.SearchHighlights;
 import ch.mab.search.es.model.Technology;
 import org.elasticsearch.action.admin.indices.analyze.AnalyzeRequest;
 import org.elasticsearch.action.admin.indices.analyze.AnalyzeResponse;
@@ -11,11 +12,14 @@ import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.indices.GetIndexRequest;
 import org.elasticsearch.client.indices.GetIndexResponse;
 import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.elasticsearch.common.xcontent.XContentFactory;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -37,6 +41,9 @@ class IndexServiceTest {
     @Autowired
     private ContactService contactService;
 
+    @Autowired
+    private SearchService searchService;
+
     @BeforeEach
     void setUp() throws IOException {
         if (indexService.isIndexExisting(INDEX)) {
@@ -44,7 +51,6 @@ class IndexServiceTest {
         }
         indexService.createIndex(INDEX);
     }
-
 
     @AfterEach
     void tearDown() throws IOException {
@@ -57,12 +63,14 @@ class IndexServiceTest {
     void createIndex_addAnalyzerToSettings_shouldCreateIndex() throws IOException {
         Settings settings = Settings.builder()
                                     .put("analysis.analyzer",
-                                         " \"std_english\": {\n" +
-                                         "\"type\":      \"standard\",\n" +
+                                         " \"std_english\": {\n" + "\"type\":      \"standard\",\n" +
                                          "\"stopwords\": \"_english_\"\n}")
                                     .put("index.number_of_shards", 3)
-                                    .put("index.number_of_replicas", 2).build();
-        if (indexService.isIndexExisting(INDEX)) indexService.deleteIndex(INDEX);
+                                    .put("index.number_of_replicas", 2)
+                                    .build();
+        if (indexService.isIndexExisting(INDEX)) {
+            indexService.deleteIndex(INDEX);
+        }
         indexService.createIndex(INDEX, settings);
         GetIndexResponse index = indexService.getIndex(INDEX);
         Assertions.assertTrue(index.getSetting(INDEX, "index.analysis.analyzer").contains("english"));
@@ -70,18 +78,55 @@ class IndexServiceTest {
 
     @Test
     void createIndex_addTokenizeOnCharsTokenizer_shouldCreateIndex() throws IOException {
+        XContentBuilder settings = XContentFactory.jsonBuilder()
+        .startObject()
+                .startObject("analysis")
+                    .startObject("analyzer")
+                        .startObject("underscore_analyzer")
+                            .field("tokenizer", "underscore_tokenizer")
+                            .field("type", "custom")
+                        .endObject()
+                    .endObject()
+                    .startObject("tokenizer")
+                        .startObject("underscore_tokenizer")
+                            .field("type", "char_group")
+                            .field("tokenize_on_chars", "_")
+                        .endObject()
+                    .endObject()
+                .endObject()
+            .endObject();
+
+        if (indexService.isIndexExisting(INDEX)) {
+            indexService.deleteIndex(INDEX);
+        }
+        indexService.createIndex(INDEX, searchService.createMappingObject(), settings);
+        GetIndexResponse index = indexService.getIndex(INDEX);
+        Assertions.assertTrue(index.getSettings().get(INDEX).hasValue("index.analysis.analyzer.underscore_analyzer.tokenizer"));
+
+        searchService.indexDocument(INDEX, testService.createSecasignDocument(Path.of("2018_dagobert_duck"), "I am passionate about Elasticsearch"));
+
+        List<SearchHighlights> dagobert = searchService.findByTermHighlighted(INDEX, "dagobert");
+        dagobert.forEach(h -> {
+            System.out.println(h.getDocumentName() + ": ");
+            h.getHighlights().forEach(hi -> System.out.print(hi + ", "));
+        });
+    }
+
+
+    // remove
+    @Test
+    void createIndex_addTokenizeOnCharsTokenizerAndMapping_shouldCreateIndex() throws IOException {
         Settings settings = Settings.builder()
-                                    .put("analysis.analyzer",
-                                         "\"underscore_analyzer\":" +
-                                         "{\"tokenizer\":\"underscore_tokenizer\"}")
+                                    .put("analysis.analyzer", "\"type\": \"custom\"," + "\"underscore_analyzer\":" +
+                                                              "{\"tokenizer\":\"underscore_tokenizer\"}")
                                     .put("analysis.tokenizer",
-                                         "\"underscore_tokenizer\":" +
-                                         "{\"type\":\"char_group\"," +
+                                         "\"underscore_tokenizer\":" + "{\"type\":\"char_group\"," +
                                          "{\"tokenize_on_chars\": [\"_\"]}")
-                                    .put("index.number_of_shards", 3)
-                                    .put("index.number_of_replicas", 2).build();
-        if (indexService.isIndexExisting(INDEX)) indexService.deleteIndex(INDEX);
-        indexService.createIndex(INDEX, settings);
+                                    .build();
+        if (indexService.isIndexExisting(INDEX)) {
+            indexService.deleteIndex(INDEX);
+        }
+        indexService.createIndex(INDEX, searchService.createMappingObject(), settings);
         GetIndexResponse index = indexService.getIndex(INDEX);
         Assertions.assertTrue(index.getSetting(INDEX, "index.analysis.analyzer").contains("underscore_tokenizer"));
     }
@@ -179,7 +224,8 @@ class IndexServiceTest {
     @Test
     void updateMapping_updateIndex_returnOkResponse() throws IOException {
         Assertions.assertTrue(indexService.isIndexExisting(INDEX));
-        AcknowledgedResponse acknowledgedResponse = indexService.updateMapping(INDEX, contactService.createMappingObject());
+        AcknowledgedResponse acknowledgedResponse =
+                indexService.updateMapping(INDEX, contactService.createMappingObject());
         Assertions.assertTrue(acknowledgedResponse.isAcknowledged());
     }
 
@@ -201,12 +247,10 @@ class IndexServiceTest {
         Assertions.assertEquals(3, indexService.getTotalHits(INDEX));
     }
 
-
     private ContactDocument createContact() {
-        return new ContactDocument("mabambam-" + UUID.randomUUID().toString(), "sut", Collections.singletonList(new Technology("angular", "2019")),
-                                   "mab@mab.ch", "079");
+        return new ContactDocument("mabambam-" + UUID.randomUUID().toString(), "sut",
+                                   Collections.singletonList(new Technology("angular", "2019")), "mab@mab.ch", "079");
     }
-
 
     @Disabled
     @Test
@@ -220,8 +264,13 @@ class IndexServiceTest {
         TimeUnit.SECONDS.sleep(2);
         index = indexService.getIndex(INDEX);
 
-        Collection<String> values = index.getMappings().get(INDEX).getSourceAsMap().values().stream().map(Object::toString).collect(
-                Collectors.toList());
+        Collection<String> values = index.getMappings()
+                                         .get(INDEX)
+                                         .getSourceAsMap()
+                                         .values()
+                                         .stream()
+                                         .map(Object::toString)
+                                         .collect(Collectors.toList());
         Collection<String> expectedValues = Arrays.asList("technologies", "firstName", "lastName");
         Assertions.assertTrue(values.containsAll(expectedValues));
     }
