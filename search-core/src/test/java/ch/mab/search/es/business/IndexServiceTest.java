@@ -193,8 +193,6 @@ class IndexServiceTest {
         Assertions.assertTrue(expectedTerms.containsAll(Stream.of("2018", "dagobert", "duck", "tal","mann", "bad", "geht,", "ging", "heut", "gehend", "haus", "gehend", "oma.").collect(Collectors.toList())));
     }
 
-
-
     @Test
     void analyze_language_returnTokensAnalzyedByStandardTokenizer() throws IOException {
         testService.initIndexIfNotExisting(INDEX);
@@ -216,7 +214,6 @@ class IndexServiceTest {
         System.out.println("German: Etwas Text zum analysieren\", \"Etwas mehr Text zum analysieren");
         tokens.forEach(token -> System.out.println(token.getTerm()));
     }
-
 
     @Test
     void createIndex_createNewIndexWithoutMapping_returnOkResponse() throws Exception {
