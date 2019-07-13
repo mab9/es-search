@@ -69,6 +69,24 @@ class IndexServiceTest {
     }
 
     @Test
+    void createIndex_addTokenizeOnCharsTokenizer_shouldCreateIndex() throws IOException {
+        Settings settings = Settings.builder()
+                                    .put("analysis.analyzer",
+                                         "\"underscore_analyzer\":" +
+                                         "{\"tokenizer\":\"underscore_tokenizer\"}")
+                                    .put("analysis.tokenizer",
+                                         "\"underscore_tokenizer\":" +
+                                         "{\"type\":\"char_group\"," +
+                                         "{\"tokenize_on_chars\": [\"_\"]}")
+                                    .put("index.number_of_shards", 3)
+                                    .put("index.number_of_replicas", 2).build();
+        if (indexService.isIndexExisting(INDEX)) indexService.deleteIndex(INDEX);
+        indexService.createIndex(INDEX, settings);
+        GetIndexResponse index = indexService.getIndex(INDEX);
+        Assertions.assertTrue(index.getSetting(INDEX, "index.analysis.analyzer").contains("underscore_tokenizer"));
+    }
+
+    @Test
     void analyze_language_returnTokensAnalzyedByStandardTokenizer() throws IOException {
         testService.initIndexIfNotExisting(INDEX);
         AnalyzeRequest request = new AnalyzeRequest();
