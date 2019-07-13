@@ -146,4 +146,12 @@ class SearchServiceTest {
         Assertions.assertEquals(1, search.size());
         Assertions.assertTrue(docs.contains(search.get(0)));
     }
+
+    @Test
+    void searchDoc() throws IOException {
+        indexService.deleteIndex(INDEX);
+
+
+
+    }
 }

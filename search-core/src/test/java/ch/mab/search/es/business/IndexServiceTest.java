@@ -2,7 +2,6 @@ package ch.mab.search.es.business;
 
 import ch.mab.search.es.TestHelperService;
 import ch.mab.search.es.model.ContactDocument;
-import ch.mab.search.es.model.SearchHighlights;
 import ch.mab.search.es.model.Technology;
 import org.elasticsearch.action.admin.indices.analyze.AnalyzeRequest;
 import org.elasticsearch.action.admin.indices.analyze.AnalyzeResponse;
@@ -11,7 +10,6 @@ import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.indices.GetIndexRequest;
 import org.elasticsearch.client.indices.GetIndexResponse;
-import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.junit.jupiter.api.*;
@@ -19,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -84,7 +81,7 @@ class IndexServiceTest {
             indexService.deleteIndex(INDEX);
         }
 
-        indexService.createIndex(INDEX, searchService.createMappingObjectWithAnalyzers(), settings);
+        indexService.createIndex(INDEX, searchService.createMappingObjectWithAnalyzer("underscore_analyzer"), settings);
         GetIndexResponse index = indexService.getIndex(INDEX);
         Assertions.assertTrue(index.getSettings().get(INDEX).hasValue("index.analysis.analyzer.underscore_analyzer.tokenizer"));
 
@@ -132,7 +129,7 @@ class IndexServiceTest {
             indexService.deleteIndex(INDEX);
         }
 
-        indexService.createIndex(INDEX, searchService.createMappingObjectWithAnalyzers(), settings);
+        indexService.createIndex(INDEX, searchService.createMappingObjectWithAnalyzer("underscore_analyzer"), settings);
         GetIndexResponse index = indexService.getIndex(INDEX);
         Assertions.assertTrue(index.getSettings().get(INDEX).hasValue("index.analysis.analyzer.underscore_analyzer.tokenizer"));
 
@@ -180,7 +177,7 @@ class IndexServiceTest {
             indexService.deleteIndex(INDEX);
         }
 
-        indexService.createIndex(INDEX, searchService.createMappingObjectWithAnalyzers(), settings);
+        indexService.createIndex(INDEX, searchService.createMappingObjectWithAnalyzer("underscore_analyzer"), settings);
         GetIndexResponse index = indexService.getIndex(INDEX);
         Assertions.assertTrue(index.getSettings().get(INDEX).hasValue("index.analysis.analyzer.underscore_analyzer.tokenizer"));
 
@@ -191,6 +188,48 @@ class IndexServiceTest {
 
         List<String> expectedTerms = analyze.getTokens().stream().map(AnalyzeResponse.AnalyzeToken::getTerm).collect(Collectors.toList());
         Assertions.assertTrue(expectedTerms.containsAll(Stream.of("2018", "dagobert", "duck", "tal","mann", "bad", "geht,", "ging", "heut", "gehend", "haus", "gehend", "oma.").collect(Collectors.toList())));
+    }
+
+     @Test
+    void createIndex_rebuildStandardAnalyzer_shouldTokenizeExtendStandardAnalyzer() throws IOException {
+        XContentBuilder settings = XContentFactory.jsonBuilder()
+        .startObject()
+                .startObject("analysis")
+                    .startObject("filter")
+                        .startObject("german_stop")
+                            .field("type", "stop")
+                            .field("stopwords", "_german_")
+                        .endObject()
+                        .startObject("german_stemmer")
+                            .field("type", "stemmer")
+                            .field("language", "light_german")
+                        .endObject()
+                    .endObject()
+                    .startObject("analyzer")
+                        .startObject("rebuilt_standard")
+                            .field("type", "custom")
+                            .field("tokenizer", "standard")
+                            .field("filter", "lowercase, german_stop, german_stemmer")
+                        .endObject()
+                    .endObject()
+                .endObject()
+            .endObject();
+
+        if (indexService.isIndexExisting(INDEX)) {
+            indexService.deleteIndex(INDEX);
+        }
+
+        indexService.createIndex(INDEX, searchService.createMappingObjectWithAnalyzer("rebuilt_standard"), settings);
+        GetIndexResponse index = indexService.getIndex(INDEX);
+        Assertions.assertTrue(index.getSettings().get(INDEX).hasValue("index.analysis.analyzer.rebuilt_standard.tokenizer"));
+
+        AnalyzeRequest request = new AnalyzeRequest(INDEX);
+        request.analyzer("rebuilt_standard");
+        request.text("Ein Mann schwimmt am Abend zu einem Schwimmbad. Schwimmend trifft er auf zwei Schwimmenden. Ist das möglich?");
+        AnalyzeResponse analyze = client.indices().analyze(request, RequestOptions.DEFAULT);
+
+        List<String> expectedTerms = analyze.getTokens().stream().map(AnalyzeResponse.AnalyzeToken::getTerm).collect(Collectors.toList());
+        Assertions.assertTrue(expectedTerms.containsAll(Stream.of("mann", "schwimmt", "abend", "schwimmbad", "schwimmend", "trifft", "zwei", "schwimmend", "moglich").collect(Collectors.toList())));
     }
 
     @Test
