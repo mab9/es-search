@@ -1,7 +1,9 @@
 package ch.mab.search.es;
 
+import ch.mab.search.es.business.IndexService;
 import ch.mab.search.es.model.SecasignboxDocument;
 import ch.mab.search.ocr.business.OcrService;
+import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -12,11 +14,16 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static org.junit.jupiter.api.Assertions.fail;
+
 @Component
 public class TestHelperService {
 
     @Autowired
     private OcrService ocrService;
+
+    @Autowired
+    private IndexService indexService;
 
     private final String PATH_TO_PDF_RESOURCES = "src/test/resources/pdf";
 
@@ -36,22 +43,45 @@ public class TestHelperService {
                                        documentContent);
     }
 
-    public List<Path> collectPathsOfPdfTestFiles() throws IOException {
+    public List<Path> collectPathsOfPdfTestFiles() {
         Path roote = Paths.get(PATH_TO_PDF_RESOURCES);
         return getPaths(roote);
     }
 
 
-    public List<Path> collectPathsOfPdfTestFiles(String path) throws IOException {
+    public List<Path> collectPathsOfPdfTestFiles(String path) {
         Path roote = Paths.get(path);
         return getPaths(roote);
     }
 
-    private List<Path> getPaths(Path roote) throws IOException {
+    private List<Path> getPaths(Path roote) {
         PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:*.{pdf}");
-        return Files.walk(roote)
-                    .filter(Files::isRegularFile)
-                    .filter(f -> matcher.matches(f.getFileName()))
-                    .collect(Collectors.toList());
+        try {
+            return Files.walk(roote)
+                        .filter(Files::isRegularFile)
+                        .filter(f -> matcher.matches(f.getFileName()))
+                        .collect(Collectors.toList());
+        } catch (IOException e) {
+            fail("Could not gather paths recursively from root: " + roote.toString(), e);
+            throw new RuntimeException();
+        }
+    }
+
+    public void initIndexIfNotExisting(String index, XContentBuilder mappingObject) {
+        try {
+            if (indexService.isIndexExisting(index)) {
+                indexService.deleteIndex(index);
+            }
+
+            indexService.createIndex(index,  mappingObject);
+        } catch (IOException e) {
+            fail("Could not init index: " + index, e);
+        }
+    }
+
+    public List<SecasignboxDocument> gatherSecasignBoxDocuments(int amount) {
+        List<Path> files = collectPathsOfPdfTestFiles();
+        files = files.subList(0, amount);
+        return getSecasignboxDocumentsOfPdfs(files);
     }
 }

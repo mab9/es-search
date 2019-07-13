@@ -2,11 +2,15 @@ package ch.mab.search.es.business;
 
 import ch.mab.search.es.TestHelperService;
 import ch.mab.search.es.model.SecasignboxDocument;
+import org.elasticsearch.action.admin.indices.analyze.AnalyzeRequest;
+import org.elasticsearch.action.admin.indices.analyze.AnalyzeResponse;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.indices.GetIndexRequest;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -15,7 +19,6 @@ import java.nio.file.Path;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 @SpringBootTest
@@ -35,7 +38,7 @@ class SearchServiceTest {
     @Autowired
     private TestHelperService testService;
 
-    @BeforeEach
+    //    @BeforeEach
     void setUp() throws IOException {
         if (indexService.isIndexExisting(INDEX)) {
             indexService.deleteIndex(INDEX);
@@ -46,13 +49,34 @@ class SearchServiceTest {
     /*
         TODO bessere Lösung finden zum löschen der Daten nach den Tests.
      */
-    @AfterEach
+    //@AfterEach
     void tearDown() throws IOException {
         if (indexService.isIndexExisting(INDEX)) {
             indexService.deleteIndex(INDEX);
         }
     }
 
+    @Test
+    void testAnalyzer() throws IOException {
+        testService.initIndexIfNotExisting(INDEX, searchService.createMappingObject());
+        AnalyzeRequest request = new AnalyzeRequest();
+        request.text("Some text to analyze", "Some more text to analyze");
+        request.analyzer("english");
+
+        AnalyzeResponse response = client.indices().analyze(request, RequestOptions.DEFAULT);
+        List<AnalyzeResponse.AnalyzeToken> tokens = response.getTokens();
+        System.out.println("English: Some text to analyze\", \"Some more text to analyze\"");
+        tokens.forEach(token -> System.out.println(token.getTerm()));
+
+        request = new AnalyzeRequest();
+        request.text("Etwas Text zum analysieren", "Etwas mehr Text zum analysieren");
+        request.analyzer("german");
+
+        response = client.indices().analyze(request, RequestOptions.DEFAULT);
+        tokens = response.getTokens();
+        System.out.println("German: Etwas Text zum analysieren\", \"Etwas mehr Text zum analysieren");
+        tokens.forEach(token -> System.out.println(token.getTerm()));
+    }
 
     @Test
     void createIndex_createSecasignboxDocumentwIndexWithtMapping_returnOkResponse() throws IOException {
@@ -80,7 +104,7 @@ class SearchServiceTest {
     }
 
     @Test
-    void findAll_indexedDocuments_expectingCreatedDocuments () throws IOException, InterruptedException {
+    void findAll_indexedDocuments_expectingCreatedDocuments() throws IOException, InterruptedException {
         List<SecasignboxDocument> all = searchService.findAll(INDEX);
         Assertions.assertTrue(all.isEmpty());
 
@@ -98,7 +122,7 @@ class SearchServiceTest {
     }
 
     @Test
-    void findById_indexedDocuments_expectingCreatedDocuments () throws IOException, InterruptedException {
+    void findById_indexedDocuments_expectingCreatedDocuments() throws IOException, InterruptedException {
         SecasignboxDocument document1 = createDocument("Donald Duck und seinen Glückstaler");
         SecasignboxDocument document2 = createDocument("Donald Duck und seine 3 Neffen");
         searchService.indexDocument(INDEX, document1);
@@ -111,7 +135,7 @@ class SearchServiceTest {
     }
 
     @Test
-    void deleteDocument_indexedDocuments_expectingCreatedDocuments () throws IOException, InterruptedException {
+    void deleteDocument_indexedDocuments_expectingCreatedDocuments() throws IOException, InterruptedException {
         SecasignboxDocument document1 = createDocument("Donald Duck und seinen Glückstaler");
         SecasignboxDocument document2 = createDocument("Donald Duck und seine 3 Neffen");
         searchService.indexDocument(INDEX, document1);
