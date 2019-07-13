@@ -98,6 +98,56 @@ class IndexServiceTest {
     }
 
     @Test
+    void createIndex_addCustomTokenizerAndDefaultLanguageWithFilters_shouldCreateIndex() throws IOException {
+        XContentBuilder settings = XContentFactory.jsonBuilder()
+        .startObject()
+                .startObject("analysis")
+                    .startObject("filter")
+                        .startObject("german_stop")
+                            .field("type", "stop")
+                            .field("stopwords", "_german_")
+                        .endObject()
+                        .startObject("german_stemmer")
+                            .field("type", "stemmer")
+                            .field("language", "light_german")
+                        .endObject()
+                    .endObject()
+                    .startObject("analyzer")
+                        .startObject("underscore_analyzer")
+                            .field("type", "custom")
+                            .field("tokenizer", "underscore_tokenizer")
+                            .field("filter", "lowercase, german_stop, german_stemmer")
+                        .endObject()
+                    .endObject()
+                    .startObject("tokenizer")
+                        .startObject("underscore_tokenizer")
+                            .field("type", "char_group")
+                            .field("tokenize_on_chars", "_,whitespace")
+                        .endObject()
+                    .endObject()
+                .endObject()
+            .endObject();
+
+        if (indexService.isIndexExisting(INDEX)) {
+            indexService.deleteIndex(INDEX);
+        }
+
+        indexService.createIndex(INDEX, searchService.createMappingObjectWithAnalyzers(), settings);
+        GetIndexResponse index = indexService.getIndex(INDEX);
+        Assertions.assertTrue(index.getSettings().get(INDEX).hasValue("index.analysis.analyzer.underscore_analyzer.tokenizer"));
+
+        AnalyzeRequest request = new AnalyzeRequest(INDEX);
+        request.analyzer("underscore_analyzer");
+        request.text("2018_dagobert_duck taler", "Ein Mann der Baden geht, ging heute gehend nach Hause zu seiner gehenden Oma.");
+        AnalyzeResponse analyze = client.indices().analyze(request, RequestOptions.DEFAULT);
+
+        List<String> expectedTerms = analyze.getTokens().stream().map(AnalyzeResponse.AnalyzeToken::getTerm).collect(Collectors.toList());
+        Assertions.assertTrue(expectedTerms.containsAll(Stream.of("2018", "dagobert", "duck", "tal","mann", "bad", "geht,", "ging", "heut", "gehend", "haus", "gehend", "oma.").collect(Collectors.toList())));
+    }
+
+
+
+    @Test
     void analyze_language_returnTokensAnalzyedByStandardTokenizer() throws IOException {
         testService.initIndexIfNotExisting(INDEX);
         AnalyzeRequest request = new AnalyzeRequest();
