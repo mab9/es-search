@@ -23,6 +23,7 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @SpringBootTest
 class IndexServiceTest {
@@ -99,21 +100,20 @@ class IndexServiceTest {
         if (indexService.isIndexExisting(INDEX)) {
             indexService.deleteIndex(INDEX);
         }
-        indexService.createIndex(INDEX, searchService.createMappingObject(), settings);
+
+        indexService.createIndex(INDEX, searchService.createMappingObjectWithAnalyzers(), settings);
         GetIndexResponse index = indexService.getIndex(INDEX);
         Assertions.assertTrue(index.getSettings().get(INDEX).hasValue("index.analysis.analyzer.underscore_analyzer.tokenizer"));
 
-        searchService.indexDocument(INDEX, testService.createSecasignDocument(Path.of("2018_dagobert_duck"), "I am passionate about Elasticsearch"));
+        AnalyzeRequest request = new AnalyzeRequest(INDEX);
+        request.analyzer("underscore_analyzer");
+        request.text("2018_dagobert_duck taler");
+        AnalyzeResponse analyze = client.indices().analyze(request, RequestOptions.DEFAULT);
 
-        List<SearchHighlights> dagobert = searchService.findByTermHighlighted(INDEX, "dagobert");
-        dagobert.forEach(h -> {
-            System.out.println(h.getDocumentName() + ": ");
-            h.getHighlights().forEach(hi -> System.out.print(hi + ", "));
-        });
+        List<String> expectedTerms = analyze.getTokens().stream().map(AnalyzeResponse.AnalyzeToken::getTerm).collect(Collectors.toList());
+        Assertions.assertTrue(expectedTerms.containsAll(Stream.of("2018", "dagobert", "duck taler").collect(Collectors.toList())));
     }
 
-
-    // remove
     @Test
     void createIndex_addTokenizeOnCharsTokenizerAndMapping_shouldCreateIndex() throws IOException {
         Settings settings = Settings.builder()
@@ -153,47 +153,6 @@ class IndexServiceTest {
         tokens.forEach(token -> System.out.println(token.getTerm()));
     }
 
-    @Disabled(
-            "Open bug from Elastic Search, patch follows in 7.3.0: https://github.com/elastic/elasticsearch/issues/39670")
-    @Test
-    void analyze_charGroupAnalyze_returnTokensSplittedByChar() throws IOException {
-        testService.initIndexIfNotExisting(INDEX);
-        /*AnalyzeRequest request = new AnalyzeRequest();
-
-        Map<String, Object> charGroup = new HashMap<>();
-        charGroup.put("type", "simple_pattern_split");
-        charGroup.put("pattern", "_");
-        request.tokenizer(charGroup);
-
-
-                charGroup.put("type", "char_group");
-        charGroup.put("tokenize_on_chars", "_");
-         */
-
-        /*
-         "type": "simple_pattern_split",
-          "pattern": "_"
-
-
-        request.text("20191206_mobi_guthaben_wohnung", "Etwas text um mehr bessere Resultate zu erzielen.");
-        request.analyzer("german");
-*/
-
-        AnalyzeRequest request = new AnalyzeRequest();
-        request.text("<b>Some text to analyze</b>");
-        request.addCharFilter("html_strip");
-        request.tokenizer("standard");
-        request.addTokenFilter("lowercase");
-
-        Map<String, Object> stopFilter = new HashMap<>();
-        stopFilter.put("type", "stop");
-        stopFilter.put("stopwords", new String[] { "to" });
-        request.addTokenFilter(stopFilter);
-
-        AnalyzeResponse response = client.indices().analyze(request, RequestOptions.DEFAULT);
-        List<AnalyzeResponse.AnalyzeToken> tokens = response.getTokens();
-        tokens.forEach(token -> System.out.println(token.getTerm()));
-    }
 
     @Test
     void createIndex_createNewIndexWithoutMapping_returnOkResponse() throws Exception {

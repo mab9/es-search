@@ -235,7 +235,7 @@ public class SearchService extends AbstractIndex {
         return builder;
     }
 
-    private XContentBuilder createMappingObjectWithAnalyzers() throws IOException {
+    public XContentBuilder createMappingObjectWithAnalyzers() throws IOException {
         XContentBuilder builder = XContentFactory.jsonBuilder();
         builder.startObject();
         {
