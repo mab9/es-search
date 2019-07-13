@@ -61,23 +61,6 @@ class IndexServiceTest {
     }
 
     @Test
-    void createIndex_addAnalyzerToSettings_shouldCreateIndex() throws IOException {
-        Settings settings = Settings.builder()
-                                    .put("analysis.analyzer",
-                                         " \"std_english\": {\n" + "\"type\":      \"standard\",\n" +
-                                         "\"stopwords\": \"_english_\"\n}")
-                                    .put("index.number_of_shards", 3)
-                                    .put("index.number_of_replicas", 2)
-                                    .build();
-        if (indexService.isIndexExisting(INDEX)) {
-            indexService.deleteIndex(INDEX);
-        }
-        indexService.createIndex(INDEX, settings);
-        GetIndexResponse index = indexService.getIndex(INDEX);
-        Assertions.assertTrue(index.getSetting(INDEX, "index.analysis.analyzer").contains("english"));
-    }
-
-    @Test
     void createIndex_addTokenizeOnCharsTokenizer_shouldCreateIndex() throws IOException {
         XContentBuilder settings = XContentFactory.jsonBuilder()
         .startObject()
@@ -112,23 +95,6 @@ class IndexServiceTest {
 
         List<String> expectedTerms = analyze.getTokens().stream().map(AnalyzeResponse.AnalyzeToken::getTerm).collect(Collectors.toList());
         Assertions.assertTrue(expectedTerms.containsAll(Stream.of("2018", "dagobert", "duck taler").collect(Collectors.toList())));
-    }
-
-    @Test
-    void createIndex_addTokenizeOnCharsTokenizerAndMapping_shouldCreateIndex() throws IOException {
-        Settings settings = Settings.builder()
-                                    .put("analysis.analyzer", "\"type\": \"custom\"," + "\"underscore_analyzer\":" +
-                                                              "{\"tokenizer\":\"underscore_tokenizer\"}")
-                                    .put("analysis.tokenizer",
-                                         "\"underscore_tokenizer\":" + "{\"type\":\"char_group\"," +
-                                         "{\"tokenize_on_chars\": [\"_\"]}")
-                                    .build();
-        if (indexService.isIndexExisting(INDEX)) {
-            indexService.deleteIndex(INDEX);
-        }
-        indexService.createIndex(INDEX, searchService.createMappingObject(), settings);
-        GetIndexResponse index = indexService.getIndex(INDEX);
-        Assertions.assertTrue(index.getSetting(INDEX, "index.analysis.analyzer").contains("underscore_tokenizer"));
     }
 
     @Test

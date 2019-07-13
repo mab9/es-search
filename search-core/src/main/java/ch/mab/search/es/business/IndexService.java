@@ -42,15 +42,9 @@ public class IndexService {
         return client.indices().create(request, RequestOptions.DEFAULT);
     }
 
-    public CreateIndexResponse createIndex(String index, Settings settings) throws IOException {
+    public CreateIndexResponse createIndex(String index, XContentBuilder mapping) throws IOException {
         CreateIndexRequest request = new CreateIndexRequest(index);
-        request.settings(settings);
-        return client.indices().create(request, RequestOptions.DEFAULT);
-    }
-
-    public CreateIndexResponse createIndex(String index, XContentBuilder builder) throws IOException {
-        CreateIndexRequest request = new CreateIndexRequest(index);
-        request.mapping(builder);
+        request.mapping(mapping);
         return client.indices().create(request, RequestOptions.DEFAULT);
     }
 
@@ -58,13 +52,6 @@ public class IndexService {
         CreateIndexRequest request = new CreateIndexRequest(index);
         request.settings(settings);
         request.mapping(mapping);
-        return client.indices().create(request, RequestOptions.DEFAULT);
-    }
-
-    public CreateIndexResponse createIndex(String index, XContentBuilder builder, Settings settings) throws IOException {
-        CreateIndexRequest request = new CreateIndexRequest(index);
-        request.settings(settings);
-        request.mapping(builder);
         return client.indices().create(request, RequestOptions.DEFAULT);
     }
 
