@@ -67,6 +67,20 @@ public class TestHelperService {
         }
     }
 
+    public void initIndexIfNotExisting(String index) {
+        try {
+            if (indexService.isIndexExisting(index)) {
+                indexService.deleteIndex(index);
+            }
+
+            indexService.createIndex(index);
+        } catch (IOException e) {
+            fail("Could not init index: " + index, e);
+            throw new RuntimeException();
+        }
+
+    }
+
     public void initIndexIfNotExisting(String index, XContentBuilder mappingObject) {
         try {
             if (indexService.isIndexExisting(index)) {
@@ -76,6 +90,7 @@ public class TestHelperService {
             indexService.createIndex(index,  mappingObject);
         } catch (IOException e) {
             fail("Could not init index: " + index, e);
+            throw new RuntimeException();
         }
     }
 

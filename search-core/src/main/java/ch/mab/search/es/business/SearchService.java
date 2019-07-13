@@ -5,8 +5,6 @@ import ch.mab.search.es.model.SearchHighlights;
 import ch.mab.search.es.model.SearchQuery;
 import ch.mab.search.es.model.SecasignboxDocument;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import org.elasticsearch.action.admin.indices.analyze.AnalyzeRequest;
-import org.elasticsearch.action.admin.indices.analyze.AnalyzeResponse;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.delete.DeleteRequest;
@@ -22,6 +20,7 @@ import org.elasticsearch.common.text.Text;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.common.xcontent.XContentType;
+import org.elasticsearch.index.query.MatchAllQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
@@ -92,7 +91,7 @@ public class SearchService extends AbstractIndex {
         GetResponse getResponse = client.get(getRequest, RequestOptions.DEFAULT);
 
         if (getResponse.getSource() != null) {
-            return Optional.of(objectMapper.convertValue(getResponse.getSourceAsString(), SecasignboxDocument.class));
+            return Optional.of(objectMapper.readValue(getResponse.getSourceAsString(), SecasignboxDocument.class));
         } else {
             return Optional.empty();
         }
@@ -101,8 +100,8 @@ public class SearchService extends AbstractIndex {
     public List<SecasignboxDocument> findAll(String index) throws IOException {
         SearchRequest searchRequest = new SearchRequest(index);
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-        QueryBuilder query = composQueryService.composeQuery(new SearchQuery());
-        searchSourceBuilder.query(query);
+        MatchAllQueryBuilder matchAllQueryBuilder = new MatchAllQueryBuilder();
+        searchSourceBuilder.query(matchAllQueryBuilder);
         searchRequest.source(searchSourceBuilder);
         SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
         return getSearchResult(searchResponse);

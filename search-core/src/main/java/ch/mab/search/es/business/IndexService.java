@@ -42,6 +42,12 @@ public class IndexService {
         return client.indices().create(request, RequestOptions.DEFAULT);
     }
 
+    public CreateIndexResponse createIndex(String index, Settings settings) throws IOException {
+        CreateIndexRequest request = new CreateIndexRequest(index);
+        request.settings(settings);
+        return client.indices().create(request, RequestOptions.DEFAULT);
+    }
+
     public CreateIndexResponse createIndex(String index, XContentBuilder builder) throws IOException {
         CreateIndexRequest request = new CreateIndexRequest(index);
         appendSettings(request);
@@ -49,13 +55,7 @@ public class IndexService {
         return client.indices().create(request, RequestOptions.DEFAULT);
     }
 
-    public CreateIndexResponse createIndex(String index, XContentBuilder builder, Settings settings) throws IOException {
-        CreateIndexRequest request = new CreateIndexRequest(index);
-        request.settings(settings);
-        request.mapping(builder);
-        return client.indices().create(request, RequestOptions.DEFAULT);
-    }
-
+    // TODO beurteilen ob es Shards und Replicas auf einer Kiste benötigt
     private void appendSettings(CreateIndexRequest request) {
         request.settings(Settings.builder()
                                  .put("index.number_of_shards", 3)

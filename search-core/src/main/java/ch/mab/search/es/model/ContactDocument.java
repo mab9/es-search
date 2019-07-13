@@ -1,5 +1,11 @@
 package ch.mab.search.es.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -60,5 +66,23 @@ public class ContactDocument {
 
     public void setPhone(String phone) {
         this.phone = phone;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ContactDocument that = (ContactDocument) o;
+        return id.equals(that.id) && firstName.equals(that.firstName) && lastName.equals(that.lastName) &&
+               Objects.equals(technologies, that.technologies) && email.equals(that.email) && phone.equals(that.phone);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, firstName, lastName, technologies, email, phone);
     }
 }

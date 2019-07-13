@@ -49,7 +49,7 @@ public class ContactService extends AbstractIndex {
         GetResponse getResponse = client.get(getRequest, RequestOptions.DEFAULT);
 
         if (getResponse.getSource() != null) {
-            return Optional.of(objectMapper.convertValue(getResponse.getSource().toString(), ContactDocument.class));
+            return Optional.of(objectMapper.convertValue(getResponse.getSourceAsMap(), ContactDocument.class));
         } else {
             return Optional.empty();
         }
