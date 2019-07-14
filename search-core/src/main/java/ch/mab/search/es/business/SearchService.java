@@ -138,7 +138,7 @@ public class SearchService extends AbstractIndex {
         return getSearchStrikes(searchResponse);
     }
 
-    public  List<SearchStrike> findByDocumentNamenAndTerm(String index, String term) throws IOException {
+    public  List<SearchStrike> queryMatchByTerm(String index, String term) throws IOException {
         SearchRequest searchRequest = new SearchRequest(index);
         SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 
@@ -146,6 +146,21 @@ public class SearchService extends AbstractIndex {
         sourceBuilder.highlighter(highlightBuilder);
 
         QueryBuilder query =  QueryBuilders.matchQuery("documentName", term);
+        sourceBuilder.query(query);
+
+        searchRequest.source(sourceBuilder);
+        SearchResponse search = client.search(searchRequest, RequestOptions.DEFAULT);
+        return getSearchStrikes(search);
+    }
+
+    public  List<SearchStrike> queryPhraseByTerm(String index, String term) throws IOException {
+        SearchRequest searchRequest = new SearchRequest(index);
+        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+
+        HighlightBuilder highlightBuilder = createHighlighter( "documentName");
+        sourceBuilder.highlighter(highlightBuilder);
+
+        QueryBuilder query =  QueryBuilders.matchPhraseQuery("documentName", term);
         sourceBuilder.query(query);
 
         searchRequest.source(sourceBuilder);

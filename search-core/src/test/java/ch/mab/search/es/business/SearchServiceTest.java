@@ -5,7 +5,6 @@ import ch.mab.search.es.base.IndexMappingSetting;
 import ch.mab.search.es.model.SearchStrike;
 import ch.mab.search.es.model.SecasignboxDocument;
 import org.elasticsearch.action.bulk.BulkResponse;
-import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.indices.GetIndexRequest;
@@ -13,7 +12,6 @@ import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import javax.validation.constraints.AssertTrue;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Date;
@@ -140,7 +138,7 @@ class SearchServiceTest {
     }
 
     @Test
-    void searchByDocumentName_mappingAndSetting_returnAnalyzedDocuments() throws IOException, InterruptedException {
+    void findByDocumentNamenAndTerm_matchQuery_returnAnalyzedDocuments() throws IOException, InterruptedException {
         indexService.deleteIndex(INDEX);
         indexService.createIndex(INDEX, IndexMappingSetting.mappingAnalyzerSecasignDoc(), IndexMappingSetting.settingGermanRebuiltAndUnderscoreAnalyzerSecasignDoc());
 
@@ -154,13 +152,45 @@ class SearchServiceTest {
         List<SearchStrike> strikes;
         List<String> expectedStrikes;
 
-        strikes = searchService.findByDocumentNamenAndTerm(INDEX, "Mandel");
+        strikes = searchService.queryMatchByTerm(INDEX, "Mandel");
         expectedStrikes = strikes.stream().flatMap(strike -> strike.getHighlights().stream()).collect(Collectors.toList());
         Assertions.assertTrue(expectedStrikes.contains("2018_<b>mandel</b>_fx_threads"));
         Assertions.assertTrue(expectedStrikes.contains("2019 <b>mandel</b> fx threads"));
         Assertions.assertEquals(strikes.get(0).getScore(), strikes.get(1).getScore());
 
-        strikes = searchService.findByDocumentNamenAndTerm(INDEX, "2018_mandel");
+        strikes = searchService.queryMatchByTerm(INDEX, "2018_mandel");
+        expectedStrikes = strikes.stream().flatMap(strike -> strike.getHighlights().stream()).collect(Collectors.toList());
+        Assertions.assertTrue(expectedStrikes.contains("<b>2018</b>_<b>mandel</b>_fx_threads"));
+        Assertions.assertTrue(expectedStrikes.contains("2019 <b>mandel</b> fx threads"));
+        Assertions.assertNotEquals(strikes.get(0).getScore(), strikes.get(1).getScore());
+    }
+
+    // fuzzy einbauen und testen
+    // phrase einbauen und testen
+    // shingle mapping einbauen und testen
+
+        @Test
+    void findByDocumentNamenAndTerm_phraseQuery_returnAnalyzedDocuments() throws IOException, InterruptedException {
+        indexService.deleteIndex(INDEX);
+        indexService.createIndex(INDEX, IndexMappingSetting.mappingAnalyzerSecasignDoc(), IndexMappingSetting.settingGermanRebuiltAndUnderscoreAnalyzerSecasignDoc());
+
+        SecasignboxDocument doc1 = testService.createSecasignDocCustomeContentAndDate("2018_mandel_fx_threads");
+        SecasignboxDocument doc2 = testService.createSecasignDocCustomeContentAndDate("2019 mandel fx threads");
+
+        searchService.indexDocument(INDEX, doc1);
+        searchService.indexDocument(INDEX, doc2);
+
+        TimeUnit.SECONDS.sleep(2);
+        List<SearchStrike> strikes;
+        List<String> expectedStrikes;
+
+        strikes = searchService.queryMatchByTerm(INDEX, "Mandel");
+        expectedStrikes = strikes.stream().flatMap(strike -> strike.getHighlights().stream()).collect(Collectors.toList());
+        Assertions.assertTrue(expectedStrikes.contains("2018_<b>mandel</b>_fx_threads"));
+        Assertions.assertTrue(expectedStrikes.contains("2019 <b>mandel</b> fx threads"));
+        Assertions.assertEquals(strikes.get(0).getScore(), strikes.get(1).getScore());
+
+        strikes = searchService.queryMatchByTerm(INDEX, "2018_mandel");
         expectedStrikes = strikes.stream().flatMap(strike -> strike.getHighlights().stream()).collect(Collectors.toList());
         Assertions.assertTrue(expectedStrikes.contains("<b>2018</b>_<b>mandel</b>_fx_threads"));
         Assertions.assertTrue(expectedStrikes.contains("2019 <b>mandel</b> fx threads"));
