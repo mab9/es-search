@@ -7,6 +7,10 @@ import java.io.IOException;
 
 public class IndexMappingSetting {
 
+    public static final String FIELD_SECASIGN_DOC_NAME = "documentName";
+    public static final String FIELD_SECASIGN_DOC_CONTENT = "documentContent";
+    public static final String FIELD_SECASIGN_DOC_UPLOAD_DATE = "uploadDate";
+
     public static XContentBuilder mappingDefaultContactDoc() {
         try {
             return XContentFactory.jsonBuilder()

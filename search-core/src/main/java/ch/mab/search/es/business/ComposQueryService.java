@@ -1,5 +1,6 @@
 package ch.mab.search.es.business;
 
+import ch.mab.search.es.base.IndexMappingSetting;
 import ch.mab.search.es.model.SearchQuery;
 import org.elasticsearch.index.query.*;
 import org.springframework.stereotype.Service;
@@ -9,9 +10,6 @@ import java.util.Date;
 @Service
 public class ComposQueryService {
 
-    private final String FIELD_DOCUMENT_NAME = "documentName";
-    private final String FIELD_DOCUMENT_CONTENT = "documentContent";
-    private final String FIELD_UPLOAD_DATE = "uploadDate";
     private final float BOOST_DOCUMENT_NAME = 4.0f;
 
     public ComposQueryService() {
@@ -52,8 +50,8 @@ public class ComposQueryService {
     private QueryBuilder composeFuzzyQuery(SearchQuery query) {
         assert query.isFuzzy();
 
-        MatchQueryBuilder matchDocContent = new MatchQueryBuilder(FIELD_DOCUMENT_CONTENT, query.getTerm());
-        MatchQueryBuilder matchDocName = new MatchQueryBuilder(FIELD_DOCUMENT_NAME, query.getTerm());
+        MatchQueryBuilder matchDocContent = new MatchQueryBuilder(IndexMappingSetting.FIELD_SECASIGN_DOC_CONTENT, query.getTerm());
+        MatchQueryBuilder matchDocName = new MatchQueryBuilder(IndexMappingSetting.FIELD_SECASIGN_DOC_NAME, query.getTerm());
 
         // the add of a prefixLength could be a performance improvement but does restrict the search.
         matchDocContent.maxExpansions(7);
@@ -66,8 +64,8 @@ public class ComposQueryService {
     private QueryBuilder composeFuzzyDocumentNameQuery(SearchQuery query) {
         assert query.isFuzzy() && query.isDocumentName();
 
-        MatchQueryBuilder matchDocContent = new MatchQueryBuilder(FIELD_DOCUMENT_CONTENT, query.getTerm());
-        MatchQueryBuilder matchDocName1 = new MatchQueryBuilder(FIELD_DOCUMENT_NAME, query.getTerm());
+        MatchQueryBuilder matchDocContent = new MatchQueryBuilder(IndexMappingSetting.FIELD_SECASIGN_DOC_CONTENT, query.getTerm());
+        MatchQueryBuilder matchDocName1 = new MatchQueryBuilder(IndexMappingSetting.FIELD_SECASIGN_DOC_NAME, query.getTerm());
         QueryBuilder matchDocName2 = composeDocumentNameQuery(query);
 
         matchDocName1.maxExpansions(7);
@@ -106,7 +104,7 @@ public class ComposQueryService {
 
     private QueryBuilder composeDocumentNameQuery(SearchQuery query) {
         assert query.isDocumentName();
-        return new MatchPhraseQueryBuilder(FIELD_DOCUMENT_NAME, query.getTerm());
+        return new MatchPhraseQueryBuilder(IndexMappingSetting.FIELD_SECASIGN_DOC_NAME, query.getTerm());
     }
 
     private QueryBuilder composeDocumentNameRangeQuery(SearchQuery query) {
@@ -128,7 +126,7 @@ public class ComposQueryService {
             assert query.getFromDate().compareTo(query.getToDate()) <= 0;
         }
 
-        RangeQueryBuilder rangeUploadDate = new RangeQueryBuilder(FIELD_UPLOAD_DATE);
+        RangeQueryBuilder rangeUploadDate = new RangeQueryBuilder(IndexMappingSetting.FIELD_SECASIGN_DOC_UPLOAD_DATE);
         RangeQueryBuilder range;
 
         if (query.getFromDate() != null && query.getToDate() != null) {
@@ -143,9 +141,9 @@ public class ComposQueryService {
     }
 
     public QueryBuilder composeMatchAllQuery(String term) {
-        MatchPhraseQueryBuilder matchPhraseDocName = new MatchPhraseQueryBuilder(FIELD_DOCUMENT_NAME, term);
-        MatchPhraseQueryBuilder matchDocContent = new MatchPhraseQueryBuilder(FIELD_DOCUMENT_CONTENT, term);
-        MatchQueryBuilder matchDocName = new MatchQueryBuilder(FIELD_DOCUMENT_NAME, term);
+        MatchPhraseQueryBuilder matchPhraseDocName = new MatchPhraseQueryBuilder(IndexMappingSetting.FIELD_SECASIGN_DOC_NAME, term);
+        MatchPhraseQueryBuilder matchDocContent = new MatchPhraseQueryBuilder(IndexMappingSetting.FIELD_SECASIGN_DOC_CONTENT, term);
+        MatchQueryBuilder matchDocName = new MatchQueryBuilder(IndexMappingSetting.FIELD_SECASIGN_DOC_NAME, term);
 
         // the add of a prefixLength could be a performance improvement but does restrict the search.
         matchDocName.maxExpansions(7);

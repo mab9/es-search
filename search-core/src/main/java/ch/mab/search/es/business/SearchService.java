@@ -1,6 +1,7 @@
 package ch.mab.search.es.business;
 
 import ch.mab.search.es.api.AbstractIndex;
+import ch.mab.search.es.base.IndexMappingSetting;
 import ch.mab.search.es.model.SearchStrike;
 import ch.mab.search.es.model.SearchQuery;
 import ch.mab.search.es.model.SecasignboxDocument;
@@ -31,6 +32,8 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static ch.mab.search.es.base.IndexMappingSetting.*;
 
 @Service
 public class SearchService extends AbstractIndex {
@@ -108,7 +111,7 @@ public class SearchService extends AbstractIndex {
         SearchRequest searchRequest = new SearchRequest(index);
         SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 
-        HighlightBuilder highlightBuilder = createHighlighter("documentName", "documentContent", "uploadDate");
+        HighlightBuilder highlightBuilder = createHighlighter(FIELD_SECASIGN_DOC_NAME, FIELD_SECASIGN_DOC_CONTENT, FIELD_SECASIGN_DOC_UPLOAD_DATE);
         sourceBuilder.highlighter(highlightBuilder);
 
         QueryBuilder query = composQueryService.composeQuery(searchQuery);
@@ -125,7 +128,7 @@ public class SearchService extends AbstractIndex {
         SearchRequest searchRequest = new SearchRequest(index);
         SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 
-        HighlightBuilder highlightBuilder = createHighlighter("documentContent", "documentName");
+        HighlightBuilder highlightBuilder = createHighlighter(FIELD_SECASIGN_DOC_CONTENT, FIELD_SECASIGN_DOC_NAME);
         sourceBuilder.highlighter(highlightBuilder);
 
         QueryBuilder query = composQueryService.composeMatchAllQuery(term);
@@ -142,10 +145,10 @@ public class SearchService extends AbstractIndex {
         SearchRequest searchRequest = new SearchRequest(index);
         SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 
-        HighlightBuilder highlightBuilder = createHighlighter( "documentName");
+        HighlightBuilder highlightBuilder = createHighlighter( FIELD_SECASIGN_DOC_NAME);
         sourceBuilder.highlighter(highlightBuilder);
 
-        QueryBuilder query =  QueryBuilders.matchQuery("documentName", term);
+        QueryBuilder query =  QueryBuilders.matchQuery(FIELD_SECASIGN_DOC_NAME, term);
         sourceBuilder.query(query);
 
         searchRequest.source(sourceBuilder);
@@ -157,13 +160,12 @@ public class SearchService extends AbstractIndex {
         SearchRequest searchRequest = new SearchRequest(index);
         SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 
-        HighlightBuilder highlightBuilder = createHighlighter( "documentName");
+        HighlightBuilder highlightBuilder = createHighlighter( FIELD_SECASIGN_DOC_NAME);
         sourceBuilder.highlighter(highlightBuilder);
 
-        MatchPhraseQueryBuilder phraseQuery = new MatchPhraseQueryBuilder("documentName", term);
-        // amount of missing words between two word in a term
-        phraseQuery.slop(10);
-        sourceBuilder.query(phraseQuery);
+        // slop -> amount of missing words between two word in a term
+        QueryBuilder query = QueryBuilders.matchPhraseQuery(FIELD_SECASIGN_DOC_NAME, term).slop(10);
+        sourceBuilder.query(query);
 
         searchRequest.source(sourceBuilder);
         SearchResponse search = client.search(searchRequest, RequestOptions.DEFAULT);
@@ -188,9 +190,9 @@ public class SearchService extends AbstractIndex {
         for (SearchHit hit : searchHit) {
             Map<String, HighlightField> highlightFields = hit.getHighlightFields();
             List<String> highlights = new ArrayList<>();
-            highlights.addAll(getHighlights(highlightFields, "documentContent"));
-            highlights.addAll(0, getHighlights(highlightFields, "documentName"));
-            highlights.addAll(0, getHighlights(highlightFields, "uploadDate"));
+            highlights.addAll(getHighlights(highlightFields, FIELD_SECASIGN_DOC_CONTENT));
+            highlights.addAll(0, getHighlights(highlightFields, FIELD_SECASIGN_DOC_NAME));
+            highlights.addAll(0, getHighlights(highlightFields, FIELD_SECASIGN_DOC_UPLOAD_DATE));
 
             SecasignboxDocument document = objectMapper.convertValue(hit.getSourceAsMap(), SecasignboxDocument.class);
             SearchStrike dto = new SearchStrike();
