@@ -208,4 +208,34 @@ class SearchServiceTest {
         Assertions.assertEquals(1, expectedStrikes.size());
     }
 
+    @Test
+    void findByDocumentNamenAndTerm_phraseQueryAndFuzzy_returnAnalyzedDocuments() throws IOException, InterruptedException {
+        indexService.deleteIndex(INDEX);
+        indexService.createIndex(INDEX, IndexMappingSetting.mappingAnalyzerSecasignDoc(), IndexMappingSetting.settingGermanRebuiltAndUnderscoreAnalyzerSecasignDoc());
+
+        SecasignboxDocument doc1 = testService.createSecasignDocCustomeContentAndDate("2018_mandel_fx_threads_concurrent_pic");
+        SecasignboxDocument doc2 = testService.createSecasignDocCustomeContentAndDate("2018_mandel_fx_threads_concurrent_img");
+        SecasignboxDocument doc3 = testService.createSecasignDocCustomeContentAndDate("2019 mandel fx threads concurrent pic");
+
+        searchService.indexDocument(INDEX, doc1);
+        searchService.indexDocument(INDEX, doc2);
+        searchService.indexDocument(INDEX, doc3);
+
+        TimeUnit.SECONDS.sleep(2);
+        List<SearchStrike> strikes;
+        List<String> expectedStrikes;
+
+        strikes = searchService.queryPhraseFuzzyByTerm(INDEX, "mandel treads");
+        expectedStrikes = strikes.stream().flatMap(strike -> strike.getHighlights().stream()).collect(Collectors.toList());
+        Assertions.assertTrue(expectedStrikes.contains("2018_<b>mandel</b>_fx_<b>threads</b>_concurrent_pic"));
+        Assertions.assertTrue(expectedStrikes.contains("2018_<b>mandel</b>_fx_<b>threads</b>_concurrent_img"));
+        Assertions.assertTrue(expectedStrikes.contains("2019 <b>mandel</b> fx <b>threads</b> concurrent pic"));
+        Assertions.assertEquals(strikes.get(0).getScore(), strikes.get(1).getScore());
+        Assertions.assertEquals(strikes.get(0).getScore(), strikes.get(2).getScore());
+
+        strikes = searchService.queryPhraseByTerm(INDEX, "2018 fx pic");
+        expectedStrikes = strikes.stream().flatMap(strike -> strike.getHighlights().stream()).collect(Collectors.toList());
+        Assertions.assertTrue(expectedStrikes.contains("<b>2018</b>_mandel_<b>fx</b>_threads_concurrent_<b>pic</b>"));
+        Assertions.assertEquals(1, expectedStrikes.size());
+    }
 }

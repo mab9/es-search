@@ -18,6 +18,7 @@ import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.common.text.Text;
+import org.elasticsearch.common.unit.Fuzziness;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.*;
 import org.elasticsearch.search.SearchHit;
@@ -167,6 +168,27 @@ public class SearchService extends AbstractIndex {
         QueryBuilder query = QueryBuilders.matchPhraseQuery(FIELD_SECASIGN_DOC_NAME, term).slop(10);
         sourceBuilder.query(query);
 
+        searchRequest.source(sourceBuilder);
+        SearchResponse search = client.search(searchRequest, RequestOptions.DEFAULT);
+        return getSearchStrikes(search);
+    }
+
+    public  List<SearchStrike> queryPhraseFuzzyByTerm(String index, String term) throws IOException {
+        SearchRequest searchRequest = new SearchRequest(index);
+        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+
+        HighlightBuilder highlightBuilder = createHighlighter( FIELD_SECASIGN_DOC_NAME);
+        sourceBuilder.highlighter(highlightBuilder);
+
+        QueryBuilder phraseQuery = QueryBuilders.matchPhraseQuery(FIELD_SECASIGN_DOC_NAME, term).slop(10);
+        QueryBuilder fuzzyQuery = QueryBuilders.matchQuery(FIELD_SECASIGN_DOC_NAME, term).fuzziness(Fuzziness.AUTO).maxExpansions(50);
+
+        QueryBuilder query = QueryBuilders
+                .boolQuery()
+                    .should(phraseQuery)
+                    .should(fuzzyQuery);
+
+        sourceBuilder.query(query);
         searchRequest.source(sourceBuilder);
         SearchResponse search = client.search(searchRequest, RequestOptions.DEFAULT);
         return getSearchStrikes(search);
