@@ -157,6 +157,21 @@ public class SearchService extends AbstractIndex {
         return getSearchStrikes(search);
     }
 
+    public  List<SearchStrike> queryFuzzyByTerm(String index, String term) throws IOException {
+        SearchRequest searchRequest = new SearchRequest(index);
+        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+
+        HighlightBuilder highlightBuilder = createHighlighter( FIELD_SECASIGN_DOC_NAME);
+        sourceBuilder.highlighter(highlightBuilder);
+
+        QueryBuilder query =  QueryBuilders.matchQuery(FIELD_SECASIGN_DOC_NAME, term).fuzziness(Fuzziness.AUTO).maxExpansions(50);
+        sourceBuilder.query(query);
+
+        searchRequest.source(sourceBuilder);
+        SearchResponse search = client.search(searchRequest, RequestOptions.DEFAULT);
+        return getSearchStrikes(search);
+    }
+
     public  List<SearchStrike> queryPhraseByTerm(String index, String term) throws IOException {
         SearchRequest searchRequest = new SearchRequest(index);
         SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();

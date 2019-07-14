@@ -138,7 +138,7 @@ class SearchServiceTest {
     }
 
     @Test
-    void findByDocumentNamenAndTerm_matchQuery_returnAnalyzedDocuments() throws IOException, InterruptedException {
+    void queryByTerm_matchQuery_returnAnalyzedDocuments() throws IOException, InterruptedException {
         indexService.deleteIndex(INDEX);
         indexService.createIndex(INDEX, IndexMappingSetting.mappingAnalyzerSecasignDoc(), IndexMappingSetting.settingGermanRebuiltAndUnderscoreAnalyzerSecasignDoc());
 
@@ -165,13 +165,42 @@ class SearchServiceTest {
         Assertions.assertNotEquals(strikes.get(0).getScore(), strikes.get(1).getScore());
     }
 
+        @Test
+    void queryFuzzyByTerm_matchFuzzy_returnAnalyzedDocuments() throws IOException, InterruptedException {
+        indexService.deleteIndex(INDEX);
+        indexService.createIndex(INDEX, IndexMappingSetting.mappingAnalyzerSecasignDoc(), IndexMappingSetting.settingGermanRebuiltAndUnderscoreAnalyzerSecasignDoc());
+
+        SecasignboxDocument doc1 = testService.createSecasignDocCustomeContentAndDate("2018_mandel_fx_threads");
+        SecasignboxDocument doc2 = testService.createSecasignDocCustomeContentAndDate("2019 mandel fx threads");
+
+        searchService.indexDocument(INDEX, doc1);
+        searchService.indexDocument(INDEX, doc2);
+
+        TimeUnit.SECONDS.sleep(2);
+        List<SearchStrike> strikes;
+        List<String> expectedStrikes;
+
+        strikes = searchService.queryFuzzyByTerm(INDEX, "treads");
+        expectedStrikes = strikes.stream().flatMap(strike -> strike.getHighlights().stream()).collect(Collectors.toList());
+        Assertions.assertTrue(expectedStrikes.contains("2018_mandel_fx_<b>threads</b>"));
+        Assertions.assertTrue(expectedStrikes.contains("2019 mandel fx <b>threads</b>"));
+        Assertions.assertEquals(strikes.get(0).getScore(), strikes.get(1).getScore());
+
+        strikes = searchService.queryFuzzyByTerm(INDEX, "2018");
+        expectedStrikes = strikes.stream().flatMap(strike -> strike.getHighlights().stream()).collect(Collectors.toList());
+        Assertions.assertTrue(expectedStrikes.contains("<b>2018</b>_mandel_fx_threads"));
+        Assertions.assertTrue(expectedStrikes.contains("<b>2019</b> mandel fx threads"));
+        Assertions.assertNotEquals(strikes.get(0).getScore(), strikes.get(1).getScore());
+    }
+
+
     // fuzzy einbauen und testen
-    // phrase einbauen und testen
+    // ok phrase einbauen und testen
     // shingle mapping einbauen und testen
     // search in 2 indexes
 
         @Test
-    void findByDocumentNamenAndTerm_phraseQuery_returnAnalyzedDocuments() throws IOException, InterruptedException {
+    void queryPhraseByTerm_matchPhrase_returnAnalyzedDocuments() throws IOException, InterruptedException {
         indexService.deleteIndex(INDEX);
         indexService.createIndex(INDEX, IndexMappingSetting.mappingAnalyzerSecasignDoc(), IndexMappingSetting.settingGermanRebuiltAndUnderscoreAnalyzerSecasignDoc());
 
@@ -209,7 +238,7 @@ class SearchServiceTest {
     }
 
     @Test
-    void findByDocumentNamenAndTerm_phraseQueryAndFuzzy_returnAnalyzedDocuments() throws IOException, InterruptedException {
+    void queryPhraseFuzzyByTerm_matchPhraseAndFuzzyMixed_returnAnalyzedDocuments() throws IOException, InterruptedException {
         indexService.deleteIndex(INDEX);
         indexService.createIndex(INDEX, IndexMappingSetting.mappingAnalyzerSecasignDoc(), IndexMappingSetting.settingGermanRebuiltAndUnderscoreAnalyzerSecasignDoc());
 
