@@ -207,63 +207,45 @@ public class SearchService extends AbstractIndex {
     }
 
     public XContentBuilder createDefaultMappingObject() throws IOException {
-        XContentBuilder builder = XContentFactory.jsonBuilder();
-        builder.startObject();
-        {
-            builder.startObject("properties");{
-                builder.startObject("documentId");{
-                    builder.field("type", "text");
-                }builder.endObject();
-            }
-            {
-                builder.startObject("documentName");{
-                    builder.field("type", "text");
-                }builder.endObject();
-            }
-            {
-                builder.startObject("uploadDate");{
-                    builder.field("type", "date");
-                }builder.endObject();
-            }
-            {
-                builder.startObject("documentContent");{
-                    builder.field("type", "text");
-                }builder.endObject();
-            }builder.endObject();
-        }
-        builder.endObject();
-        return builder;
+        return XContentFactory.jsonBuilder()
+        .startObject()
+            .startObject("properties")
+                .startObject("documentId")
+                    .field("type", "text")
+                .endObject()
+                .startObject("documentName")
+                    .field("type", "text")
+                .endObject()
+                .startObject("uploadDate")
+                    .field("type", "date")
+                .endObject()
+                .startObject("documentContent")
+                    .field("type", "text")
+                .endObject()
+            .endObject()
+        .endObject();
     }
 
     public XContentBuilder createMappingObjectWithAnalyzer(String analyzer) throws IOException {
-        XContentBuilder builder = XContentFactory.jsonBuilder();
-        builder.startObject();
-        {
-            builder.startObject("properties");{
-            builder.startObject("documentId");{
-                builder.field("type", "text");
-            }builder.endObject();
-        }
-            {
-                builder.startObject("documentName");{
-                builder.field("type", "text");
-                builder.field("analyzer", analyzer);
-            }builder.endObject();
-            }
-            {
-                builder.startObject("uploadDate");{
-                builder.field("type", "date");
-            }builder.endObject();
-            }
-            {
-                builder.startObject("documentContent");{
-                builder.field("type", "text");
-                builder.field("analyzer", "english");
-            }builder.endObject();
-            }builder.endObject();
-        }
-        builder.endObject();
-        return builder;
+        return XContentFactory.jsonBuilder()
+        .startObject()
+            .startObject("properties")
+                .startObject("documentId")
+                    .field("type", "text")
+                .endObject()
+                .startObject("documentName")
+                    .field("type", "text")
+                    .field("analyzer", analyzer)
+                .endObject()
+                .startObject("uploadDate")
+                    .field("type", "date")
+                .endObject()
+                .startObject("documentContent")
+                    .field("type", "text")
+                    .field("analyzer", "german")
+                .endObject()
+            .endObject()
+        .endObject();
     }
 
     public XContentBuilder createShingleMappingObject() throws IOException {
