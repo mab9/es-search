@@ -14,11 +14,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @SpringBootTest
 class SearchServiceTest {
@@ -180,13 +182,13 @@ class SearchServiceTest {
         List<SearchStrike> strikes;
         List<String> expectedStrikes;
 
-        strikes = searchService.queryFuzzyByTerm(INDEX, "treads");
+        strikes = searchService.queryFuzzyByTerm(new String[] {INDEX}, "treads");
         expectedStrikes = strikes.stream().flatMap(strike -> strike.getHighlights().stream()).collect(Collectors.toList());
         Assertions.assertTrue(expectedStrikes.contains("2018_mandel_fx_<b>threads</b>"));
         Assertions.assertTrue(expectedStrikes.contains("2019 mandel fx <b>threads</b>"));
         Assertions.assertEquals(strikes.get(0).getScore(), strikes.get(1).getScore());
 
-        strikes = searchService.queryFuzzyByTerm(INDEX, "2018");
+        strikes = searchService.queryFuzzyByTerm(new String[] {INDEX}, "2018");
         expectedStrikes = strikes.stream().flatMap(strike -> strike.getHighlights().stream()).collect(Collectors.toList());
         Assertions.assertTrue(expectedStrikes.contains("<b>2018</b>_mandel_fx_threads"));
         Assertions.assertTrue(expectedStrikes.contains("<b>2019</b> mandel fx threads"));
@@ -194,7 +196,7 @@ class SearchServiceTest {
     }
 
 
-    // fuzzy einbauen und testen
+    // ok fuzzy einbauen und testen
     // ok phrase einbauen und testen
     // shingle mapping einbauen und testen
     // search in 2 indexes
@@ -267,4 +269,6 @@ class SearchServiceTest {
         Assertions.assertTrue(expectedStrikes.contains("<b>2018</b>_mandel_<b>fx</b>_threads_concurrent_<b>pic</b>"));
         Assertions.assertEquals(1, expectedStrikes.size());
     }
+
+
 }
