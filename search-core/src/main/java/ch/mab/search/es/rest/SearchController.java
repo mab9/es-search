@@ -1,7 +1,7 @@
 package ch.mab.search.es.rest;
 
 import ch.mab.search.es.business.SearchService;
-import ch.mab.search.es.model.SearchHighlights;
+import ch.mab.search.es.model.SearchStrike;
 import ch.mab.search.es.model.SearchQuery;
 import ch.mab.search.es.model.SecasignboxDocument;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,18 +52,18 @@ public class SearchController {
     }
 
     @GetMapping(value = "search/{term}")
-    public ResponseEntity<List<SearchHighlights>> findDocumentsByTerm(@PathVariable String term) throws Exception {
+    public ResponseEntity<List<SearchStrike>> findDocumentsByTerm(@PathVariable String term) throws Exception {
         return new ResponseEntity<>(service.findByTermHighlighted("secasignbox", term), HttpStatus.OK);
     }
 
     @GetMapping(value = "search/highlighted/{term}")
-    public ResponseEntity<List<SearchHighlights>> findDocumentsByTermHighlighted(@PathVariable String term) throws Exception {
+    public ResponseEntity<List<SearchStrike>> findDocumentsByTermHighlighted(@PathVariable String term) throws Exception {
         return new ResponseEntity<>(service.findByTermHighlighted("secasignbox", term), HttpStatus.OK);
     }
 
     // todo check get with payload (frontend)
     @PostMapping(value = "search/highlighted/query")
-    public ResponseEntity<List<SearchHighlights>> findDocumentsByQueryHighlighted(@RequestBody SearchQuery query) throws Exception {
+    public ResponseEntity<List<SearchStrike>> findDocumentsByQueryHighlighted(@RequestBody SearchQuery query) throws Exception {
         return new ResponseEntity<>(service.findByQueryHighlighted("secasignbox", query), HttpStatus.OK);
     }
 }

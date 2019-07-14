@@ -2,6 +2,7 @@ package ch.mab.search.es.business;
 
 import ch.mab.search.es.TestHelperService;
 import ch.mab.search.es.base.IndexMappingSetting;
+import ch.mab.search.es.model.SearchStrike;
 import ch.mab.search.es.model.SecasignboxDocument;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.search.SearchResponse;
@@ -12,12 +13,14 @@ import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import javax.validation.constraints.AssertTrue;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @SpringBootTest
 class SearchServiceTest {
@@ -136,25 +139,11 @@ class SearchServiceTest {
         Assertions.assertTrue(docs.containsAll(all));
     }
 
-    @Disabled("muss an die neue Logik angepasst werden")
-    @Test
-    void searchByDocumentName_indexedDocuments_returnDocumentWithSameName() throws IOException, InterruptedException {
-        List<Path> files = testService.collectPathsOfPdfTestFiles();
-        List<SecasignboxDocument> docs = testService.readSecasignDocumentFromPdfs(files);
-        searchService.bulkIndexDocument(INDEX, docs);
-        TimeUnit.SECONDS.sleep(2);
-
-        List<SecasignboxDocument> search = null; // secasignboxService.searchByDocumentName(INDEX, "AS_MandelFx.pdf");
-        Assertions.assertEquals(1, search.size());
-        Assertions.assertTrue(docs.contains(search.get(0)));
-    }
-
     @Test
     void searchByDocumentName_mappingAndSetting_returnAnalyzedDocuments() throws IOException, InterruptedException {
         indexService.deleteIndex(INDEX);
         indexService.createIndex(INDEX, IndexMappingSetting.mappingAnalyzerSecasignDoc(), IndexMappingSetting.settingGermanRebuiltAndUnderscoreAnalyzerSecasignDoc());
 
-      //  indexService.createIndex(INDEX, IndexMappingSetting.mappingDefaultSecasignDoc(), IndexMappingSetting.settingGermanRebuiltAndUnderscoreAnalyzerSecasignDoc());
         SecasignboxDocument doc1 = testService.createSecasignDocCustomeContentAndDate("2018_mandel_fx_threads");
         SecasignboxDocument doc2 = testService.createSecasignDocCustomeContentAndDate("2019 mandel fx threads");
 
@@ -162,8 +151,19 @@ class SearchServiceTest {
         searchService.indexDocument(INDEX, doc2);
 
         TimeUnit.SECONDS.sleep(2);
+        List<SearchStrike> strikes;
+        List<String> expectedStrikes;
 
-        SearchResponse mandel = searchService.findByDocumentNamenAndTerm(INDEX, "mandel");
-        System.out.println(mandel.getHits().getTotalHits().value);
+        strikes = searchService.findByDocumentNamenAndTerm(INDEX, "Mandel");
+        expectedStrikes = strikes.stream().flatMap(strike -> strike.getHighlights().stream()).collect(Collectors.toList());
+        Assertions.assertTrue(expectedStrikes.contains("2018_<b>mandel</b>_fx_threads"));
+        Assertions.assertTrue(expectedStrikes.contains("2019 <b>mandel</b> fx threads"));
+        Assertions.assertEquals(strikes.get(0).getScore(), strikes.get(1).getScore());
+
+        strikes = searchService.findByDocumentNamenAndTerm(INDEX, "2018_mandel");
+        expectedStrikes = strikes.stream().flatMap(strike -> strike.getHighlights().stream()).collect(Collectors.toList());
+        Assertions.assertTrue(expectedStrikes.contains("<b>2018</b>_<b>mandel</b>_fx_threads"));
+        Assertions.assertTrue(expectedStrikes.contains("2019 <b>mandel</b> fx threads"));
+        Assertions.assertNotEquals(strikes.get(0).getScore(), strikes.get(1).getScore());
     }
 }

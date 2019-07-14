@@ -1,8 +1,7 @@
 package ch.mab.search.es.business;
 
 import ch.mab.search.es.api.AbstractIndex;
-import ch.mab.search.es.base.IndexMappingSetting;
-import ch.mab.search.es.model.SearchHighlights;
+import ch.mab.search.es.model.SearchStrike;
 import ch.mab.search.es.model.SearchQuery;
 import ch.mab.search.es.model.SecasignboxDocument;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -18,10 +17,8 @@ import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.common.text.Text;
-import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.*;
-import org.elasticsearch.index.search.MatchQuery;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
@@ -107,7 +104,7 @@ public class SearchService extends AbstractIndex {
         return getSearchResult(searchResponse);
     }
 
-    public List<SearchHighlights> findByQueryHighlighted(String index, SearchQuery searchQuery) throws IOException {
+    public List<SearchStrike> findByQueryHighlighted(String index, SearchQuery searchQuery) throws IOException {
         SearchRequest searchRequest = new SearchRequest(index);
         SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 
@@ -121,10 +118,10 @@ public class SearchService extends AbstractIndex {
         searchRequest.source(sourceBuilder);
 
         SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
-        return getSearchResultHighlighted(searchResponse);
+        return getSearchStrikes(searchResponse);
     }
 
-    public List<SearchHighlights> findByTermHighlighted(String index, String term) throws IOException {
+    public List<SearchStrike> findByTermHighlighted(String index, String term) throws IOException {
         SearchRequest searchRequest = new SearchRequest(index);
         SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 
@@ -138,19 +135,22 @@ public class SearchService extends AbstractIndex {
         searchRequest.source(sourceBuilder);
 
         SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
-        return getSearchResultHighlighted(searchResponse);
+        return getSearchStrikes(searchResponse);
     }
 
-    public SearchResponse findByDocumentNamenAndTerm(String index, String term) throws IOException {
+    public  List<SearchStrike> findByDocumentNamenAndTerm(String index, String term) throws IOException {
         SearchRequest searchRequest = new SearchRequest(index);
         SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+
+        HighlightBuilder highlightBuilder = createHighlighter( "documentName");
+        sourceBuilder.highlighter(highlightBuilder);
 
         QueryBuilder query =  QueryBuilders.matchQuery("documentName", term);
         sourceBuilder.query(query);
 
         searchRequest.source(sourceBuilder);
         SearchResponse search = client.search(searchRequest, RequestOptions.DEFAULT);
-        return search;
+        return getSearchStrikes(search);
     }
 
     private HighlightBuilder createHighlighter(String... fields) {
@@ -163,10 +163,10 @@ public class SearchService extends AbstractIndex {
         });
         return highlightBuilder;
     }
-    private List<SearchHighlights> getSearchResultHighlighted(SearchResponse response) {
+    private List<SearchStrike> getSearchStrikes(SearchResponse response) {
         SearchHit[] searchHit = response.getHits().getHits();
 
-        List<SearchHighlights> dtos = new ArrayList<>();
+        List<SearchStrike> dtos = new ArrayList<>();
 
         for (SearchHit hit : searchHit) {
             Map<String, HighlightField> highlightFields = hit.getHighlightFields();
@@ -175,8 +175,9 @@ public class SearchService extends AbstractIndex {
             highlights.addAll(0, getHighlights(highlightFields, "documentName"));
             highlights.addAll(0, getHighlights(highlightFields, "uploadDate"));
 
-            SearchHighlights dto = new SearchHighlights();
             SecasignboxDocument document = objectMapper.convertValue(hit.getSourceAsMap(), SecasignboxDocument.class);
+            SearchStrike dto = new SearchStrike();
+            dto.setScore(hit.getScore());
             dto.setDocumentId(document.getDocumentId());
             dto.setDocumentName(document.getDocumentName());
             dto.setHighlights(replaceHighlihtCursivByBold(highlights));
