@@ -27,7 +27,7 @@ public class IndexService {
         return client.indices().get(request, RequestOptions.DEFAULT);
     }
 
-    public long getTotalHits(String index) throws IOException {
+    public long getTotalDocuments(String index) throws IOException {
         SearchRequest searchRequest = new SearchRequest(index);
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         searchSourceBuilder.query(QueryBuilders.matchAllQuery());
@@ -38,7 +38,6 @@ public class IndexService {
 
     public CreateIndexResponse createIndex(String index) throws IOException {
         CreateIndexRequest request = new CreateIndexRequest(index);
-        appendSettings(request);
         return client.indices().create(request, RequestOptions.DEFAULT);
     }
 
@@ -55,12 +54,6 @@ public class IndexService {
         return client.indices().create(request, RequestOptions.DEFAULT);
     }
 
-    // TODO beurteilen ob es Shards und Replicas auf einer Kiste benötigt
-    private void appendSettings(CreateIndexRequest request) {
-        request.settings(Settings.builder()
-                                 .put("index.number_of_shards", 3)
-                                 .put("index.number_of_replicas", 2));
-    }
 
     public AcknowledgedResponse updateMapping(String index, XContentBuilder builder) throws IOException {
         PutMappingRequest request = new PutMappingRequest(index);

@@ -1,6 +1,7 @@
 package ch.mab.search.es.business;
 
 import ch.mab.search.es.TestHelperService;
+import ch.mab.search.es.base.IndexMappingSetting;
 import ch.mab.search.es.model.ContactDocument;
 import ch.mab.search.es.model.Technology;
 import org.elasticsearch.action.admin.indices.analyze.AnalyzeRequest;
@@ -81,7 +82,7 @@ class IndexServiceTest {
             indexService.deleteIndex(INDEX);
         }
 
-        indexService.createIndex(INDEX, searchService.createMappingObjectWithAnalyzer("underscore_analyzer"), settings);
+        indexService.createIndex(INDEX, IndexMappingSetting.mappingAnalyzer("underscore_analyzer"), settings);
         GetIndexResponse index = indexService.getIndex(INDEX);
         Assertions.assertTrue(index.getSettings().get(INDEX).hasValue("index.analysis.analyzer.underscore_analyzer.tokenizer"));
 
@@ -129,7 +130,7 @@ class IndexServiceTest {
             indexService.deleteIndex(INDEX);
         }
 
-        indexService.createIndex(INDEX, searchService.createMappingObjectWithAnalyzer("underscore_analyzer"), settings);
+        indexService.createIndex(INDEX, IndexMappingSetting.mappingAnalyzer("underscore_analyzer"), settings);
         GetIndexResponse index = indexService.getIndex(INDEX);
         Assertions.assertTrue(index.getSettings().get(INDEX).hasValue("index.analysis.analyzer.underscore_analyzer.tokenizer"));
 
@@ -177,7 +178,7 @@ class IndexServiceTest {
             indexService.deleteIndex(INDEX);
         }
 
-        indexService.createIndex(INDEX, searchService.createMappingObjectWithAnalyzer("underscore_analyzer"), settings);
+        indexService.createIndex(INDEX, IndexMappingSetting.mappingAnalyzer("underscore_analyzer"), settings);
         GetIndexResponse index = indexService.getIndex(INDEX);
         Assertions.assertTrue(index.getSettings().get(INDEX).hasValue("index.analysis.analyzer.underscore_analyzer.tokenizer"));
 
@@ -219,7 +220,7 @@ class IndexServiceTest {
             indexService.deleteIndex(INDEX);
         }
 
-        indexService.createIndex(INDEX, searchService.createMappingObjectWithAnalyzer("rebuilt_standard"), settings);
+        indexService.createIndex(INDEX, IndexMappingSetting.mappingAnalyzer("rebuilt_standard"), settings);
         GetIndexResponse index = indexService.getIndex(INDEX);
         Assertions.assertTrue(index.getSettings().get(INDEX).hasValue("index.analysis.analyzer.rebuilt_standard.tokenizer"));
 
@@ -303,7 +304,7 @@ class IndexServiceTest {
         contactService.createContact(INDEX, createContact());
 
         TimeUnit.SECONDS.sleep(2);
-        Assertions.assertEquals(3, indexService.getTotalHits(INDEX));
+        Assertions.assertEquals(3, indexService.getTotalDocuments(INDEX));
     }
 
     private ContactDocument createContact() {

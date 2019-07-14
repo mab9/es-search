@@ -1,6 +1,7 @@
 package ch.mab.search.es.business;
 
 import ch.mab.search.es.api.AbstractIndex;
+import ch.mab.search.es.base.IndexMappingSetting;
 import ch.mab.search.es.model.SearchHighlights;
 import ch.mab.search.es.model.SearchQuery;
 import ch.mab.search.es.model.SecasignboxDocument;
@@ -18,7 +19,6 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.common.text.Text;
 import org.elasticsearch.common.xcontent.XContentBuilder;
-import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.MatchAllQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
@@ -203,78 +203,6 @@ public class SearchService extends AbstractIndex {
 
     @Override
     public XContentBuilder createMappingObject() throws IOException {
-        return createDefaultMappingObject();
-    }
-
-    public XContentBuilder createDefaultMappingObject() throws IOException {
-        return XContentFactory.jsonBuilder()
-        .startObject()
-            .startObject("properties")
-                .startObject("documentId")
-                    .field("type", "text")
-                .endObject()
-                .startObject("documentName")
-                    .field("type", "text")
-                .endObject()
-                .startObject("uploadDate")
-                    .field("type", "date")
-                .endObject()
-                .startObject("documentContent")
-                    .field("type", "text")
-                .endObject()
-            .endObject()
-        .endObject();
-    }
-
-    public XContentBuilder createMappingObjectWithAnalyzer(String analyzer) throws IOException {
-        return XContentFactory.jsonBuilder()
-        .startObject()
-            .startObject("properties")
-                .startObject("documentId")
-                    .field("type", "text")
-                .endObject()
-                .startObject("documentName")
-                    .field("type", "text")
-                    .field("analyzer", analyzer)
-                .endObject()
-                .startObject("uploadDate")
-                    .field("type", "date")
-                .endObject()
-                .startObject("documentContent")
-                    .field("type", "text")
-                    .field("analyzer", "german")
-                .endObject()
-            .endObject()
-        .endObject();
-    }
-
-    public XContentBuilder createShingleMappingObject() throws IOException {
-        XContentBuilder builder = XContentFactory.jsonBuilder();
-        builder.startObject();{
-            builder.startObject("properties");{
-                builder.startObject("documentId");{
-                    builder.field("type", "text");
-                }builder.endObject();
-            }
-            {
-                builder.startObject("documentName");{
-                builder.field("search_analyzer", "analyzer_shingle");
-                builder.field("index_analyzer", "analyzer_shingle");
-                builder.field("type", "text");
-            }builder.endObject();
-            }
-            {
-                builder.startObject("uploadDate");{
-                builder.field("type", "date");
-            }builder.endObject();
-            }
-            {
-                builder.startObject("documentContent");{
-                builder.field("type", "text");
-            }builder.endObject();
-            }builder.endObject();
-        }
-        builder.endObject();
-        return builder;
+        return IndexMappingSetting.mappingDefault();
     }
 }

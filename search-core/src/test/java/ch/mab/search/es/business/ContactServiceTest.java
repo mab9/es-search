@@ -59,7 +59,7 @@ public class ContactServiceTest {
 
         // elastic search is indexing async
         TimeUnit.SECONDS.sleep(2);
-        long totalHits = indexService.getTotalHits(INDEX);
+        long totalHits = indexService.getTotalDocuments(INDEX);
         Assertions.assertEquals(amount, totalHits);
     }
 
