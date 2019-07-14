@@ -15,8 +15,6 @@ public abstract class AbstractIndex {
     @Autowired
     public ObjectMapper objectMapper;
 
-    public abstract XContentBuilder createMappingObject() throws IOException;
-
     @Autowired
     public RestHighLevelClient client;
 

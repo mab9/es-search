@@ -200,9 +200,4 @@ public class SearchService extends AbstractIndex {
 
         return documents;
     }
-
-    @Override
-    public XContentBuilder createMappingObject() throws IOException {
-        return IndexMappingSetting.mappingDefault();
-    }
 }

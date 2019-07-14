@@ -7,7 +7,24 @@ import java.io.IOException;
 
 public class IndexMappingSetting {
 
-    public static XContentBuilder mappingDefault() throws IOException {
+    public static XContentBuilder mappingDefaultContactDoc() throws IOException {
+        return XContentFactory.jsonBuilder()
+        .startObject()
+            .startObject("properties")
+                .startObject("firstName")
+                    .field("type", "text")
+                .endObject()
+                .startObject("lastName")
+                    .field("type", "text")
+                .endObject()
+                .startObject("technologies")
+                     .field("type", "nested")
+                .endObject()
+            .endObject()
+        .endObject();
+    }
+
+    public static XContentBuilder mappingDefaultSecasignDoc() throws IOException {
         return XContentFactory.jsonBuilder()
         .startObject()
             .startObject("properties")
@@ -27,7 +44,7 @@ public class IndexMappingSetting {
         .endObject();
     }
 
-    public static XContentBuilder mappingAnalyzer() throws IOException {
+    public static XContentBuilder mappingAnalyzerSecasignDoc() throws IOException {
         return XContentFactory.jsonBuilder()
         .startObject()
             .startObject("properties")
@@ -49,12 +66,12 @@ public class IndexMappingSetting {
         .endObject();
     }
 
-    public static XContentBuilder mappingAnalyzer(String docNameAnalyzer) throws IOException {
-        return mappingAnalyzer(docNameAnalyzer, "german");
+    public static XContentBuilder mappingAnalyzerSecasignDoc(String docNameAnalyzer) throws IOException {
+        return mappingAnalyzerSecasignDoc(docNameAnalyzer, "german");
     }
 
 
-    public static XContentBuilder mappingAnalyzer(String docNameAnalyzer, String docContentAnalyzer) throws IOException {
+    public static XContentBuilder mappingAnalyzerSecasignDoc(String docNameAnalyzer, String docContentAnalyzer) throws IOException {
         return XContentFactory.jsonBuilder()
         .startObject()
             .startObject("properties")
@@ -116,7 +133,7 @@ public class IndexMappingSetting {
         Use the "underscore_analyzer" for the field documentName. It splits the documentName at the
         character underscore or whitespace.
      */
-    public static XContentBuilder settingGermanRebuiltAndUnderscoreAnalyzer() throws IOException {
+    public static XContentBuilder settingGermanRebuiltAndUnderscoreAnalyzerSecasignDoc() throws IOException {
         return XContentFactory.jsonBuilder()
         .startObject()
                 .startObject("analysis")

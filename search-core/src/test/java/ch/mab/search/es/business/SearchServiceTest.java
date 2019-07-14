@@ -1,6 +1,7 @@
 package ch.mab.search.es.business;
 
 import ch.mab.search.es.TestHelperService;
+import ch.mab.search.es.base.IndexMappingSetting;
 import ch.mab.search.es.model.SecasignboxDocument;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.client.RequestOptions;
@@ -39,7 +40,7 @@ class SearchServiceTest {
         if (indexService.isIndexExisting(INDEX)) {
             indexService.deleteIndex(INDEX);
         }
-        indexService.createIndex(INDEX, searchService.createMappingObject());
+        indexService.createIndex(INDEX, IndexMappingSetting.mappingDefaultSecasignDoc());
     }
 
     @AfterEach
@@ -57,7 +58,7 @@ class SearchServiceTest {
         boolean indexExists = client.indices().exists(request, RequestOptions.DEFAULT);
         Assertions.assertFalse(indexExists);
 
-        indexService.createIndex(INDEX, searchService.createMappingObject());
+        indexService.createIndex(INDEX, IndexMappingSetting.mappingDefaultSecasignDoc());
 
         indexExists = client.indices().exists(request, RequestOptions.DEFAULT);
         Assertions.assertTrue(indexExists);
@@ -145,13 +146,5 @@ class SearchServiceTest {
         List<SecasignboxDocument> search = null; // secasignboxService.searchByDocumentName(INDEX, "AS_MandelFx.pdf");
         Assertions.assertEquals(1, search.size());
         Assertions.assertTrue(docs.contains(search.get(0)));
-    }
-
-    @Test
-    void searchDoc() throws IOException {
-        indexService.deleteIndex(INDEX);
-
-
-
     }
 }

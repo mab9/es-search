@@ -1,6 +1,7 @@
 package ch.mab.search.es.benchmark;
 
 import ch.mab.search.es.TestHelperService;
+import ch.mab.search.es.base.IndexMappingSetting;
 import ch.mab.search.es.business.IndexService;
 import ch.mab.search.es.business.SearchService;
 import ch.mab.search.es.model.SecasignboxDocument;
@@ -41,7 +42,7 @@ public class BenchmarkTest {
         if (indexService.isIndexExisting(INDEX)) {
             indexService.deleteIndex(INDEX);
         }
-        indexService.createIndex(INDEX, searchService.createMappingObject());
+        indexService.createIndex(INDEX, IndexMappingSetting.mappingDefaultSecasignDoc());
     }
 
     @Test

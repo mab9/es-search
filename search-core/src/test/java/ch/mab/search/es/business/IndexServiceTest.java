@@ -40,9 +40,6 @@ class IndexServiceTest {
     @Autowired
     private ContactService contactService;
 
-    @Autowired
-    private SearchService searchService;
-
     @BeforeEach
     void setUp() throws IOException {
         if (indexService.isIndexExisting(INDEX)) {
@@ -82,7 +79,7 @@ class IndexServiceTest {
             indexService.deleteIndex(INDEX);
         }
 
-        indexService.createIndex(INDEX, IndexMappingSetting.mappingAnalyzer("underscore_analyzer"), settings);
+        indexService.createIndex(INDEX, IndexMappingSetting.mappingAnalyzerSecasignDoc("underscore_analyzer"), settings);
         GetIndexResponse index = indexService.getIndex(INDEX);
         Assertions.assertTrue(index.getSettings().get(INDEX).hasValue("index.analysis.analyzer.underscore_analyzer.tokenizer"));
 
@@ -130,7 +127,7 @@ class IndexServiceTest {
             indexService.deleteIndex(INDEX);
         }
 
-        indexService.createIndex(INDEX, IndexMappingSetting.mappingAnalyzer("underscore_analyzer"), settings);
+        indexService.createIndex(INDEX, IndexMappingSetting.mappingAnalyzerSecasignDoc("underscore_analyzer"), settings);
         GetIndexResponse index = indexService.getIndex(INDEX);
         Assertions.assertTrue(index.getSettings().get(INDEX).hasValue("index.analysis.analyzer.underscore_analyzer.tokenizer"));
 
@@ -178,7 +175,7 @@ class IndexServiceTest {
             indexService.deleteIndex(INDEX);
         }
 
-        indexService.createIndex(INDEX, IndexMappingSetting.mappingAnalyzer("underscore_analyzer"), settings);
+        indexService.createIndex(INDEX, IndexMappingSetting.mappingAnalyzerSecasignDoc("underscore_analyzer"), settings);
         GetIndexResponse index = indexService.getIndex(INDEX);
         Assertions.assertTrue(index.getSettings().get(INDEX).hasValue("index.analysis.analyzer.underscore_analyzer.tokenizer"));
 
@@ -220,7 +217,7 @@ class IndexServiceTest {
             indexService.deleteIndex(INDEX);
         }
 
-        indexService.createIndex(INDEX, IndexMappingSetting.mappingAnalyzer("rebuilt_standard"), settings);
+        indexService.createIndex(INDEX, IndexMappingSetting.mappingAnalyzerSecasignDoc("rebuilt_standard"), settings);
         GetIndexResponse index = indexService.getIndex(INDEX);
         Assertions.assertTrue(index.getSettings().get(INDEX).hasValue("index.analysis.analyzer.rebuilt_standard.tokenizer"));
 
@@ -275,7 +272,7 @@ class IndexServiceTest {
         boolean indexExists = client.indices().exists(request, RequestOptions.DEFAULT);
         Assertions.assertFalse(indexExists);
 
-        indexService.createIndex(INDEX, contactService.createMappingObject());
+        indexService.createIndex(INDEX, IndexMappingSetting.mappingDefaultContactDoc());
 
         indexExists = client.indices().exists(request, RequestOptions.DEFAULT);
         Assertions.assertTrue(indexExists);
@@ -285,7 +282,7 @@ class IndexServiceTest {
     void updateMapping_updateIndex_returnOkResponse() throws IOException {
         Assertions.assertTrue(indexService.isIndexExisting(INDEX));
         AcknowledgedResponse acknowledgedResponse =
-                indexService.updateMapping(INDEX, contactService.createMappingObject());
+                indexService.updateMapping(INDEX, IndexMappingSetting.mappingDefaultContactDoc());
         Assertions.assertTrue(acknowledgedResponse.isAcknowledged());
     }
 
@@ -298,7 +295,7 @@ class IndexServiceTest {
 
     @Test
     void getTotalHits_indexedDocuments_returnAmountOfIndexedDocuments() throws IOException, InterruptedException {
-        indexService.updateMapping(INDEX, contactService.createMappingObject());
+        indexService.updateMapping(INDEX, IndexMappingSetting.mappingDefaultContactDoc());
         contactService.createContact(INDEX, createContact());
         contactService.createContact(INDEX, createContact());
         contactService.createContact(INDEX, createContact());
@@ -315,7 +312,7 @@ class IndexServiceTest {
     @Disabled
     @Test
     void getIndex_indexDetails_returnAllDetailsAboutTheIndex() throws IOException, InterruptedException {
-        indexService.updateMapping(INDEX, contactService.createMappingObject());
+        indexService.updateMapping(INDEX, IndexMappingSetting.mappingDefaultContactDoc());
         GetIndexResponse index = indexService.getIndex(INDEX);
 
         Assertions.assertEquals(index.getIndices().length, 1);

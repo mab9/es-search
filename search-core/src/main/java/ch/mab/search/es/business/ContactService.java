@@ -119,17 +119,4 @@ public class ContactService extends AbstractIndex {
         DeleteResponse response = client.delete(deleteRequest, RequestOptions.DEFAULT);
         return current;
     }
-
-    public XContentBuilder createMappingObject() throws IOException {
-        XContentBuilder builder = XContentFactory.jsonBuilder();
-        builder.startObject();
-        {
-            builder.startObject("properties");
-            { builder.startObject("firstName"); { builder.field("type", "text"); } builder.endObject(); }
-            { builder.startObject("lastName"); { builder.field("type", "text"); } builder.endObject(); }
-            { builder.startObject("technologies"); { builder.field("type", "nested"); } builder.endObject(); }
-            builder.endObject(); }
-        builder.endObject();
-        return builder;
-    }
 }
