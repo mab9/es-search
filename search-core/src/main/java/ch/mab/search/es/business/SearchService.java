@@ -138,7 +138,7 @@ public class SearchService extends AbstractIndex {
         return getSearchStrikes(searchResponse);
     }
 
-    public  List<SearchStrike> queryMatchByTerm(String index, String term) throws IOException {
+    public  List<SearchStrike> queryByTerm(String index, String term) throws IOException {
         SearchRequest searchRequest = new SearchRequest(index);
         SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 
@@ -160,8 +160,10 @@ public class SearchService extends AbstractIndex {
         HighlightBuilder highlightBuilder = createHighlighter( "documentName");
         sourceBuilder.highlighter(highlightBuilder);
 
-        QueryBuilder query =  QueryBuilders.matchPhraseQuery("documentName", term);
-        sourceBuilder.query(query);
+        MatchPhraseQueryBuilder phraseQuery = new MatchPhraseQueryBuilder("documentName", term);
+        // amount of missing words between two word in a term
+        phraseQuery.slop(10);
+        sourceBuilder.query(phraseQuery);
 
         searchRequest.source(sourceBuilder);
         SearchResponse search = client.search(searchRequest, RequestOptions.DEFAULT);

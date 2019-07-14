@@ -152,13 +152,13 @@ class SearchServiceTest {
         List<SearchStrike> strikes;
         List<String> expectedStrikes;
 
-        strikes = searchService.queryMatchByTerm(INDEX, "Mandel");
+        strikes = searchService.queryByTerm(INDEX, "Mandel");
         expectedStrikes = strikes.stream().flatMap(strike -> strike.getHighlights().stream()).collect(Collectors.toList());
         Assertions.assertTrue(expectedStrikes.contains("2018_<b>mandel</b>_fx_threads"));
         Assertions.assertTrue(expectedStrikes.contains("2019 <b>mandel</b> fx threads"));
         Assertions.assertEquals(strikes.get(0).getScore(), strikes.get(1).getScore());
 
-        strikes = searchService.queryMatchByTerm(INDEX, "2018_mandel");
+        strikes = searchService.queryByTerm(INDEX, "2018_mandel");
         expectedStrikes = strikes.stream().flatMap(strike -> strike.getHighlights().stream()).collect(Collectors.toList());
         Assertions.assertTrue(expectedStrikes.contains("<b>2018</b>_<b>mandel</b>_fx_threads"));
         Assertions.assertTrue(expectedStrikes.contains("2019 <b>mandel</b> fx threads"));
@@ -168,6 +168,7 @@ class SearchServiceTest {
     // fuzzy einbauen und testen
     // phrase einbauen und testen
     // shingle mapping einbauen und testen
+    // search in 2 indexes
 
         @Test
     void findByDocumentNamenAndTerm_phraseQuery_returnAnalyzedDocuments() throws IOException, InterruptedException {
@@ -184,16 +185,15 @@ class SearchServiceTest {
         List<SearchStrike> strikes;
         List<String> expectedStrikes;
 
-        strikes = searchService.queryMatchByTerm(INDEX, "Mandel");
+        strikes = searchService.queryPhraseByTerm(INDEX, "mandel threads");
         expectedStrikes = strikes.stream().flatMap(strike -> strike.getHighlights().stream()).collect(Collectors.toList());
-        Assertions.assertTrue(expectedStrikes.contains("2018_<b>mandel</b>_fx_threads"));
-        Assertions.assertTrue(expectedStrikes.contains("2019 <b>mandel</b> fx threads"));
+        Assertions.assertTrue(expectedStrikes.contains("2018_<b>mandel</b>_fx_<b>threads</b>"));
+        Assertions.assertTrue(expectedStrikes.contains("2019 <b>mandel</b> fx <b>threads</b>"));
         Assertions.assertEquals(strikes.get(0).getScore(), strikes.get(1).getScore());
 
-        strikes = searchService.queryMatchByTerm(INDEX, "2018_mandel");
+        strikes = searchService.queryPhraseByTerm(INDEX, "2018 threads");
         expectedStrikes = strikes.stream().flatMap(strike -> strike.getHighlights().stream()).collect(Collectors.toList());
-        Assertions.assertTrue(expectedStrikes.contains("<b>2018</b>_<b>mandel</b>_fx_threads"));
-        Assertions.assertTrue(expectedStrikes.contains("2019 <b>mandel</b> fx threads"));
-        Assertions.assertNotEquals(strikes.get(0).getScore(), strikes.get(1).getScore());
+        Assertions.assertTrue(expectedStrikes.contains("<b>2018</b>_mandel_fx_<b>threads</b>"));
+        Assertions.assertEquals(1, expectedStrikes.size());
     }
 }
