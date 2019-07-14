@@ -1,5 +1,6 @@
 package ch.mab.search.es.rest;
 
+import ch.mab.search.es.base.IndexMappingSetting;
 import ch.mab.search.es.business.IndexService;
 import ch.mab.search.es.business.ContactService;
 import org.elasticsearch.action.support.master.AcknowledgedResponse;
@@ -40,7 +41,7 @@ public class IndexController {
      */
     @PutMapping(value = "{index}")
     public ResponseEntity<AcknowledgedResponse> updateIndexMapping(@PathVariable String index) throws IOException {
-        AcknowledgedResponse response = indexService.updateMapping(index, contactService.createMappingObject());
+        AcknowledgedResponse response = indexService.updateMapping(index, IndexMappingSetting.mappingDefaultContactDoc());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
