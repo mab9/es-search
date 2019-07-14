@@ -7,95 +7,113 @@ import java.io.IOException;
 
 public class IndexMappingSetting {
 
-    public static XContentBuilder mappingDefaultContactDoc() throws IOException {
-        return XContentFactory.jsonBuilder()
-        .startObject()
-            .startObject("properties")
-                .startObject("firstName")
-                    .field("type", "text")
+    public static XContentBuilder mappingDefaultContactDoc() {
+        try {
+            return XContentFactory.jsonBuilder()
+            .startObject()
+                .startObject("properties")
+                    .startObject("firstName")
+                        .field("type", "text")
+                    .endObject()
+                    .startObject("lastName")
+                        .field("type", "text")
+                    .endObject()
+                    .startObject("technologies")
+                         .field("type", "nested")
+                    .endObject()
                 .endObject()
-                .startObject("lastName")
-                    .field("type", "text")
-                .endObject()
-                .startObject("technologies")
-                     .field("type", "nested")
-                .endObject()
-            .endObject()
-        .endObject();
+            .endObject();
+        } catch (IOException e) {
+            throw new RuntimeException("Could not build the object mapping.", e);
+        }
     }
 
-    public static XContentBuilder mappingDefaultSecasignDoc() throws IOException {
-        return XContentFactory.jsonBuilder()
-        .startObject()
-            .startObject("properties")
-                .startObject("documentId")
-                    .field("type", "text")
+    public static XContentBuilder mappingDefaultSecasignDoc() {
+        try {
+            return XContentFactory.jsonBuilder()
+            .startObject()
+                .startObject("properties")
+                    .startObject("documentId")
+                        .field("type", "text")
+                    .endObject()
+                    .startObject("documentName")
+                        .field("type", "text")
+                    .endObject()
+                    .startObject("uploadDate")
+                        .field("type", "date")
+                    .endObject()
+                    .startObject("documentContent")
+                        .field("type", "text")
+                    .endObject()
                 .endObject()
-                .startObject("documentName")
-                    .field("type", "text")
-                .endObject()
-                .startObject("uploadDate")
-                    .field("type", "date")
-                .endObject()
-                .startObject("documentContent")
-                    .field("type", "text")
-                .endObject()
-            .endObject()
-        .endObject();
+            .endObject();
+        } catch (IOException e) {
+            throw new RuntimeException("Could not build the object mapping.", e);
+        }
     }
 
-    public static XContentBuilder mappingAnalyzerSecasignDoc() throws IOException {
-        return XContentFactory.jsonBuilder()
-        .startObject()
-            .startObject("properties")
-                .startObject("documentId")
-                    .field("type", "text")
+    public static XContentBuilder mappingAnalyzerSecasignDoc() {
+        try {
+            return XContentFactory.jsonBuilder()
+            .startObject()
+                .startObject("properties")
+                    .startObject("documentId")
+                        .field("type", "text")
+                    .endObject()
+                    .startObject("documentName")
+                        .field("type", "text")
+                        .field("analyzer", "underscore_analyzer")
+                    .endObject()
+                    .startObject("uploadDate")
+                        .field("type", "date")
+                    .endObject()
+                    .startObject("documentContent")
+                        .field("type", "text")
+                        .field("analyzer", "rebuilt_standard_analyzer")
+                    .endObject()
                 .endObject()
-                .startObject("documentName")
-                    .field("type", "text")
-                    .field("analyzer", "underscore_analyzer")
-                .endObject()
-                .startObject("uploadDate")
-                    .field("type", "date")
-                .endObject()
-                .startObject("documentContent")
-                    .field("type", "text")
-                    .field("analyzer", "rebuilt_standard_analyzer")
-                .endObject()
-            .endObject()
-        .endObject();
+            .endObject();
+        } catch (IOException e) {
+            throw new RuntimeException("Could not build the object mapping.", e);
+        }
     }
 
-    public static XContentBuilder mappingAnalyzerSecasignDoc(String docNameAnalyzer) throws IOException {
+    public static XContentBuilder mappingAnalyzerSecasignDoc(String docNameAnalyzer) {
         return mappingAnalyzerSecasignDoc(docNameAnalyzer, "german");
     }
 
 
-    public static XContentBuilder mappingAnalyzerSecasignDoc(String docNameAnalyzer, String docContentAnalyzer) throws IOException {
-        return XContentFactory.jsonBuilder()
-        .startObject()
-            .startObject("properties")
-                .startObject("documentId")
-                    .field("type", "text")
+    public static XContentBuilder mappingAnalyzerSecasignDoc(String docNameAnalyzer, String docContentAnalyzer) {
+        try {
+            return XContentFactory.jsonBuilder()
+            .startObject()
+                .startObject("properties")
+                    .startObject("documentId")
+                        .field("type", "text")
+                    .endObject()
+                    .startObject("documentName")
+                        .field("type", "text")
+                        .field("analyzer", docNameAnalyzer)
+                    .endObject()
+                    .startObject("uploadDate")
+                        .field("type", "date")
+                    .endObject()
+                    .startObject("documentContent")
+                        .field("type", "text")
+                        .field("analyzer", docContentAnalyzer)
+                    .endObject()
                 .endObject()
-                .startObject("documentName")
-                    .field("type", "text")
-                    .field("analyzer", docNameAnalyzer)
-                .endObject()
-                .startObject("uploadDate")
-                    .field("type", "date")
-                .endObject()
-                .startObject("documentContent")
-                    .field("type", "text")
-                    .field("analyzer", docContentAnalyzer)
-                .endObject()
-            .endObject()
-        .endObject();
+            .endObject();
+        } catch (IOException e) {
+            throw new RuntimeException("Could not build the object mapping.", e);
+        }
     }
 
-    public static XContentBuilder mappingShingle() throws IOException {
-        XContentBuilder builder = XContentFactory.jsonBuilder();
-        builder.startObject();{
+    public static XContentBuilder mappingShingle() {
+        XContentBuilder builder = null;
+        try {
+            builder = XContentFactory.jsonBuilder();
+             builder.startObject();{
             builder.startObject("properties");{
                 builder.startObject("documentId");{
                     builder.field("type", "text");
@@ -121,6 +139,10 @@ public class IndexMappingSetting {
         }
         builder.endObject();
         return builder;
+        } catch (IOException e) {
+                        throw new RuntimeException("Could not build the object mapping.", e);
+
+        }
     }
 
     /*
@@ -133,39 +155,43 @@ public class IndexMappingSetting {
         Use the "underscore_analyzer" for the field documentName. It splits the documentName at the
         character underscore or whitespace.
      */
-    public static XContentBuilder settingGermanRebuiltAndUnderscoreAnalyzerSecasignDoc() throws IOException {
-        return XContentFactory.jsonBuilder()
-        .startObject()
-                .startObject("analysis")
-                    .startObject("filter")
-                        .startObject("german_stop")
-                            .field("type", "stop")
-                            .field("stopwords", "_german_")
+    public static XContentBuilder settingGermanRebuiltAndUnderscoreAnalyzerSecasignDoc() {
+        try {
+            return XContentFactory.jsonBuilder()
+            .startObject()
+                    .startObject("analysis")
+                        .startObject("filter")
+                            .startObject("german_stop")
+                                .field("type", "stop")
+                                .field("stopwords", "_german_")
+                            .endObject()
+                            .startObject("german_stemmer")
+                                .field("type", "stemmer")
+                                .field("language", "light_german")
+                            .endObject()
                         .endObject()
-                        .startObject("german_stemmer")
-                            .field("type", "stemmer")
-                            .field("language", "light_german")
+                        .startObject("analyzer")
+                            .startObject("rebuilt_standard_analyzer")
+                                .field("type", "custom")
+                                .field("tokenizer", "standard")
+                                .field("filter", "lowercase, german_stop, german_stemmer")
+                            .endObject()
+                            .startObject("underscore_analyzer")
+                                .field("type", "custom")
+                                .field("tokenizer", "underscore_tokenizer")
+                                .field("filter", "lowercase, german_stop, german_stemmer")
+                            .endObject()
+                        .endObject()
+                        .startObject("tokenizer")
+                            .startObject("underscore_tokenizer")
+                                .field("type", "char_group")
+                                .field("tokenize_on_chars", "_,whitespace")
+                            .endObject()
                         .endObject()
                     .endObject()
-                    .startObject("analyzer")
-                        .startObject("rebuilt_standard_analyzer")
-                            .field("type", "custom")
-                            .field("tokenizer", "standard")
-                            .field("filter", "lowercase, german_stop, german_stemmer")
-                        .endObject()
-                        .startObject("underscore_analyzer")
-                            .field("type", "custom")
-                            .field("tokenizer", "underscore_tokenizer")
-                            .field("filter", "lowercase, german_stop, german_stemmer")
-                        .endObject()
-                    .endObject()
-                    .startObject("tokenizer")
-                        .startObject("underscore_tokenizer")
-                            .field("type", "char_group")
-                            .field("tokenize_on_chars", "_,whitespace")
-                        .endObject()
-                    .endObject()
-                .endObject()
-            .endObject();
+                .endObject();
+        } catch (IOException e) {
+            throw new RuntimeException("Could not build the object mapping.", e);
+        }
     }
 }

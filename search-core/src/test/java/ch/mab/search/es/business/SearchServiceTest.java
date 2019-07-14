@@ -4,6 +4,7 @@ import ch.mab.search.es.TestHelperService;
 import ch.mab.search.es.base.IndexMappingSetting;
 import ch.mab.search.es.model.SecasignboxDocument;
 import org.elasticsearch.action.bulk.BulkResponse;
+import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.indices.GetIndexRequest;
@@ -146,5 +147,23 @@ class SearchServiceTest {
         List<SecasignboxDocument> search = null; // secasignboxService.searchByDocumentName(INDEX, "AS_MandelFx.pdf");
         Assertions.assertEquals(1, search.size());
         Assertions.assertTrue(docs.contains(search.get(0)));
+    }
+
+    @Test
+    void searchByDocumentName_mappingAndSetting_returnAnalyzedDocuments() throws IOException, InterruptedException {
+        indexService.deleteIndex(INDEX);
+        indexService.createIndex(INDEX, IndexMappingSetting.mappingAnalyzerSecasignDoc(), IndexMappingSetting.settingGermanRebuiltAndUnderscoreAnalyzerSecasignDoc());
+
+      //  indexService.createIndex(INDEX, IndexMappingSetting.mappingDefaultSecasignDoc(), IndexMappingSetting.settingGermanRebuiltAndUnderscoreAnalyzerSecasignDoc());
+        SecasignboxDocument doc1 = testService.createSecasignDocCustomeContentAndDate("2018_mandel_fx_threads");
+        SecasignboxDocument doc2 = testService.createSecasignDocCustomeContentAndDate("2019 mandel fx threads");
+
+        searchService.indexDocument(INDEX, doc1);
+        searchService.indexDocument(INDEX, doc2);
+
+        TimeUnit.SECONDS.sleep(2);
+
+        SearchResponse mandel = searchService.findByDocumentNamenAndTerm(INDEX, "mandel");
+        System.out.println(mandel.getHits().getTotalHits().value);
     }
 }

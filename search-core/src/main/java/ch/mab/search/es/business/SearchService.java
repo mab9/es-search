@@ -20,8 +20,8 @@ import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.common.text.Text;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentType;
-import org.elasticsearch.index.query.MatchAllQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.index.query.*;
+import org.elasticsearch.index.search.MatchQuery;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
@@ -139,6 +139,18 @@ public class SearchService extends AbstractIndex {
 
         SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
         return getSearchResultHighlighted(searchResponse);
+    }
+
+    public SearchResponse findByDocumentNamenAndTerm(String index, String term) throws IOException {
+        SearchRequest searchRequest = new SearchRequest(index);
+        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+
+        QueryBuilder query =  QueryBuilders.matchQuery("documentName", term);
+        sourceBuilder.query(query);
+
+        searchRequest.source(sourceBuilder);
+        SearchResponse search = client.search(searchRequest, RequestOptions.DEFAULT);
+        return search;
     }
 
     private HighlightBuilder createHighlighter(String... fields) {
