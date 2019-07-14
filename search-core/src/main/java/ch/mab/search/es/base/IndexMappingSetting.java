@@ -40,13 +40,13 @@ public class IndexMappingSetting {
                     .startObject("documentId")
                         .field("type", "text")
                     .endObject()
-                    .startObject("documentName")
+                    .startObject(FIELD_SECASIGN_DOC_NAME)
                         .field("type", "text")
                     .endObject()
-                    .startObject("uploadDate")
+                    .startObject(FIELD_SECASIGN_DOC_UPLOAD_DATE)
                         .field("type", "date")
                     .endObject()
-                    .startObject("documentContent")
+                    .startObject(FIELD_SECASIGN_DOC_CONTENT)
                         .field("type", "text")
                     .endObject()
                 .endObject()
@@ -64,14 +64,14 @@ public class IndexMappingSetting {
                     .startObject("documentId")
                         .field("type", "text")
                     .endObject()
-                    .startObject("documentName")
+                    .startObject(FIELD_SECASIGN_DOC_NAME)
                         .field("type", "text")
                         .field("analyzer", "underscore_analyzer")
                     .endObject()
-                    .startObject("uploadDate")
+                    .startObject(FIELD_SECASIGN_DOC_UPLOAD_DATE)
                         .field("type", "date")
                     .endObject()
-                    .startObject("documentContent")
+                    .startObject(FIELD_SECASIGN_DOC_CONTENT)
                         .field("type", "text")
                         .field("analyzer", "rebuilt_standard_analyzer")
                     .endObject()
@@ -95,14 +95,14 @@ public class IndexMappingSetting {
                     .startObject("documentId")
                         .field("type", "text")
                     .endObject()
-                    .startObject("documentName")
+                    .startObject(FIELD_SECASIGN_DOC_NAME)
                         .field("type", "text")
                         .field("analyzer", docNameAnalyzer)
                     .endObject()
-                    .startObject("uploadDate")
+                    .startObject(FIELD_SECASIGN_DOC_UPLOAD_DATE)
                         .field("type", "date")
                     .endObject()
-                    .startObject("documentContent")
+                    .startObject(FIELD_SECASIGN_DOC_CONTENT)
                         .field("type", "text")
                         .field("analyzer", docContentAnalyzer)
                     .endObject()
@@ -124,19 +124,19 @@ public class IndexMappingSetting {
                 }builder.endObject();
             }
             {
-                builder.startObject("documentName");{
+                builder.startObject(FIELD_SECASIGN_DOC_NAME);{
                 builder.field("search_analyzer", "analyzer_shingle");
                 builder.field("index_analyzer", "analyzer_shingle");
                 builder.field("type", "text");
             }builder.endObject();
             }
             {
-                builder.startObject("uploadDate");{
+                builder.startObject(FIELD_SECASIGN_DOC_UPLOAD_DATE);{
                 builder.field("type", "date");
             }builder.endObject();
             }
             {
-                builder.startObject("documentContent");{
+                builder.startObject(FIELD_SECASIGN_DOC_CONTENT);{
                 builder.field("type", "text");
             }builder.endObject();
             }builder.endObject();
