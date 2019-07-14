@@ -28,7 +28,7 @@ public class TestHelperService {
 
 
 
-    public List<SecasignboxDocument> getSecasignboxDocumentsOfPdfs(List<Path> pdfs) {
+    public List<SecasignboxDocument> readSecasignDocumentFromPdfs(List<Path> pdfs) {
         return pdfs.stream().map(pdf -> {
             try {
                 String text = ocrService.extractTextFromFile(pdf.toFile());
@@ -98,6 +98,6 @@ public class TestHelperService {
     public List<SecasignboxDocument> gatherSecasignBoxDocuments(int amount) {
         List<Path> files = collectPathsOfPdfTestFiles();
         files = files.subList(0, amount);
-        return getSecasignboxDocumentsOfPdfs(files);
+        return readSecasignDocumentFromPdfs(files);
     }
 }

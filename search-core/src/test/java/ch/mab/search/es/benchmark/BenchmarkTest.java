@@ -49,7 +49,7 @@ public class BenchmarkTest {
     void index_test_set_1() throws  IOException {
         List<Path> files = testService.collectPathsOfPdfTestFiles("/home/mab/Documents/fhnw/sem-6/ip5/ip5-testdatenset");
         long totalFileSize = calculateTotalFileSize(files);
-        List<SecasignboxDocument> docs = testService.getSecasignboxDocumentsOfPdfs(files);
+        List<SecasignboxDocument> docs = testService.readSecasignDocumentFromPdfs(files);
 
         randomizeUploadDateBetweenDates(docs, Date.from(ZonedDateTime.now().minusMonths(1).toInstant()), new Date());
 
@@ -67,7 +67,7 @@ public class BenchmarkTest {
         List<Path> files = testService.collectPathsOfPdfTestFiles();
         //files = files.subList(0, 20);
         long totalFileSize = calculateTotalFileSize(files);
-        List<SecasignboxDocument> docs = testService.getSecasignboxDocumentsOfPdfs(files);
+        List<SecasignboxDocument> docs = testService.readSecasignDocumentFromPdfs(files);
 
         randomizeUploadDateBetweenDates(docs, Date.from(ZonedDateTime.now().minusMonths(1).toInstant()), new Date());
 
@@ -95,7 +95,7 @@ public class BenchmarkTest {
         List<Path> files = testService.collectPathsOfPdfTestFiles();
         files = files.subList(0, 100);
         long totalFileSize = calculateTotalFileSize(files);
-        List<SecasignboxDocument> docs = testService.getSecasignboxDocumentsOfPdfs(files);
+        List<SecasignboxDocument> docs = testService.readSecasignDocumentFromPdfs(files);
 
         long start = System.currentTimeMillis();
         searchService.bulkIndexDocument(INDEX, docs);
@@ -111,7 +111,7 @@ public class BenchmarkTest {
         List<Path> files = testService.collectPathsOfPdfTestFiles();
         files = files.subList(0, 200);
         long totalFileSize = calculateTotalFileSize(files);
-        List<SecasignboxDocument> docs = testService.getSecasignboxDocumentsOfPdfs(files);
+        List<SecasignboxDocument> docs = testService.readSecasignDocumentFromPdfs(files);
 
         long start = System.currentTimeMillis();
         searchService.bulkIndexDocument(INDEX, docs);
@@ -127,7 +127,7 @@ public class BenchmarkTest {
         List<Path> files = testService.collectPathsOfPdfTestFiles();
         files = files.subList(0, 400);
         long totalFileSize = calculateTotalFileSize(files);
-        List<SecasignboxDocument> docs = testService.getSecasignboxDocumentsOfPdfs(files);
+        List<SecasignboxDocument> docs = testService.readSecasignDocumentFromPdfs(files);
 
         long start = System.currentTimeMillis();
         searchService.bulkIndexDocument(INDEX, docs);

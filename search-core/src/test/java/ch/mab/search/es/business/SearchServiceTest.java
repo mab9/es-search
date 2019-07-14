@@ -126,7 +126,7 @@ class SearchServiceTest {
     @Test
     void bulkIndexDocument_createBulkOfDocuments_returnOk() throws IOException, InterruptedException {
         List<Path> files = testService.collectPathsOfPdfTestFiles();
-        List<SecasignboxDocument> docs = testService.getSecasignboxDocumentsOfPdfs(files);
+        List<SecasignboxDocument> docs = testService.readSecasignDocumentFromPdfs(files);
         BulkResponse bulkItemResponses = searchService.bulkIndexDocument(INDEX, docs);
         TimeUnit.SECONDS.sleep(4);
 
@@ -139,7 +139,7 @@ class SearchServiceTest {
     @Test
     void searchByDocumentName_indexedDocuments_returnDocumentWithSameName() throws IOException, InterruptedException {
         List<Path> files = testService.collectPathsOfPdfTestFiles();
-        List<SecasignboxDocument> docs = testService.getSecasignboxDocumentsOfPdfs(files);
+        List<SecasignboxDocument> docs = testService.readSecasignDocumentFromPdfs(files);
         searchService.bulkIndexDocument(INDEX, docs);
         TimeUnit.SECONDS.sleep(2);
 
