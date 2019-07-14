@@ -19,9 +19,6 @@ public class IndexController {
     @Autowired
     private IndexService indexService;
 
-    @Autowired
-    private ContactService contactService;
-
     public IndexController() {
     }
 
@@ -36,9 +33,6 @@ public class IndexController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    /*
-        TODO Update profileIndex mapping - implement generic
-     */
     @PutMapping(value = "{index}")
     public ResponseEntity<AcknowledgedResponse> updateIndexMapping(@PathVariable String index) throws IOException {
         AcknowledgedResponse response = indexService.updateMapping(index, IndexMappingSetting.mappingDefaultContactDoc());
