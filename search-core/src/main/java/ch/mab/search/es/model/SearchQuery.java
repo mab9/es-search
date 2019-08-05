@@ -4,7 +4,7 @@ import java.util.Date;
 
 public class SearchQuery {
 
-    private String term = "";
+    private String term = null;
     private boolean fuzzy = false;
     private boolean documentName = false;
     private Date fromDate = null;
