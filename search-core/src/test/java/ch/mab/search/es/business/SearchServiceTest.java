@@ -14,13 +14,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @SpringBootTest
 class SearchServiceTest {
@@ -53,7 +51,6 @@ class SearchServiceTest {
             indexService.deleteIndex(INDEX);
         }
     }
-
 
     @Test
     void createIndex_createSecasignboxDocumentwIndexWithtMapping_returnOkResponse() throws IOException {
@@ -142,10 +139,11 @@ class SearchServiceTest {
     @Test
     void queryByTerm_matchQuery_returnAnalyzedDocuments() throws IOException, InterruptedException {
         indexService.deleteIndex(INDEX);
-        indexService.createIndex(INDEX, IndexMappingSetting.mappingAnalyzerSecasignDoc(), IndexMappingSetting.settingGermanRebuiltAndUnderscoreAnalyzerSecasignDoc());
+        indexService.createIndex(INDEX, IndexMappingSetting.mappingAnalyzerSecasignDoc(),
+                                 IndexMappingSetting.settingGermanRebuiltAndUnderscoreAnalyzerSecasignDoc());
 
-        SecasignboxDocument doc1 = testService.createSecasignDocCustomeContentAndDate("2018_mandel_fx_threads");
-        SecasignboxDocument doc2 = testService.createSecasignDocCustomeContentAndDate("2019 mandel fx threads");
+        SecasignboxDocument doc1 = testService.createSecasignDocCustomeName("2018_mandel_fx_threads");
+        SecasignboxDocument doc2 = testService.createSecasignDocCustomeName("2019 mandel fx threads");
 
         searchService.indexDocument(INDEX, doc1);
         searchService.indexDocument(INDEX, doc2);
@@ -154,14 +152,16 @@ class SearchServiceTest {
         List<SearchStrike> strikes;
         List<String> expectedStrikes;
 
-        strikes = searchService.queryByTerm(INDEX, "Mandel");
-        expectedStrikes = strikes.stream().flatMap(strike -> strike.getHighlights().stream()).collect(Collectors.toList());
+        strikes = searchService.queryByTermOnDocName(INDEX, "Mandel");
+        expectedStrikes =
+                strikes.stream().flatMap(strike -> strike.getHighlights().stream()).collect(Collectors.toList());
         Assertions.assertTrue(expectedStrikes.contains("2018_<b>mandel</b>_fx_threads"));
         Assertions.assertTrue(expectedStrikes.contains("2019 <b>mandel</b> fx threads"));
         Assertions.assertEquals(strikes.get(0).getScore(), strikes.get(1).getScore());
 
-        strikes = searchService.queryByTerm(INDEX, "2018_mandel");
-        expectedStrikes = strikes.stream().flatMap(strike -> strike.getHighlights().stream()).collect(Collectors.toList());
+        strikes = searchService.queryByTermOnDocName(INDEX, "2018_mandel");
+        expectedStrikes =
+                strikes.stream().flatMap(strike -> strike.getHighlights().stream()).collect(Collectors.toList());
         Assertions.assertTrue(expectedStrikes.contains("<b>2018</b>_<b>mandel</b>_fx_threads"));
         Assertions.assertTrue(expectedStrikes.contains("2019 <b>mandel</b> fx threads"));
         Assertions.assertNotEquals(strikes.get(0).getScore(), strikes.get(1).getScore());
@@ -170,10 +170,11 @@ class SearchServiceTest {
     @Test
     void queryFuzzyByTerm_matchFuzzy_returnAnalyzedDocuments() throws IOException, InterruptedException {
         indexService.deleteIndex(INDEX);
-        indexService.createIndex(INDEX, IndexMappingSetting.mappingAnalyzerSecasignDoc(), IndexMappingSetting.settingGermanRebuiltAndUnderscoreAnalyzerSecasignDoc());
+        indexService.createIndex(INDEX, IndexMappingSetting.mappingAnalyzerSecasignDoc(),
+                                 IndexMappingSetting.settingGermanRebuiltAndUnderscoreAnalyzerSecasignDoc());
 
-        SecasignboxDocument doc1 = testService.createSecasignDocCustomeContentAndDate("2018_mandel_fx_threads");
-        SecasignboxDocument doc2 = testService.createSecasignDocCustomeContentAndDate("2019 mandel fx threads");
+        SecasignboxDocument doc1 = testService.createSecasignDocCustomeName("2018_mandel_fx_threads");
+        SecasignboxDocument doc2 = testService.createSecasignDocCustomeName("2019 mandel fx threads");
 
         searchService.indexDocument(INDEX, doc1);
         searchService.indexDocument(INDEX, doc2);
@@ -182,14 +183,16 @@ class SearchServiceTest {
         List<SearchStrike> strikes;
         List<String> expectedStrikes;
 
-        strikes = searchService.queryFuzzyByTerm(new String[] {INDEX}, "treads");
-        expectedStrikes = strikes.stream().flatMap(strike -> strike.getHighlights().stream()).collect(Collectors.toList());
+        strikes = searchService.queryFuzzyByTermOnDocName(new String[] { INDEX }, "treads");
+        expectedStrikes =
+                strikes.stream().flatMap(strike -> strike.getHighlights().stream()).collect(Collectors.toList());
         Assertions.assertTrue(expectedStrikes.contains("2018_mandel_fx_<b>threads</b>"));
         Assertions.assertTrue(expectedStrikes.contains("2019 mandel fx <b>threads</b>"));
         Assertions.assertEquals(strikes.get(0).getScore(), strikes.get(1).getScore());
 
-        strikes = searchService.queryFuzzyByTerm(new String[] {INDEX}, "2018");
-        expectedStrikes = strikes.stream().flatMap(strike -> strike.getHighlights().stream()).collect(Collectors.toList());
+        strikes = searchService.queryFuzzyByTermOnDocName(new String[] { INDEX }, "2018");
+        expectedStrikes =
+                strikes.stream().flatMap(strike -> strike.getHighlights().stream()).collect(Collectors.toList());
         Assertions.assertTrue(expectedStrikes.contains("<b>2018</b>_mandel_fx_threads"));
         Assertions.assertTrue(expectedStrikes.contains("<b>2019</b> mandel fx threads"));
         Assertions.assertNotEquals(strikes.get(0).getScore(), strikes.get(1).getScore());
@@ -198,11 +201,12 @@ class SearchServiceTest {
     @Test
     void queryPhraseByTerm_matchPhrase_returnAnalyzedDocuments() throws IOException, InterruptedException {
         indexService.deleteIndex(INDEX);
-        indexService.createIndex(INDEX, IndexMappingSetting.mappingAnalyzerSecasignDoc(), IndexMappingSetting.settingGermanRebuiltAndUnderscoreAnalyzerSecasignDoc());
+        indexService.createIndex(INDEX, IndexMappingSetting.mappingAnalyzerSecasignDoc(),
+                                 IndexMappingSetting.settingGermanRebuiltAndUnderscoreAnalyzerSecasignDoc());
 
-        SecasignboxDocument doc1 = testService.createSecasignDocCustomeContentAndDate("2018_mandel_fx_threads_concurrent_pic");
-        SecasignboxDocument doc2 = testService.createSecasignDocCustomeContentAndDate("2018_mandel_fx_threads_concurrent_img");
-        SecasignboxDocument doc3 = testService.createSecasignDocCustomeContentAndDate("2019 mandel fx threads concurrent pic");
+        SecasignboxDocument doc1 = testService.createSecasignDocCustomeName("2018_mandel_fx_threads_concurrent_pic");
+        SecasignboxDocument doc2 = testService.createSecasignDocCustomeName("2018_mandel_fx_threads_concurrent_img");
+        SecasignboxDocument doc3 = testService.createSecasignDocCustomeName("2019 mandel fx threads concurrent pic");
 
         searchService.indexDocument(INDEX, doc1);
         searchService.indexDocument(INDEX, doc2);
@@ -212,35 +216,40 @@ class SearchServiceTest {
         List<SearchStrike> strikes;
         List<String> expectedStrikes;
 
-        strikes = searchService.queryPhraseByTerm(INDEX, "mandel threads");
-        expectedStrikes = strikes.stream().flatMap(strike -> strike.getHighlights().stream()).collect(Collectors.toList());
+        strikes = searchService.queryPhraseByTermOnDocName(INDEX, "mandel threads");
+        expectedStrikes =
+                strikes.stream().flatMap(strike -> strike.getHighlights().stream()).collect(Collectors.toList());
         Assertions.assertTrue(expectedStrikes.contains("2018_<b>mandel</b>_fx_<b>threads</b>_concurrent_pic"));
         Assertions.assertTrue(expectedStrikes.contains("2018_<b>mandel</b>_fx_<b>threads</b>_concurrent_img"));
         Assertions.assertTrue(expectedStrikes.contains("2019 <b>mandel</b> fx <b>threads</b> concurrent pic"));
         Assertions.assertEquals(strikes.get(0).getScore(), strikes.get(1).getScore());
         Assertions.assertEquals(strikes.get(0).getScore(), strikes.get(2).getScore());
 
-        strikes = searchService.queryPhraseByTerm(INDEX, "2018 threads");
-        expectedStrikes = strikes.stream().flatMap(strike -> strike.getHighlights().stream()).collect(Collectors.toList());
+        strikes = searchService.queryPhraseByTermOnDocName(INDEX, "2018 threads");
+        expectedStrikes =
+                strikes.stream().flatMap(strike -> strike.getHighlights().stream()).collect(Collectors.toList());
         Assertions.assertTrue(expectedStrikes.contains("<b>2018</b>_mandel_fx_<b>threads</b>_concurrent_pic"));
         Assertions.assertTrue(expectedStrikes.contains("<b>2018</b>_mandel_fx_<b>threads</b>_concurrent_img"));
         Assertions.assertEquals(strikes.get(0).getScore(), strikes.get(1).getScore());
         Assertions.assertEquals(2, expectedStrikes.size());
 
-        strikes = searchService.queryPhraseByTerm(INDEX, "2018 fx pic");
-        expectedStrikes = strikes.stream().flatMap(strike -> strike.getHighlights().stream()).collect(Collectors.toList());
+        strikes = searchService.queryPhraseByTermOnDocName(INDEX, "2018 fx pic");
+        expectedStrikes =
+                strikes.stream().flatMap(strike -> strike.getHighlights().stream()).collect(Collectors.toList());
         Assertions.assertTrue(expectedStrikes.contains("<b>2018</b>_mandel_<b>fx</b>_threads_concurrent_<b>pic</b>"));
         Assertions.assertEquals(1, expectedStrikes.size());
     }
 
     @Test
-    void queryPhraseFuzzyByTerm_matchPhraseAndFuzzyMixed_returnAnalyzedDocuments() throws IOException, InterruptedException {
+    void queryPhraseFuzzyByTerm_matchPhraseAndFuzzyMixed_returnAnalyzedDocuments() throws IOException,
+            InterruptedException {
         indexService.deleteIndex(INDEX);
-        indexService.createIndex(INDEX, IndexMappingSetting.mappingAnalyzerSecasignDoc(), IndexMappingSetting.settingGermanRebuiltAndUnderscoreAnalyzerSecasignDoc());
+        indexService.createIndex(INDEX, IndexMappingSetting.mappingAnalyzerSecasignDoc(),
+                                 IndexMappingSetting.settingGermanRebuiltAndUnderscoreAnalyzerSecasignDoc());
 
-        SecasignboxDocument doc1 = testService.createSecasignDocCustomeContentAndDate("2018_mandel_fx_threads_concurrent_pic");
-        SecasignboxDocument doc2 = testService.createSecasignDocCustomeContentAndDate("2018_mandel_fx_threads_concurrent_img");
-        SecasignboxDocument doc3 = testService.createSecasignDocCustomeContentAndDate("2019 mandel fx threads concurrent pic");
+        SecasignboxDocument doc1 = testService.createSecasignDocCustomeName("2018_mandel_fx_threads_concurrent_pic");
+        SecasignboxDocument doc2 = testService.createSecasignDocCustomeName("2018_mandel_fx_threads_concurrent_img");
+        SecasignboxDocument doc3 = testService.createSecasignDocCustomeName("2019 mandel fx threads concurrent pic");
 
         searchService.indexDocument(INDEX, doc1);
         searchService.indexDocument(INDEX, doc2);
@@ -250,38 +259,46 @@ class SearchServiceTest {
         List<SearchStrike> strikes;
         List<String> expectedStrikes;
 
-        strikes = searchService.queryPhraseFuzzyByTerm(INDEX, "mandel treads");
-        expectedStrikes = strikes.stream().flatMap(strike -> strike.getHighlights().stream()).collect(Collectors.toList());
+        strikes = searchService.queryPhraseFuzzyByTermOnDocName(INDEX, "mandel treads");
+        expectedStrikes =
+                strikes.stream().flatMap(strike -> strike.getHighlights().stream()).collect(Collectors.toList());
         Assertions.assertTrue(expectedStrikes.contains("2018_<b>mandel</b>_fx_<b>threads</b>_concurrent_pic"));
         Assertions.assertTrue(expectedStrikes.contains("2018_<b>mandel</b>_fx_<b>threads</b>_concurrent_img"));
         Assertions.assertTrue(expectedStrikes.contains("2019 <b>mandel</b> fx <b>threads</b> concurrent pic"));
         Assertions.assertEquals(strikes.get(0).getScore(), strikes.get(1).getScore());
         Assertions.assertEquals(strikes.get(0).getScore(), strikes.get(2).getScore());
 
-        strikes = searchService.queryPhraseByTerm(INDEX, "2018 fx pic");
-        expectedStrikes = strikes.stream().flatMap(strike -> strike.getHighlights().stream()).collect(Collectors.toList());
+        strikes = searchService.queryPhraseByTermOnDocName(INDEX, "2018 fx pic");
+        expectedStrikes =
+                strikes.stream().flatMap(strike -> strike.getHighlights().stream()).collect(Collectors.toList());
         Assertions.assertTrue(expectedStrikes.contains("<b>2018</b>_mandel_<b>fx</b>_threads_concurrent_<b>pic</b>"));
         Assertions.assertEquals(1, expectedStrikes.size());
     }
 
-
     @Test
     void queryByTerm_multipleIndexes_returnDocumentsFromMultipleIndexes() throws IOException, InterruptedException {
         indexService.deleteIndex(INDEX);
-        indexService.createIndex(INDEX, IndexMappingSetting.mappingAnalyzerSecasignDoc(), IndexMappingSetting.settingGermanRebuiltAndUnderscoreAnalyzerSecasignDoc());
+        indexService.createIndex(INDEX, IndexMappingSetting.mappingAnalyzerSecasignDoc(),
+                                 IndexMappingSetting.settingGermanRebuiltAndUnderscoreAnalyzerSecasignDoc());
 
         String index2 = INDEX + "-2";
         String index3 = INDEX + "-3";
-        if (indexService.isIndexExisting(index2)) indexService.deleteIndex(index2);
-        if (indexService.isIndexExisting(index3)) indexService.deleteIndex(index3);
+        if (indexService.isIndexExisting(index2)) {
+            indexService.deleteIndex(index2);
+        }
+        if (indexService.isIndexExisting(index3)) {
+            indexService.deleteIndex(index3);
+        }
 
-        indexService.createIndex(index2, IndexMappingSetting.mappingAnalyzerSecasignDoc(), IndexMappingSetting.settingGermanRebuiltAndUnderscoreAnalyzerSecasignDoc());
-        indexService.createIndex(index3, IndexMappingSetting.mappingAnalyzerSecasignDoc(), IndexMappingSetting.settingGermanRebuiltAndUnderscoreAnalyzerSecasignDoc());
+        indexService.createIndex(index2, IndexMappingSetting.mappingAnalyzerSecasignDoc(),
+                                 IndexMappingSetting.settingGermanRebuiltAndUnderscoreAnalyzerSecasignDoc());
+        indexService.createIndex(index3, IndexMappingSetting.mappingAnalyzerSecasignDoc(),
+                                 IndexMappingSetting.settingGermanRebuiltAndUnderscoreAnalyzerSecasignDoc());
 
-        SecasignboxDocument doc1 = testService.createSecasignDocCustomeContentAndDate("2016_mandel_fx_threads");
-        SecasignboxDocument doc2 = testService.createSecasignDocCustomeContentAndDate("2017_mandel_fx_threads");
-        SecasignboxDocument doc3 = testService.createSecasignDocCustomeContentAndDate("2018_mandel_fx_threads");
-        SecasignboxDocument doc4 = testService.createSecasignDocCustomeContentAndDate("2019_mandel_fx_threads");
+        SecasignboxDocument doc1 = testService.createSecasignDocCustomeName("2016_mandel_fx_threads");
+        SecasignboxDocument doc2 = testService.createSecasignDocCustomeName("2017_mandel_fx_threads");
+        SecasignboxDocument doc3 = testService.createSecasignDocCustomeName("2018_mandel_fx_threads");
+        SecasignboxDocument doc4 = testService.createSecasignDocCustomeName("2019_mandel_fx_threads");
 
         searchService.indexDocument(INDEX, doc1);
         searchService.indexDocument(INDEX, doc2);
@@ -292,14 +309,55 @@ class SearchServiceTest {
         List<SearchStrike> strikes;
         List<String> expectedStrikes;
 
-        strikes = searchService.queryFuzzyByTerm(new String[] {INDEX, INDEX + "-2"}, "2018");
+        strikes = searchService.queryFuzzyByTermOnDocName(new String[] { INDEX, INDEX + "-2" }, "2018");
         indexService.deleteIndex(index2);
         indexService.deleteIndex(index3);
 
-        expectedStrikes = strikes.stream().flatMap(strike -> strike.getHighlights().stream()).collect(Collectors.toList());
+        expectedStrikes =
+                strikes.stream().flatMap(strike -> strike.getHighlights().stream()).collect(Collectors.toList());
         Assertions.assertTrue(expectedStrikes.contains("<b>2016</b>_mandel_fx_threads"));
         Assertions.assertTrue(expectedStrikes.contains("<b>2017</b>_mandel_fx_threads"));
         Assertions.assertTrue(expectedStrikes.contains("<b>2018</b>_mandel_fx_threads"));
         Assertions.assertFalse(expectedStrikes.contains("<b>2019</b>_mandel_fx_threads"));
+    }
+
+    @Test
+    void queryByTerm_multipleQueryOnFileds_returnComperableScoresOfMultipleQueries() throws IOException,
+            InterruptedException {
+        indexService.deleteIndex(INDEX);
+        indexService.createIndex(INDEX, IndexMappingSetting.mappingAnalyzerSecasignDoc(),
+                                 IndexMappingSetting.settingGermanRebuiltAndUnderscoreAnalyzerSecasignDoc());
+
+        SecasignboxDocument doc1 = testService.createSecasignDocCustomNameAndContent("2018_mandel_fx_threads",
+                                                                                     "Der Glückstaler von neben an wurde ein mandel mal mehr in threads wieder gefunden.");
+
+        SecasignboxDocument doc2 = testService.createSecasignDocCustomNameAndContent("2019_mandel_fx_threads",
+                                                                                     "Der Glückstaler von neben an wurde ein weiteres mal mehr in threads wieder gefunden.");
+
+        SecasignboxDocument doc3 = testService.createSecasignDocCustomNameAndContent("yeyo",
+                                                                                     "Der Glückstaler von neben an wurde ein weiteres mal  thread mehr i wieder mandel gefunden.");
+
+        searchService.indexDocument(INDEX, doc1);
+        searchService.indexDocument(INDEX, doc2);
+        searchService.indexDocument(INDEX, doc3);
+
+        TimeUnit.SECONDS.sleep(2);
+        List<SearchStrike> strikes;
+
+        strikes = searchService.queryFuzzyAndPhraseByTermOnDocNameAndDocContent(INDEX, "treads");
+        Assertions.assertEquals(strikes.get(0).getScore(), strikes.get(1).getScore());
+        Assertions.assertNotEquals(strikes.get(0).getScore(), strikes.get(2).getScore());
+
+        Assertions.assertNotEquals(strikes.get(0).getDocumentName(), strikes.get(1).getDocumentName());
+        Assertions.assertNotEquals(strikes.get(0).getDocumentContent(), strikes.get(1).getDocumentContent());
+        Assertions.assertNotEquals(strikes.get(0).getDocumentName(), strikes.get(2).getDocumentName());
+        Assertions.assertNotEquals(strikes.get(0).getDocumentContent(), strikes.get(2).getDocumentContent());
+
+        strikes = searchService.queryFuzzyAndPhraseByTermOnDocNameAndDocContent(INDEX, "mandel threads");
+
+        Assertions.assertEquals(doc1.getDocumentName(), strikes.get(0).getDocumentName());
+        Assertions.assertEquals(doc1.getDocumentContent(), strikes.get(0).getDocumentContent());
+        Assertions.assertEquals(doc2.getDocumentName(), strikes.get(1).getDocumentName());
+        Assertions.assertEquals(doc2.getDocumentContent(), strikes.get(1).getDocumentContent());
     }
 }

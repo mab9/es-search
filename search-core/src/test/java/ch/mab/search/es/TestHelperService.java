@@ -32,29 +32,24 @@ public class TestHelperService {
         return pdfs.stream().map(pdf -> {
             try {
                 String text = ocrService.extractTextFromFile(pdf.toFile());
-                return createSecasignDocCustomDate(pdf.getFileName(), text);
+                return createSecasignDocCustomNameAndContent(pdf.getFileName(), text);
             } catch (IOException e) {
                 return null;
             }
         }).collect(Collectors.toList());
     }
 
-    public SecasignboxDocument createSecasignDocCustomeNameAndDate(String docName) {
+    public SecasignboxDocument createSecasignDocCustomeName(String docName) {
         return new SecasignboxDocument(docName, new Date(),
                                        "Ein Thread");
     }
 
-    public SecasignboxDocument createSecasignDocCustomeContentAndDate(String docName) {
-        return new SecasignboxDocument(docName, new Date(),
-                                       "Ein Thread");
-    }
-
-    public SecasignboxDocument createSecasignDocCustomDate(String docName, String docContent) {
+    public SecasignboxDocument createSecasignDocCustomNameAndContent(String docName, String docContent) {
         return new SecasignboxDocument(docName, new Date(),
                                        docContent);
     }
 
-    public SecasignboxDocument createSecasignDocCustomDate(Path fileName, String documentContent) {
+    public SecasignboxDocument createSecasignDocCustomNameAndContent(Path fileName, String documentContent) {
         return new SecasignboxDocument(fileName.toString(), new Date(),
                                        documentContent);
     }

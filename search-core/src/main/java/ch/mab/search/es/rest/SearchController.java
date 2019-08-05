@@ -53,17 +53,12 @@ public class SearchController {
 
     @GetMapping(value = "search/{term}")
     public ResponseEntity<List<SearchStrike>> findDocumentsByTerm(@PathVariable String term) throws Exception {
-        return new ResponseEntity<>(service.findByTermHighlighted("secasignbox", term), HttpStatus.OK);
-    }
-
-    @GetMapping(value = "search/highlighted/{term}")
-    public ResponseEntity<List<SearchStrike>> findDocumentsByTermHighlighted(@PathVariable String term) throws Exception {
-        return new ResponseEntity<>(service.findByTermHighlighted("secasignbox", term), HttpStatus.OK);
+        return new ResponseEntity<>(service.queryFuzzyAndPhraseByTermOnDocNameAndDocContent("secasignbox", term), HttpStatus.OK);
     }
 
     // todo check get with payload (frontend)
     @PostMapping(value = "search/highlighted/query")
-    public ResponseEntity<List<SearchStrike>> findDocumentsByQueryHighlighted(@RequestBody SearchQuery query) throws Exception {
-        return new ResponseEntity<>(service.findByQueryHighlighted("secasignbox", query), HttpStatus.OK);
+    public ResponseEntity<List<SearchStrike>> findDocumentsBySearchQuery(@RequestBody SearchQuery query) throws Exception {
+        return new ResponseEntity<>(service.queryBySearchQuery("secasignbox", query), HttpStatus.OK);
     }
 }

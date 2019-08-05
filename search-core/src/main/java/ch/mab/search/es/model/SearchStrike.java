@@ -1,6 +1,7 @@
 package ch.mab.search.es.model;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 public class SearchStrike {
@@ -71,5 +72,22 @@ public class SearchStrike {
 
     public void setUploadDate(long uploadDate) {
         this.uploadDate = uploadDate;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        SearchStrike that = (SearchStrike) o;
+        return Objects.equals(documentName, that.documentName) && Objects.equals(documentContent, that.documentContent);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(documentName, documentContent);
     }
 }

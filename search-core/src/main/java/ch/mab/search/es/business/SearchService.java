@@ -52,7 +52,6 @@ public class SearchService extends AbstractIndex {
     }
 
     public BulkResponse bulkIndexDocument(String index, Collection<SecasignboxDocument> documents) throws IOException {
-
         BulkRequest bulkRequest = new BulkRequest();
         documents.forEach(document -> {
             IndexRequest indexRequest = createIndexRequest(index, document);
@@ -108,7 +107,7 @@ public class SearchService extends AbstractIndex {
         return getSearchResult(searchResponse);
     }
 
-    public List<SearchStrike> findByQueryHighlighted(String index, SearchQuery searchQuery) throws IOException {
+    public List<SearchStrike> queryBySearchQuery(String index, SearchQuery searchQuery) throws IOException {
         SearchRequest searchRequest = new SearchRequest(index);
         SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 
@@ -117,6 +116,7 @@ public class SearchService extends AbstractIndex {
 
         QueryBuilder query = composQueryService.composeQuery(searchQuery);
         sourceBuilder.query(query);
+
         // sort descending by score
         sourceBuilder.sort(new ScoreSortBuilder().order(SortOrder.DESC));
         searchRequest.source(sourceBuilder);
@@ -125,15 +125,28 @@ public class SearchService extends AbstractIndex {
         return getSearchStrikes(searchResponse);
     }
 
-    public List<SearchStrike> findByTermHighlighted(String index, String term) throws IOException {
+    public List<SearchStrike> queryFuzzyAndPhraseByTermOnDocNameAndDocContent(String index, String term) throws IOException {
         SearchRequest searchRequest = new SearchRequest(index);
         SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 
-        HighlightBuilder highlightBuilder = createHighlighter(FIELD_SECASIGN_DOC_CONTENT, FIELD_SECASIGN_DOC_NAME);
+        HighlightBuilder highlightBuilder = createHighlighter(FIELD_SECASIGN_DOC_NAME, FIELD_SECASIGN_DOC_CONTENT);
         sourceBuilder.highlighter(highlightBuilder);
 
-        QueryBuilder query = composQueryService.composeMatchAllQuery(term);
+        QueryBuilder phraseQuery = QueryBuilders.matchPhraseQuery(FIELD_SECASIGN_DOC_NAME, term).slop(10).boost(2);
+        QueryBuilder fuzzyQuery = QueryBuilders.matchQuery(FIELD_SECASIGN_DOC_NAME, term).fuzziness(Fuzziness.AUTO).boost(2).maxExpansions(50);
+
+        QueryBuilder phraseQuery2 = QueryBuilders.matchPhraseQuery(FIELD_SECASIGN_DOC_CONTENT, term).slop(30);
+        QueryBuilder fuzzyQuery2 = QueryBuilders.matchQuery(FIELD_SECASIGN_DOC_CONTENT, term).fuzziness(Fuzziness.AUTO).maxExpansions(50);
+
+        QueryBuilder query = QueryBuilders
+                .boolQuery()
+                    .should(phraseQuery)
+                    .should(fuzzyQuery)
+                    .should(phraseQuery2)
+                    .should(fuzzyQuery2);
+
         sourceBuilder.query(query);
+
         // sort descending by score
         sourceBuilder.sort(new ScoreSortBuilder().order(SortOrder.DESC));
         searchRequest.source(sourceBuilder);
@@ -142,7 +155,7 @@ public class SearchService extends AbstractIndex {
         return getSearchStrikes(searchResponse);
     }
 
-    public  List<SearchStrike> queryByTerm(String index, String term) throws IOException {
+    public  List<SearchStrike> queryByTermOnDocName(String index, String term) throws IOException {
         SearchRequest searchRequest = new SearchRequest(index);
         SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 
@@ -157,7 +170,7 @@ public class SearchService extends AbstractIndex {
         return getSearchStrikes(search);
     }
 
-    public  List<SearchStrike> queryFuzzyByTerm(String[] indices, String term) throws IOException {
+    public  List<SearchStrike> queryFuzzyByTermOnDocName(String[] indices, String term) throws IOException {
         SearchRequest searchRequest = new SearchRequest(indices);
         SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 
@@ -172,7 +185,7 @@ public class SearchService extends AbstractIndex {
         return getSearchStrikes(search);
     }
 
-    public  List<SearchStrike> queryPhraseByTerm(String index, String term) throws IOException {
+    public  List<SearchStrike> queryPhraseByTermOnDocName(String index, String term) throws IOException {
         SearchRequest searchRequest = new SearchRequest(index);
         SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 
@@ -188,7 +201,7 @@ public class SearchService extends AbstractIndex {
         return getSearchStrikes(search);
     }
 
-    public  List<SearchStrike> queryPhraseFuzzyByTerm(String index, String term) throws IOException {
+    public  List<SearchStrike> queryPhraseFuzzyByTermOnDocName(String index, String term) throws IOException {
         SearchRequest searchRequest = new SearchRequest(index);
         SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 
@@ -236,6 +249,7 @@ public class SearchService extends AbstractIndex {
             dto.setScore(hit.getScore());
             dto.setDocumentId(document.getDocumentId());
             dto.setDocumentName(document.getDocumentName());
+            dto.setDocumentContent(document.getDocumentContent());
             dto.setHighlights(replaceHighlihtCursivByBold(highlights));
             dtos.add(dto);
         }

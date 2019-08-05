@@ -47,6 +47,13 @@ public class BenchmarkTest {
 
     @Test
     void index_test_set_1() throws  IOException {
+         if (indexService.isIndexExisting(INDEX)) {
+            indexService.deleteIndex(INDEX);
+        }
+
+        indexService.createIndex(INDEX, IndexMappingSetting.mappingAnalyzerSecasignDoc(), IndexMappingSetting.settingGermanRebuiltAndUnderscoreAnalyzerSecasignDoc());
+
+
         List<Path> files = testService.collectPathsOfPdfTestFiles("/home/mab/Documents/fhnw/sem-6/ip5/ip5-testdatenset");
         long totalFileSize = calculateTotalFileSize(files);
         List<SecasignboxDocument> docs = testService.readSecasignDocumentFromPdfs(files);
@@ -88,8 +95,6 @@ public class BenchmarkTest {
         });
     }
 
-    // TODO WRITE ALL SYSTEM INFOS AND TEST RESULTS INTO RESULT FILE
-
     @Test
     void benchmark_bulkIndex_100_documents() throws InterruptedException, IOException {
         List<Path> files = testService.collectPathsOfPdfTestFiles();
@@ -122,10 +127,10 @@ public class BenchmarkTest {
         printResults(files, totalFileSize, timeElapsed);
     }
 
-    @Test
+    //@Test //("There are not enough pdf test files to do a 400 benchmark test")
     void benchmark_bulkIndex_400_documents() throws InterruptedException, IOException {
         List<Path> files = testService.collectPathsOfPdfTestFiles();
-        files = files.subList(0, 400);
+        files = files.subList(0, files.size());
         long totalFileSize = calculateTotalFileSize(files);
         List<SecasignboxDocument> docs = testService.readSecasignDocumentFromPdfs(files);
 
