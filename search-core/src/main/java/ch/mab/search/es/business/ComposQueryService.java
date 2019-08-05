@@ -17,37 +17,37 @@ public class ComposQueryService {
 
     public QueryBuilder composeQuery(SearchQuery query) {
         if (query.isFuzzy() && !query.isDocumentName() && query.getFromDate() == null && query.getToDate() == null) {
-            return composeFuzzyQuery(query);
+            return composeQueryFuzzyOnDocNameAndDocContent(query);
         }
 
         if (query.isFuzzy() && query.isDocumentName() && query.getFromDate() == null && query.getToDate() == null) {
-            return composeFuzzyDocumentNameQuery(query);
+            return composeQueryFuzzyOnDocName(query);
         }
 
         if (query.isFuzzy() && query.isDocumentName() && (query.getFromDate() != null || query.getToDate() != null)) {
-            return composeFuzzyDocumentNameRangeQuery(query);
+            return composeQueryFuzzyAndRangeOnDocName(query);
         }
 
         if (query.isFuzzy() && !query.isDocumentName() && (query.getFromDate() != null || query.getToDate() != null)) {
-            return composeFuzzyRangeQuery(query);
+            return composeQueryFuzzyAndRangeOnDocNameAndDocContent(query);
         }
 
         if (!query.isFuzzy() && query.isDocumentName() && query.getFromDate() == null && query.getToDate() == null) {
-            return composeDocumentNameQuery(query);
+            return composeQueryOnDocName(query);
         }
 
         if (!query.isFuzzy() && query.isDocumentName() && (query.getFromDate() != null || query.getToDate() != null)) {
-            return composeDocumentNameRangeQuery(query);
+            return composeQueryRangeOnDocName(query);
         }
 
         if (!query.isFuzzy() && !query.isDocumentName() && (query.getFromDate() != null || query.getToDate() != null)) {
-            return composeRangeQuery(query);
+            return composeQueryRangeOnDocUploadDate(query);
         }
 
-        return composeMatchAllQuery(query.getTerm());
+        return composeQueryDefault(query.getTerm());
     }
 
-    private QueryBuilder composeFuzzyQuery(SearchQuery query) {
+    private QueryBuilder composeQueryFuzzyOnDocNameAndDocContent(SearchQuery query) {
         MatchQueryBuilder matchDocContent = new MatchQueryBuilder(IndexMappingSetting.FIELD_SECASIGN_DOC_CONTENT, query.getTerm());
         MatchQueryBuilder matchDocName = new MatchQueryBuilder(IndexMappingSetting.FIELD_SECASIGN_DOC_NAME, query.getTerm());
 
@@ -59,41 +59,38 @@ public class ComposQueryService {
         return QueryBuilders.boolQuery().should(matchDocContent).should(matchDocName);
     }
 
-    private QueryBuilder composeDocumentNameQuery(SearchQuery query) {
+    // todo hier das vom Search Service verwenden
+    private QueryBuilder composeQueryOnDocName(SearchQuery query) {
         return new MatchPhraseQueryBuilder(IndexMappingSetting.FIELD_SECASIGN_DOC_NAME, query.getTerm());
     }
 
-    private QueryBuilder composeFuzzyDocumentNameQuery(SearchQuery query) {
-        QueryBuilder matchDocName = composeDocumentNameQuery(query);
+    // todo hier das vom Search Service verwenden
+    private QueryBuilder composeQueryFuzzyOnDocName(SearchQuery query) {
+        QueryBuilder matchDocName = composeQueryOnDocName(query);
         return QueryBuilders.boolQuery().should(matchDocName);
     }
 
-    private QueryBuilder composeFuzzyDocumentNameRangeQuery(SearchQuery query) {
-        QueryBuilder matchFuzzyAndDocumentName = composeFuzzyDocumentNameQuery(query);
-        QueryBuilder matchRange = composeRangeQuery(query);
+    private QueryBuilder composeQueryFuzzyAndRangeOnDocName(SearchQuery query) {
+        QueryBuilder matchFuzzyAndDocumentName = composeQueryFuzzyOnDocName(query);
+        QueryBuilder matchRange = composeQueryRangeOnDocUploadDate(query);
         return QueryBuilders.boolQuery().must(matchRange).should(matchFuzzyAndDocumentName);
     }
 
-    private QueryBuilder composeFuzzyRangeQuery(SearchQuery query) {
-        QueryBuilder matchFuzzy = composeFuzzyQuery(query);
-        QueryBuilder matchRange = composeRangeQuery(query);
+    private QueryBuilder composeQueryFuzzyAndRangeOnDocNameAndDocContent(SearchQuery query) {
+        QueryBuilder matchFuzzy = composeQueryFuzzyOnDocNameAndDocContent(query);
+        QueryBuilder matchRange = composeQueryRangeOnDocUploadDate(query);
         return QueryBuilders.boolQuery().must(matchRange).should(matchFuzzy);
     }
 
-    private QueryBuilder composeDocumentNameRangeQuery(SearchQuery query) {
-        assert query.isDocumentName();
-        assert query.getFromDate() != null || query.getToDate() != null;
-        if (query.getFromDate() != null && query.getToDate() != null) {
-            assert query.getFromDate().compareTo(query.getToDate()) <= 0;
-        }
-
-        QueryBuilder matchDocumentName = composeDocumentNameQuery(query);
+    // todo braucht es den boost?
+    private QueryBuilder composeQueryRangeOnDocName(SearchQuery query) {
+        QueryBuilder matchDocumentName = composeQueryOnDocName(query);
         matchDocumentName.boost(BOOST_DOCUMENT_NAME);
-        QueryBuilder matchRange = composeRangeQuery(query);
+        QueryBuilder matchRange = composeQueryRangeOnDocUploadDate(query);
         return QueryBuilders.boolQuery().must(matchDocumentName).must(matchRange);
     }
 
-    private QueryBuilder composeRangeQuery(SearchQuery query) {
+    private QueryBuilder composeQueryRangeOnDocUploadDate(SearchQuery query) {
         RangeQueryBuilder rangeUploadDate = new RangeQueryBuilder(IndexMappingSetting.FIELD_SECASIGN_DOC_UPLOAD_DATE);
         RangeQueryBuilder range;
 
@@ -105,10 +102,11 @@ public class ComposQueryService {
             range = rangeUploadDate.lte(query.getToDate());
         }
 
-        return QueryBuilders.boolQuery().must(range).should(composeMatchAllQuery(query.getTerm()));
+        return QueryBuilders.boolQuery().must(range).should(composeQueryDefault(query.getTerm()));
     }
 
-    public QueryBuilder composeMatchAllQuery(String term) {
+    // todo hier das vom searchservice verwendne
+    public QueryBuilder composeQueryDefault(String term) {
         MatchPhraseQueryBuilder matchPhraseDocName = new MatchPhraseQueryBuilder(IndexMappingSetting.FIELD_SECASIGN_DOC_NAME, term);
         MatchPhraseQueryBuilder matchDocContent = new MatchPhraseQueryBuilder(IndexMappingSetting.FIELD_SECASIGN_DOC_CONTENT, term);
         MatchQueryBuilder matchDocName = new MatchQueryBuilder(IndexMappingSetting.FIELD_SECASIGN_DOC_NAME, term);
