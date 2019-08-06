@@ -27,7 +27,7 @@ public class SearchController {
         return new ResponseEntity(service.indexDocument("secasignbox", document), HttpStatus.CREATED);
     }
 
-    @GetMapping(value = "{id}")
+    @GetMapping("/{id}")
     public ResponseEntity findById(@PathVariable UUID id) throws IOException {
         Optional<SecasignboxDocument> result = service.findById("secasignbox", id);
 
@@ -46,18 +46,12 @@ public class SearchController {
         return new ResponseEntity<>(result.get(), HttpStatus.OK);
     }
 
-    @GetMapping
-    public ResponseEntity<List<SecasignboxDocument>> findAll() throws Exception {
-        return new ResponseEntity<>(service.findAll("secasignbox"), HttpStatus.OK);
-    }
-
     @GetMapping(value = "search/{term}")
     public ResponseEntity<List<SearchStrike>> findDocumentsByTerm(@PathVariable String term) throws Exception {
         return new ResponseEntity<>(service.queryFuzzyAndPhraseByTermOnDocNameAndDocContent("secasignbox", term), HttpStatus.OK);
     }
 
-    // todo check get with payload (frontend)
-    @PostMapping(value = "search/highlighted/query")
+    @PostMapping(value = "search/query")
     public ResponseEntity<List<SearchStrike>> findDocumentsBySearchQuery(@RequestBody SearchQuery query) throws Exception {
         return new ResponseEntity<>(service.queryBySearchQuery("secasignbox", query), HttpStatus.OK);
     }

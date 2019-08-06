@@ -1,7 +1,7 @@
 package ch.mab.search.es.business;
 
 import ch.mab.search.es.TestHelperService;
-import ch.mab.search.es.base.IndexMappingSetting;
+import ch.mab.search.es.model.ElasticsearchModel;
 import ch.mab.search.es.model.ContactDocument;
 import ch.mab.search.es.model.Technology;
 import org.elasticsearch.action.admin.indices.analyze.AnalyzeRequest;
@@ -79,7 +79,7 @@ class IndexServiceTest {
             indexService.deleteIndex(INDEX);
         }
 
-        indexService.createIndex(INDEX, IndexMappingSetting.mappingAnalyzerSecasignDoc("underscore_analyzer"), settings);
+        indexService.createIndex(INDEX, ElasticsearchModel.mappingAnalyzerSecasignDoc("underscore_analyzer"), settings);
         GetIndexResponse index = indexService.getIndex(INDEX);
         Assertions.assertTrue(index.getSettings().get(INDEX).hasValue("index.analysis.analyzer.underscore_analyzer.tokenizer"));
 
@@ -127,7 +127,7 @@ class IndexServiceTest {
             indexService.deleteIndex(INDEX);
         }
 
-        indexService.createIndex(INDEX, IndexMappingSetting.mappingAnalyzerSecasignDoc("underscore_analyzer"), settings);
+        indexService.createIndex(INDEX, ElasticsearchModel.mappingAnalyzerSecasignDoc("underscore_analyzer"), settings);
         GetIndexResponse index = indexService.getIndex(INDEX);
         Assertions.assertTrue(index.getSettings().get(INDEX).hasValue("index.analysis.analyzer.underscore_analyzer.tokenizer"));
 
@@ -175,7 +175,7 @@ class IndexServiceTest {
             indexService.deleteIndex(INDEX);
         }
 
-        indexService.createIndex(INDEX, IndexMappingSetting.mappingAnalyzerSecasignDoc("underscore_analyzer"), settings);
+        indexService.createIndex(INDEX, ElasticsearchModel.mappingAnalyzerSecasignDoc("underscore_analyzer"), settings);
         GetIndexResponse index = indexService.getIndex(INDEX);
         Assertions.assertTrue(index.getSettings().get(INDEX).hasValue("index.analysis.analyzer.underscore_analyzer.tokenizer"));
 
@@ -217,7 +217,7 @@ class IndexServiceTest {
             indexService.deleteIndex(INDEX);
         }
 
-        indexService.createIndex(INDEX, IndexMappingSetting.mappingAnalyzerSecasignDoc("rebuilt_standard"), settings);
+        indexService.createIndex(INDEX, ElasticsearchModel.mappingAnalyzerSecasignDoc("rebuilt_standard"), settings);
         GetIndexResponse index = indexService.getIndex(INDEX);
         Assertions.assertTrue(index.getSettings().get(INDEX).hasValue("index.analysis.analyzer.rebuilt_standard.tokenizer"));
 
@@ -272,7 +272,7 @@ class IndexServiceTest {
         boolean indexExists = client.indices().exists(request, RequestOptions.DEFAULT);
         Assertions.assertFalse(indexExists);
 
-        indexService.createIndex(INDEX, IndexMappingSetting.mappingDefaultContactDoc());
+        indexService.createIndex(INDEX, ElasticsearchModel.mappingDefaultContactDoc());
 
         indexExists = client.indices().exists(request, RequestOptions.DEFAULT);
         Assertions.assertTrue(indexExists);
@@ -282,7 +282,7 @@ class IndexServiceTest {
     void updateMapping_updateIndex_returnOkResponse() throws IOException {
         Assertions.assertTrue(indexService.isIndexExisting(INDEX));
         AcknowledgedResponse acknowledgedResponse =
-                indexService.updateMapping(INDEX, IndexMappingSetting.mappingDefaultContactDoc());
+                indexService.updateMapping(INDEX, ElasticsearchModel.mappingDefaultContactDoc());
         Assertions.assertTrue(acknowledgedResponse.isAcknowledged());
     }
 
@@ -295,7 +295,7 @@ class IndexServiceTest {
 
     @Test
     void getTotalHits_indexedDocuments_returnAmountOfIndexedDocuments() throws IOException, InterruptedException {
-        indexService.updateMapping(INDEX, IndexMappingSetting.mappingDefaultContactDoc());
+        indexService.updateMapping(INDEX, ElasticsearchModel.mappingDefaultContactDoc());
         contactService.createContact(INDEX, createContact());
         contactService.createContact(INDEX, createContact());
         contactService.createContact(INDEX, createContact());
@@ -312,7 +312,7 @@ class IndexServiceTest {
     @Disabled
     @Test
     void getIndex_indexDetails_returnAllDetailsAboutTheIndex() throws IOException, InterruptedException {
-        indexService.updateMapping(INDEX, IndexMappingSetting.mappingDefaultContactDoc());
+        indexService.updateMapping(INDEX, ElasticsearchModel.mappingDefaultContactDoc());
         GetIndexResponse index = indexService.getIndex(INDEX);
 
         Assertions.assertEquals(index.getIndices().length, 1);

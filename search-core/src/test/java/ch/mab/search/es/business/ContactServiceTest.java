@@ -1,6 +1,6 @@
 package ch.mab.search.es.business;
 
-import ch.mab.search.es.base.IndexMappingSetting;
+import ch.mab.search.es.model.ElasticsearchModel;
 import ch.mab.search.es.model.ContactDocument;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,7 +31,7 @@ public class ContactServiceTest {
         if (indexService.isIndexExisting(INDEX)) {
             indexService.deleteIndex(INDEX);
         }
-        indexService.createIndex(INDEX, IndexMappingSetting.mappingDefaultContactDoc());
+        indexService.createIndex(INDEX, ElasticsearchModel.mappingDefaultContactDoc());
     }
 
     @Test

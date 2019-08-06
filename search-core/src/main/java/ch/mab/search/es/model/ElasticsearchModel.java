@@ -1,15 +1,13 @@
-package ch.mab.search.es.base;
+package ch.mab.search.es.model;
 
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 
 import java.io.IOException;
 
-public class IndexMappingSetting {
+import static ch.mab.search.es.base.SecasignBoxConstants.*;
 
-    public static final String FIELD_SECASIGN_DOC_NAME = "documentName";
-    public static final String FIELD_SECASIGN_DOC_CONTENT = "documentContent";
-    public static final String FIELD_SECASIGN_DOC_UPLOAD_DATE = "uploadDate";
+public class ElasticsearchModel {
 
     public static XContentBuilder mappingDefaultContactDoc() {
         try {

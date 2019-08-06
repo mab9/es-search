@@ -102,8 +102,6 @@ export class DocumentSearchComponent implements OnInit {
       } else {
         this.documents = this.documentService.searchByTermHighlighted(newTerm);
       }
-    } else {
-      this.documents = this.documentService.getDocuments();
     }
   }
 

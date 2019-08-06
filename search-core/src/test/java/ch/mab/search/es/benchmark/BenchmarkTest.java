@@ -1,12 +1,11 @@
 package ch.mab.search.es.benchmark;
 
 import ch.mab.search.es.TestHelperService;
-import ch.mab.search.es.base.IndexMappingSetting;
+import ch.mab.search.es.model.ElasticsearchModel;
 import ch.mab.search.es.business.IndexService;
 import ch.mab.search.es.business.SearchService;
 import ch.mab.search.es.model.SecasignboxDocument;
 import org.elasticsearch.client.RestHighLevelClient;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -37,12 +36,12 @@ public class BenchmarkTest {
     @Autowired
     private TestHelperService testService;
 
-    @BeforeEach
+    //@BeforeEach
     void setUp() throws IOException {
         if (indexService.isIndexExisting(INDEX)) {
             indexService.deleteIndex(INDEX);
         }
-        indexService.createIndex(INDEX, IndexMappingSetting.mappingDefaultSecasignDoc());
+        indexService.createIndex(INDEX, ElasticsearchModel.mappingDefaultSecasignDoc());
     }
 
     @Test
@@ -51,7 +50,8 @@ public class BenchmarkTest {
             indexService.deleteIndex(INDEX);
         }
 
-        indexService.createIndex(INDEX, IndexMappingSetting.mappingAnalyzerSecasignDoc(), IndexMappingSetting.settingGermanRebuiltAndUnderscoreAnalyzerSecasignDoc());
+        indexService.createIndex(INDEX, ElasticsearchModel.mappingAnalyzerSecasignDoc(), ElasticsearchModel
+                .settingGermanRebuiltAndUnderscoreAnalyzerSecasignDoc());
 
 
         List<Path> files = testService.collectPathsOfPdfTestFiles("/home/mab/Documents/fhnw/sem-6/ip5/ip5-testdatenset");

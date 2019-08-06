@@ -1,10 +1,9 @@
 package ch.mab.search.es.business;
 
 import ch.mab.search.es.TestHelperService;
-import ch.mab.search.es.base.IndexMappingSetting;
+import ch.mab.search.es.model.ElasticsearchModel;
 import ch.mab.search.es.model.SearchStrike;
 import ch.mab.search.es.model.SecasignboxDocument;
-import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.indices.GetIndexRequest;
@@ -13,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -42,7 +40,7 @@ class SearchServiceTest {
         if (indexService.isIndexExisting(INDEX)) {
             indexService.deleteIndex(INDEX);
         }
-        indexService.createIndex(INDEX, IndexMappingSetting.mappingDefaultSecasignDoc());
+        indexService.createIndex(INDEX, ElasticsearchModel.mappingDefaultSecasignDoc());
     }
 
     @AfterEach
@@ -59,7 +57,7 @@ class SearchServiceTest {
         boolean indexExists = client.indices().exists(request, RequestOptions.DEFAULT);
         Assertions.assertFalse(indexExists);
 
-        indexService.createIndex(INDEX, IndexMappingSetting.mappingDefaultSecasignDoc());
+        indexService.createIndex(INDEX, ElasticsearchModel.mappingDefaultSecasignDoc());
 
         indexExists = client.indices().exists(request, RequestOptions.DEFAULT);
         Assertions.assertTrue(indexExists);
@@ -75,24 +73,6 @@ class SearchServiceTest {
     private SecasignboxDocument createDocument(String name) {
         return new SecasignboxDocument(name, new Date(),
                                        "Der Glückstaler ist Onkel Dagoberts erste selbstverdiente Münze");
-    }
-
-    @Test
-    void findAll_indexedDocuments_expectingCreatedDocuments() throws IOException, InterruptedException {
-        List<SecasignboxDocument> all = searchService.findAll(INDEX);
-        Assertions.assertTrue(all.isEmpty());
-
-        SecasignboxDocument document1 = createDocument("Donald Duck und seinen Glückstaler");
-        SecasignboxDocument document2 = createDocument("Donald Duck und seine 3 Neffen");
-        searchService.indexDocument(INDEX, document1);
-        searchService.indexDocument(INDEX, document2);
-
-        // elastic search is indexing async
-        TimeUnit.SECONDS.sleep(2);
-        all = searchService.findAll(INDEX);
-        Assertions.assertEquals(2, all.size());
-        Assertions.assertTrue(all.contains(document1));
-        Assertions.assertTrue(all.contains(document2));
     }
 
     @Test
@@ -122,25 +102,11 @@ class SearchServiceTest {
         Assertions.assertTrue(expected.isEmpty());
     }
 
-    // findAll returns per default 10 documents
-    @Disabled
-    @Test
-    void bulkIndexDocument_createBulkOfDocuments_returnOk() throws IOException, InterruptedException {
-        List<Path> files = testService.collectPathsOfPdfTestFiles();
-        List<SecasignboxDocument> docs = testService.readSecasignDocumentFromPdfs(files);
-        BulkResponse bulkItemResponses = searchService.bulkIndexDocument(INDEX, docs);
-        TimeUnit.SECONDS.sleep(4);
-
-        List<SecasignboxDocument> all = searchService.findAll(INDEX);
-        Assertions.assertEquals(docs.size(), all.size());
-        Assertions.assertTrue(docs.containsAll(all));
-    }
-
     @Test
     void queryByTerm_matchQuery_returnAnalyzedDocuments() throws IOException, InterruptedException {
         indexService.deleteIndex(INDEX);
-        indexService.createIndex(INDEX, IndexMappingSetting.mappingAnalyzerSecasignDoc(),
-                                 IndexMappingSetting.settingGermanRebuiltAndUnderscoreAnalyzerSecasignDoc());
+        indexService.createIndex(INDEX, ElasticsearchModel.mappingAnalyzerSecasignDoc(),
+                                 ElasticsearchModel.settingGermanRebuiltAndUnderscoreAnalyzerSecasignDoc());
 
         SecasignboxDocument doc1 = testService.createSecasignDocCustomeName("2018_mandel_fx_threads");
         SecasignboxDocument doc2 = testService.createSecasignDocCustomeName("2019 mandel fx threads");
@@ -152,14 +118,14 @@ class SearchServiceTest {
         List<SearchStrike> strikes;
         List<String> expectedStrikes;
 
-        strikes = searchService.queryByTermOnDocName(INDEX, "Mandel");
+        strikes = searchService.queryByTermByDocName(INDEX, "Mandel");
         expectedStrikes =
                 strikes.stream().flatMap(strike -> strike.getHighlights().stream()).collect(Collectors.toList());
         Assertions.assertTrue(expectedStrikes.contains("2018_<b>mandel</b>_fx_threads"));
         Assertions.assertTrue(expectedStrikes.contains("2019 <b>mandel</b> fx threads"));
         Assertions.assertEquals(strikes.get(0).getScore(), strikes.get(1).getScore());
 
-        strikes = searchService.queryByTermOnDocName(INDEX, "2018_mandel");
+        strikes = searchService.queryByTermByDocName(INDEX, "2018_mandel");
         expectedStrikes =
                 strikes.stream().flatMap(strike -> strike.getHighlights().stream()).collect(Collectors.toList());
         Assertions.assertTrue(expectedStrikes.contains("<b>2018</b>_<b>mandel</b>_fx_threads"));
@@ -170,8 +136,8 @@ class SearchServiceTest {
     @Test
     void queryFuzzyByTerm_matchFuzzy_returnAnalyzedDocuments() throws IOException, InterruptedException {
         indexService.deleteIndex(INDEX);
-        indexService.createIndex(INDEX, IndexMappingSetting.mappingAnalyzerSecasignDoc(),
-                                 IndexMappingSetting.settingGermanRebuiltAndUnderscoreAnalyzerSecasignDoc());
+        indexService.createIndex(INDEX, ElasticsearchModel.mappingAnalyzerSecasignDoc(),
+                                 ElasticsearchModel.settingGermanRebuiltAndUnderscoreAnalyzerSecasignDoc());
 
         SecasignboxDocument doc1 = testService.createSecasignDocCustomeName("2018_mandel_fx_threads");
         SecasignboxDocument doc2 = testService.createSecasignDocCustomeName("2019 mandel fx threads");
@@ -201,8 +167,8 @@ class SearchServiceTest {
     @Test
     void queryPhraseByTerm_matchPhrase_returnAnalyzedDocuments() throws IOException, InterruptedException {
         indexService.deleteIndex(INDEX);
-        indexService.createIndex(INDEX, IndexMappingSetting.mappingAnalyzerSecasignDoc(),
-                                 IndexMappingSetting.settingGermanRebuiltAndUnderscoreAnalyzerSecasignDoc());
+        indexService.createIndex(INDEX, ElasticsearchModel.mappingAnalyzerSecasignDoc(),
+                                 ElasticsearchModel.settingGermanRebuiltAndUnderscoreAnalyzerSecasignDoc());
 
         SecasignboxDocument doc1 = testService.createSecasignDocCustomeName("2018_mandel_fx_threads_concurrent_pic");
         SecasignboxDocument doc2 = testService.createSecasignDocCustomeName("2018_mandel_fx_threads_concurrent_img");
@@ -244,8 +210,8 @@ class SearchServiceTest {
     void queryPhraseFuzzyByTerm_matchPhraseAndFuzzyMixed_returnAnalyzedDocuments() throws IOException,
             InterruptedException {
         indexService.deleteIndex(INDEX);
-        indexService.createIndex(INDEX, IndexMappingSetting.mappingAnalyzerSecasignDoc(),
-                                 IndexMappingSetting.settingGermanRebuiltAndUnderscoreAnalyzerSecasignDoc());
+        indexService.createIndex(INDEX, ElasticsearchModel.mappingAnalyzerSecasignDoc(),
+                                 ElasticsearchModel.settingGermanRebuiltAndUnderscoreAnalyzerSecasignDoc());
 
         SecasignboxDocument doc1 = testService.createSecasignDocCustomeName("2018_mandel_fx_threads_concurrent_pic");
         SecasignboxDocument doc2 = testService.createSecasignDocCustomeName("2018_mandel_fx_threads_concurrent_img");
@@ -278,8 +244,8 @@ class SearchServiceTest {
     @Test
     void queryByTerm_multipleIndexes_returnDocumentsFromMultipleIndexes() throws IOException, InterruptedException {
         indexService.deleteIndex(INDEX);
-        indexService.createIndex(INDEX, IndexMappingSetting.mappingAnalyzerSecasignDoc(),
-                                 IndexMappingSetting.settingGermanRebuiltAndUnderscoreAnalyzerSecasignDoc());
+        indexService.createIndex(INDEX, ElasticsearchModel.mappingAnalyzerSecasignDoc(),
+                                 ElasticsearchModel.settingGermanRebuiltAndUnderscoreAnalyzerSecasignDoc());
 
         String index2 = INDEX + "-2";
         String index3 = INDEX + "-3";
@@ -290,10 +256,10 @@ class SearchServiceTest {
             indexService.deleteIndex(index3);
         }
 
-        indexService.createIndex(index2, IndexMappingSetting.mappingAnalyzerSecasignDoc(),
-                                 IndexMappingSetting.settingGermanRebuiltAndUnderscoreAnalyzerSecasignDoc());
-        indexService.createIndex(index3, IndexMappingSetting.mappingAnalyzerSecasignDoc(),
-                                 IndexMappingSetting.settingGermanRebuiltAndUnderscoreAnalyzerSecasignDoc());
+        indexService.createIndex(index2, ElasticsearchModel.mappingAnalyzerSecasignDoc(),
+                                 ElasticsearchModel.settingGermanRebuiltAndUnderscoreAnalyzerSecasignDoc());
+        indexService.createIndex(index3, ElasticsearchModel.mappingAnalyzerSecasignDoc(),
+                                 ElasticsearchModel.settingGermanRebuiltAndUnderscoreAnalyzerSecasignDoc());
 
         SecasignboxDocument doc1 = testService.createSecasignDocCustomeName("2016_mandel_fx_threads");
         SecasignboxDocument doc2 = testService.createSecasignDocCustomeName("2017_mandel_fx_threads");
@@ -325,8 +291,8 @@ class SearchServiceTest {
     void queryByTerm_multipleQueryOnFileds_returnComperableScoresOfMultipleQueries() throws IOException,
             InterruptedException {
         indexService.deleteIndex(INDEX);
-        indexService.createIndex(INDEX, IndexMappingSetting.mappingAnalyzerSecasignDoc(),
-                                 IndexMappingSetting.settingGermanRebuiltAndUnderscoreAnalyzerSecasignDoc());
+        indexService.createIndex(INDEX, ElasticsearchModel.mappingAnalyzerSecasignDoc(),
+                                 ElasticsearchModel.settingGermanRebuiltAndUnderscoreAnalyzerSecasignDoc());
 
         SecasignboxDocument doc1 = testService.createSecasignDocCustomNameAndContent("2018_mandel_fx_threads",
                                                                                      "Der Glückstaler von neben an wurde ein mandel mal mehr in threads wieder gefunden.");

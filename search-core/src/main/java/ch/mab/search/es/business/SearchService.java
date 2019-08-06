@@ -1,9 +1,8 @@
 package ch.mab.search.es.business;
 
 import ch.mab.search.es.api.AbstractIndex;
-import ch.mab.search.es.base.IndexMappingSetting;
-import ch.mab.search.es.model.SearchStrike;
 import ch.mab.search.es.model.SearchQuery;
+import ch.mab.search.es.model.SearchStrike;
 import ch.mab.search.es.model.SecasignboxDocument;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.elasticsearch.action.bulk.BulkRequest;
@@ -20,7 +19,8 @@ import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.common.text.Text;
 import org.elasticsearch.common.unit.Fuzziness;
 import org.elasticsearch.common.xcontent.XContentType;
-import org.elasticsearch.index.query.*;
+import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
@@ -34,24 +34,28 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static ch.mab.search.es.base.IndexMappingSetting.*;
+import static ch.mab.search.es.base.SecasignBoxConstants.*;
 
 @Service
 public class SearchService extends AbstractIndex {
 
     @Autowired
-    private ComposQueryService composQueryService;
+    private SearchQueryService searchQueryService;
 
     public SearchService() {
     }
 
     public Optional<SecasignboxDocument> indexDocument(String index, SecasignboxDocument document) throws IOException {
+        Objects.requireNonNull(index);
+        Objects.requireNonNull(document);
         IndexRequest request = createIndexRequest(index, document);
         IndexResponse indexResponse = client.index(request, RequestOptions.DEFAULT);
         return findById(index, UUID.fromString(indexResponse.getId()));
     }
 
     public BulkResponse bulkIndexDocument(String index, Collection<SecasignboxDocument> documents) throws IOException {
+        Objects.requireNonNull(index);
+        Objects.requireNonNull(documents);
         BulkRequest bulkRequest = new BulkRequest();
         documents.forEach(document -> {
             IndexRequest indexRequest = createIndexRequest(index, document);
@@ -75,6 +79,8 @@ public class SearchService extends AbstractIndex {
     }
 
     public Optional<SecasignboxDocument> deleteDocument(String index, UUID id) throws IOException {
+        Objects.requireNonNull(index);
+        Objects.requireNonNull(id);
         Optional<SecasignboxDocument> current = findById(index, id);
 
         if (current.isEmpty()) {
@@ -87,6 +93,8 @@ public class SearchService extends AbstractIndex {
     }
 
     public Optional<SecasignboxDocument> findById(String index, UUID id) throws IOException {
+        Objects.requireNonNull(index);
+        Objects.requireNonNull(id);
         GetRequest getRequest = new GetRequest(index, id.toString());
         GetResponse getResponse = client.get(getRequest, RequestOptions.DEFAULT);
 
@@ -97,129 +105,84 @@ public class SearchService extends AbstractIndex {
         }
     }
 
-    public List<SecasignboxDocument> findAll(String index) throws IOException {
-        SearchRequest searchRequest = new SearchRequest(index);
-        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-        MatchAllQueryBuilder matchAllQueryBuilder = new MatchAllQueryBuilder();
-        searchSourceBuilder.query(matchAllQueryBuilder);
-        searchRequest.source(searchSourceBuilder);
-        SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
-        return getSearchResult(searchResponse);
-    }
-
     public List<SearchStrike> queryBySearchQuery(String index, SearchQuery searchQuery) throws IOException {
-        SearchRequest searchRequest = new SearchRequest(index);
-        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
-
-        HighlightBuilder highlightBuilder = createHighlighter(FIELD_SECASIGN_DOC_NAME, FIELD_SECASIGN_DOC_CONTENT, FIELD_SECASIGN_DOC_UPLOAD_DATE);
-        sourceBuilder.highlighter(highlightBuilder);
-
-        QueryBuilder query = composQueryService.composeQuery(searchQuery);
-        sourceBuilder.query(query);
-
-        // sort descending by score
-        sourceBuilder.sort(new ScoreSortBuilder().order(SortOrder.DESC));
-        searchRequest.source(sourceBuilder);
-
-        SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
-        return getSearchStrikes(searchResponse);
+        Objects.requireNonNull(index);
+        Objects.requireNonNull(searchQuery);
+        QueryBuilder query = searchQueryService.composeQuery(searchQuery);
+        return query(new String[] { index }, query, FIELD_SECASIGN_DOC_NAME, FIELD_SECASIGN_DOC_CONTENT,
+                     FIELD_SECASIGN_DOC_UPLOAD_DATE);
     }
 
-    public List<SearchStrike> queryFuzzyAndPhraseByTermOnDocNameAndDocContent(String index, String term) throws IOException {
-        SearchRequest searchRequest = new SearchRequest(index);
-        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
-
-        HighlightBuilder highlightBuilder = createHighlighter(FIELD_SECASIGN_DOC_NAME, FIELD_SECASIGN_DOC_CONTENT);
-        sourceBuilder.highlighter(highlightBuilder);
-
-        QueryBuilder phraseQuery = QueryBuilders.matchPhraseQuery(FIELD_SECASIGN_DOC_NAME, term).slop(10).boost(2);
-        QueryBuilder fuzzyQuery = QueryBuilders.matchQuery(FIELD_SECASIGN_DOC_NAME, term).fuzziness(Fuzziness.AUTO).boost(2).maxExpansions(50);
-
-        QueryBuilder phraseQuery2 = QueryBuilders.matchPhraseQuery(FIELD_SECASIGN_DOC_CONTENT, term).slop(30);
-        QueryBuilder fuzzyQuery2 = QueryBuilders.matchQuery(FIELD_SECASIGN_DOC_CONTENT, term).fuzziness(Fuzziness.AUTO).maxExpansions(50);
-
-        QueryBuilder query = QueryBuilders
-                .boolQuery()
-                    .should(phraseQuery)
-                    .should(fuzzyQuery)
-                    .should(phraseQuery2)
-                    .should(fuzzyQuery2);
-
-        sourceBuilder.query(query);
-
-        // sort descending by score
-        sourceBuilder.sort(new ScoreSortBuilder().order(SortOrder.DESC));
-        searchRequest.source(sourceBuilder);
-
-        SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
-        return getSearchStrikes(searchResponse);
-    }
-
-    public  List<SearchStrike> queryByTermOnDocName(String index, String term) throws IOException {
-        SearchRequest searchRequest = new SearchRequest(index);
-        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
-
-        HighlightBuilder highlightBuilder = createHighlighter( FIELD_SECASIGN_DOC_NAME);
-        sourceBuilder.highlighter(highlightBuilder);
-
-        QueryBuilder query =  QueryBuilders.matchQuery(FIELD_SECASIGN_DOC_NAME, term);
-        sourceBuilder.query(query);
-
-        searchRequest.source(sourceBuilder);
-        SearchResponse search = client.search(searchRequest, RequestOptions.DEFAULT);
-        return getSearchStrikes(search);
-    }
-
-    public  List<SearchStrike> queryFuzzyByTermOnDocName(String[] indices, String term) throws IOException {
+    private List<SearchStrike> query(String[] indices, QueryBuilder query, String... highlightings) throws IOException {
         SearchRequest searchRequest = new SearchRequest(indices);
         SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 
-        HighlightBuilder highlightBuilder = createHighlighter(FIELD_SECASIGN_DOC_NAME);
+        HighlightBuilder highlightBuilder = createHighlighter(highlightings);
         sourceBuilder.highlighter(highlightBuilder);
-
-        QueryBuilder query =  QueryBuilders.matchQuery(FIELD_SECASIGN_DOC_NAME, term).fuzziness(Fuzziness.AUTO).maxExpansions(50);
         sourceBuilder.query(query);
+        // sort descending by score
+        sourceBuilder.sort(new ScoreSortBuilder().order(SortOrder.DESC));
 
         searchRequest.source(sourceBuilder);
-        SearchResponse search = client.search(searchRequest, RequestOptions.DEFAULT);
-        return getSearchStrikes(search);
+        SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
+        return getSearchStrikes(searchResponse);
     }
 
-    public  List<SearchStrike> queryPhraseByTermOnDocName(String index, String term) throws IOException {
-        SearchRequest searchRequest = new SearchRequest(index);
-        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+    public List<SearchStrike> queryFuzzyAndPhraseByTermOnDocNameAndDocContent(String index, String term) throws
+            IOException {
+        Objects.requireNonNull(index);
+        Objects.requireNonNull(term);
+        QueryBuilder phraseQuery =
+                QueryBuilders.matchPhraseQuery(FIELD_SECASIGN_DOC_NAME, term).slop(10).boost(BOOST_DOCUMENT_NAME);
+        QueryBuilder fuzzyQuery = QueryBuilders.matchQuery(FIELD_SECASIGN_DOC_NAME, term)
+                                               .fuzziness(Fuzziness.AUTO)
+                                               .boost(BOOST_DOCUMENT_NAME)
+                                               .maxExpansions(50);
 
-        HighlightBuilder highlightBuilder = createHighlighter( FIELD_SECASIGN_DOC_NAME);
-        sourceBuilder.highlighter(highlightBuilder);
+        QueryBuilder phraseQuery2 = QueryBuilders.matchPhraseQuery(FIELD_SECASIGN_DOC_CONTENT, term).slop(30);
+        QueryBuilder fuzzyQuery2 =
+                QueryBuilders.matchQuery(FIELD_SECASIGN_DOC_CONTENT, term).fuzziness(Fuzziness.AUTO).maxExpansions(50);
 
-        // slop -> amount of missing words between two word in a term
+        QueryBuilder query = QueryBuilders.boolQuery()
+                                          .should(phraseQuery)
+                                          .should(fuzzyQuery)
+                                          .should(phraseQuery2)
+                                          .should(fuzzyQuery2);
+
+        return query(new String[] { index }, query, FIELD_SECASIGN_DOC_NAME, FIELD_SECASIGN_DOC_CONTENT);
+    }
+
+    public List<SearchStrike> queryByTermByDocName(String index, String term) throws IOException {
+        Objects.requireNonNull(index);
+        Objects.requireNonNull(term);
+        QueryBuilder query = QueryBuilders.matchQuery(FIELD_SECASIGN_DOC_NAME, term);
+        return query(new String[] { index }, query, FIELD_SECASIGN_DOC_NAME);
+    }
+
+    public List<SearchStrike> queryFuzzyByTermOnDocName(String[] indices, String term) throws IOException {
+        Objects.requireNonNull(indices);
+        Objects.requireNonNull(term);
+        QueryBuilder query =
+                QueryBuilders.matchQuery(FIELD_SECASIGN_DOC_NAME, term).fuzziness(Fuzziness.AUTO).maxExpansions(50);
+        return query(indices, query, FIELD_SECASIGN_DOC_NAME);
+    }
+
+    public List<SearchStrike> queryPhraseByTermOnDocName(String index, String term) throws IOException {
+        Objects.requireNonNull(index);
+        Objects.requireNonNull(term);
         QueryBuilder query = QueryBuilders.matchPhraseQuery(FIELD_SECASIGN_DOC_NAME, term).slop(10);
-        sourceBuilder.query(query);
-
-        searchRequest.source(sourceBuilder);
-        SearchResponse search = client.search(searchRequest, RequestOptions.DEFAULT);
-        return getSearchStrikes(search);
+        return query(new String[] { index }, query, FIELD_SECASIGN_DOC_NAME);
     }
 
-    public  List<SearchStrike> queryPhraseFuzzyByTermOnDocName(String index, String term) throws IOException {
-        SearchRequest searchRequest = new SearchRequest(index);
-        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
-
-        HighlightBuilder highlightBuilder = createHighlighter( FIELD_SECASIGN_DOC_NAME);
-        sourceBuilder.highlighter(highlightBuilder);
-
+    public List<SearchStrike> queryPhraseFuzzyByTermOnDocName(String index, String term) throws IOException {
+        Objects.requireNonNull(index);
+        Objects.requireNonNull(term);
         QueryBuilder phraseQuery = QueryBuilders.matchPhraseQuery(FIELD_SECASIGN_DOC_NAME, term).slop(10);
-        QueryBuilder fuzzyQuery = QueryBuilders.matchQuery(FIELD_SECASIGN_DOC_NAME, term).fuzziness(Fuzziness.AUTO).maxExpansions(50);
+        QueryBuilder fuzzyQuery =
+                QueryBuilders.matchQuery(FIELD_SECASIGN_DOC_NAME, term).fuzziness(Fuzziness.AUTO).maxExpansions(50);
 
-        QueryBuilder query = QueryBuilders
-                .boolQuery()
-                    .should(phraseQuery)
-                    .should(fuzzyQuery);
-
-        sourceBuilder.query(query);
-        searchRequest.source(sourceBuilder);
-        SearchResponse search = client.search(searchRequest, RequestOptions.DEFAULT);
-        return getSearchStrikes(search);
+        QueryBuilder query = QueryBuilders.boolQuery().should(phraseQuery).should(fuzzyQuery);
+        return query(new String[] { index }, query, FIELD_SECASIGN_DOC_NAME);
     }
 
     private HighlightBuilder createHighlighter(String... fields) {
@@ -232,6 +195,7 @@ public class SearchService extends AbstractIndex {
         });
         return highlightBuilder;
     }
+
     private List<SearchStrike> getSearchStrikes(SearchResponse response) {
         SearchHit[] searchHit = response.getHits().getHits();
 
