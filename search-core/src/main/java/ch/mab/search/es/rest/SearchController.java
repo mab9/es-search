@@ -48,7 +48,7 @@ public class SearchController {
 
     @GetMapping(value = "search/{term}")
     public ResponseEntity<List<SearchStrike>> findDocumentsByTerm(@PathVariable String term) throws Exception {
-        return new ResponseEntity<>(service.queryFuzzyAndPhraseByTermOnDocNameAndDocContent("secasignbox", term), HttpStatus.OK);
+        return new ResponseEntity<>(service.queryByTermFuzzyPhraseOnDocNameAndContent("secasignbox", term), HttpStatus.OK);
     }
 
     @PostMapping(value = "search/query")

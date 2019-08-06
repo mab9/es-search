@@ -22,41 +22,41 @@ public class SearchQueryService {
         Objects.requireNonNull(query);
 
         if (query.isFuzzy() && !query.isDocumentName() && query.getFromDate() == null && query.getToDate() == null) {
-            return queryFuzzyAndPhraseByTermOnDocNameAndDocContent(query.getTerm());
+            return queryByTermFuzzyPhraseOnDocNameAndContent(query.getTerm());
         }
 
         if (query.isFuzzy() && query.isDocumentName() && query.getFromDate() == null && query.getToDate() == null) {
-            return composeQueryFuzzyAndPhraseByDocName(query);
+            return composeQueryFuzzyPhraseOnDocName(query);
         }
 
         if (query.isFuzzy() && query.isDocumentName() && (query.getFromDate() != null || query.getToDate() != null)) {
-            return composeQueryFuzzyAndPhraseAndRangeByDocName(query);
+            return composeQueryFuzzyPhraseRangeOnDocName(query);
         }
 
         if (query.isFuzzy() && !query.isDocumentName() && (query.getFromDate() != null || query.getToDate() != null)) {
-            return composeQueryFuzzyAndPhraseAndRangeByDocNameAndDocContent(query);
+            return composeQueryFuzzyPhraseRangeOnDocNameAndContent(query);
         }
 
         if (!query.isFuzzy() && query.isDocumentName() && query.getFromDate() == null && query.getToDate() == null) {
-            return composeQueryPhraseByDocName(query);
+            return composeQueryPhraseOnDocName(query);
         }
 
         if (!query.isFuzzy() && query.isDocumentName() && (query.getFromDate() != null || query.getToDate() != null)) {
-            return composeQueryPhraseAndRangeByDocName(query);
+            return composeQueryPhraseRangeOnDocName(query);
         }
 
         if (!query.isFuzzy() && !query.isDocumentName() && (query.getFromDate() != null || query.getToDate() != null)) {
-            return composeQueryRangeByDocUploadDate(query);
+            return composeQueryRangeOnDocUploadDate(query);
         }
 
-        return queryFuzzyAndPhraseByTermOnDocNameAndDocContent(query.getTerm());
+        return queryByTermFuzzyPhraseOnDocNameAndContent(query.getTerm());
     }
 
-    private QueryBuilder composeQueryPhraseByDocName(SearchQuery query) {
+    private QueryBuilder composeQueryPhraseOnDocName(SearchQuery query) {
         return QueryBuilders.matchPhraseQuery(FIELD_SECASIGN_DOC_NAME, query.getTerm()).slop(10);
     }
 
-    private QueryBuilder composeQueryFuzzyAndPhraseByDocName(SearchQuery query) {
+    private QueryBuilder composeQueryFuzzyPhraseOnDocName(SearchQuery query) {
         QueryBuilder phraseQuery = QueryBuilders.matchPhraseQuery(FIELD_SECASIGN_DOC_NAME, query.getTerm()).slop(10);
         QueryBuilder fuzzyQuery = QueryBuilders.matchQuery(FIELD_SECASIGN_DOC_NAME, query.getTerm())
                                                .fuzziness(Fuzziness.AUTO)
@@ -65,25 +65,25 @@ public class SearchQueryService {
         return QueryBuilders.boolQuery().should(phraseQuery).should(fuzzyQuery);
     }
 
-    private QueryBuilder composeQueryFuzzyAndPhraseAndRangeByDocName(SearchQuery query) {
-        QueryBuilder matchFuzzyAndDocumentName = composeQueryFuzzyAndPhraseByDocName(query);
-        QueryBuilder matchRange = composeQueryRangeByDocUploadDate(query);
+    private QueryBuilder composeQueryFuzzyPhraseRangeOnDocName(SearchQuery query) {
+        QueryBuilder matchFuzzyAndDocumentName = composeQueryFuzzyPhraseOnDocName(query);
+        QueryBuilder matchRange = composeQueryRangeOnDocUploadDate(query);
         return QueryBuilders.boolQuery().must(matchRange).should(matchFuzzyAndDocumentName);
     }
 
-    private QueryBuilder composeQueryFuzzyAndPhraseAndRangeByDocNameAndDocContent(SearchQuery query) {
-        QueryBuilder matchFuzzy = queryFuzzyAndPhraseByTermOnDocNameAndDocContent(query.getTerm());
-        QueryBuilder matchRange = composeQueryRangeByDocUploadDate(query);
+    private QueryBuilder composeQueryFuzzyPhraseRangeOnDocNameAndContent(SearchQuery query) {
+        QueryBuilder matchFuzzy = queryByTermFuzzyPhraseOnDocNameAndContent(query.getTerm());
+        QueryBuilder matchRange = composeQueryRangeOnDocUploadDate(query);
         return QueryBuilders.boolQuery().must(matchRange).should(matchFuzzy);
     }
 
-    private QueryBuilder composeQueryPhraseAndRangeByDocName(SearchQuery query) {
-        QueryBuilder matchDocName = composeQueryPhraseByDocName(query);
-        QueryBuilder matchRange = composeQueryRangeByDocUploadDate(query);
+    private QueryBuilder composeQueryPhraseRangeOnDocName(SearchQuery query) {
+        QueryBuilder matchDocName = composeQueryPhraseOnDocName(query);
+        QueryBuilder matchRange = composeQueryRangeOnDocUploadDate(query);
         return QueryBuilders.boolQuery().must(matchDocName).must(matchRange);
     }
 
-    private QueryBuilder composeQueryRangeByDocUploadDate(SearchQuery query) {
+    private QueryBuilder composeQueryRangeOnDocUploadDate(SearchQuery query) {
         RangeQueryBuilder rangeUploadDate = new RangeQueryBuilder(FIELD_SECASIGN_DOC_UPLOAD_DATE);
         RangeQueryBuilder range;
 
@@ -95,11 +95,11 @@ public class SearchQueryService {
             range = rangeUploadDate.lte(query.getToDate());
         }
 
-        QueryBuilder queryAll = queryFuzzyAndPhraseByTermOnDocNameAndDocContent(query.getTerm());
+        QueryBuilder queryAll = queryByTermFuzzyPhraseOnDocNameAndContent(query.getTerm());
         return QueryBuilders.boolQuery().must(range).should(queryAll);
     }
 
-    public QueryBuilder queryFuzzyAndPhraseByTermOnDocNameAndDocContent(String term) {
+    public QueryBuilder queryByTermFuzzyPhraseOnDocNameAndContent(String term) {
         Objects.requireNonNull(term);
         QueryBuilder phraseQuerDocName =
                 QueryBuilders.matchPhraseQuery(FIELD_SECASIGN_DOC_NAME, term).slop(10).boost(BOOST_DOCUMENT_NAME);

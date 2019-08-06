@@ -118,14 +118,14 @@ class SearchServiceTest {
         List<SearchStrike> strikes;
         List<String> expectedStrikes;
 
-        strikes = searchService.queryByTermByDocName(INDEX, "Mandel");
+        strikes = searchService.queryByTermOnDocName(INDEX, "Mandel");
         expectedStrikes =
                 strikes.stream().flatMap(strike -> strike.getHighlights().stream()).collect(Collectors.toList());
         Assertions.assertTrue(expectedStrikes.contains("2018_<b>mandel</b>_fx_threads"));
         Assertions.assertTrue(expectedStrikes.contains("2019 <b>mandel</b> fx threads"));
         Assertions.assertEquals(strikes.get(0).getScore(), strikes.get(1).getScore());
 
-        strikes = searchService.queryByTermByDocName(INDEX, "2018_mandel");
+        strikes = searchService.queryByTermOnDocName(INDEX, "2018_mandel");
         expectedStrikes =
                 strikes.stream().flatMap(strike -> strike.getHighlights().stream()).collect(Collectors.toList());
         Assertions.assertTrue(expectedStrikes.contains("<b>2018</b>_<b>mandel</b>_fx_threads"));
@@ -149,14 +149,14 @@ class SearchServiceTest {
         List<SearchStrike> strikes;
         List<String> expectedStrikes;
 
-        strikes = searchService.queryFuzzyByTermOnDocName(new String[] { INDEX }, "treads");
+        strikes = searchService.queryByTermFuzzyOnDocName(new String[] { INDEX }, "treads");
         expectedStrikes =
                 strikes.stream().flatMap(strike -> strike.getHighlights().stream()).collect(Collectors.toList());
         Assertions.assertTrue(expectedStrikes.contains("2018_mandel_fx_<b>threads</b>"));
         Assertions.assertTrue(expectedStrikes.contains("2019 mandel fx <b>threads</b>"));
         Assertions.assertEquals(strikes.get(0).getScore(), strikes.get(1).getScore());
 
-        strikes = searchService.queryFuzzyByTermOnDocName(new String[] { INDEX }, "2018");
+        strikes = searchService.queryByTermFuzzyOnDocName(new String[] { INDEX }, "2018");
         expectedStrikes =
                 strikes.stream().flatMap(strike -> strike.getHighlights().stream()).collect(Collectors.toList());
         Assertions.assertTrue(expectedStrikes.contains("<b>2018</b>_mandel_fx_threads"));
@@ -182,7 +182,7 @@ class SearchServiceTest {
         List<SearchStrike> strikes;
         List<String> expectedStrikes;
 
-        strikes = searchService.queryPhraseByTermOnDocName(INDEX, "mandel threads");
+        strikes = searchService.queryByTermPhraseOnDocName(INDEX, "mandel threads");
         expectedStrikes =
                 strikes.stream().flatMap(strike -> strike.getHighlights().stream()).collect(Collectors.toList());
         Assertions.assertTrue(expectedStrikes.contains("2018_<b>mandel</b>_fx_<b>threads</b>_concurrent_pic"));
@@ -191,7 +191,7 @@ class SearchServiceTest {
         Assertions.assertEquals(strikes.get(0).getScore(), strikes.get(1).getScore());
         Assertions.assertEquals(strikes.get(0).getScore(), strikes.get(2).getScore());
 
-        strikes = searchService.queryPhraseByTermOnDocName(INDEX, "2018 threads");
+        strikes = searchService.queryByTermPhraseOnDocName(INDEX, "2018 threads");
         expectedStrikes =
                 strikes.stream().flatMap(strike -> strike.getHighlights().stream()).collect(Collectors.toList());
         Assertions.assertTrue(expectedStrikes.contains("<b>2018</b>_mandel_fx_<b>threads</b>_concurrent_pic"));
@@ -199,7 +199,7 @@ class SearchServiceTest {
         Assertions.assertEquals(strikes.get(0).getScore(), strikes.get(1).getScore());
         Assertions.assertEquals(2, expectedStrikes.size());
 
-        strikes = searchService.queryPhraseByTermOnDocName(INDEX, "2018 fx pic");
+        strikes = searchService.queryByTermPhraseOnDocName(INDEX, "2018 fx pic");
         expectedStrikes =
                 strikes.stream().flatMap(strike -> strike.getHighlights().stream()).collect(Collectors.toList());
         Assertions.assertTrue(expectedStrikes.contains("<b>2018</b>_mandel_<b>fx</b>_threads_concurrent_<b>pic</b>"));
@@ -225,7 +225,7 @@ class SearchServiceTest {
         List<SearchStrike> strikes;
         List<String> expectedStrikes;
 
-        strikes = searchService.queryPhraseFuzzyByTermOnDocName(INDEX, "mandel treads");
+        strikes = searchService.queryByTermFuzzyPhraseOnDocName(INDEX, "mandel treads");
         expectedStrikes =
                 strikes.stream().flatMap(strike -> strike.getHighlights().stream()).collect(Collectors.toList());
         Assertions.assertTrue(expectedStrikes.contains("2018_<b>mandel</b>_fx_<b>threads</b>_concurrent_pic"));
@@ -234,7 +234,7 @@ class SearchServiceTest {
         Assertions.assertEquals(strikes.get(0).getScore(), strikes.get(1).getScore());
         Assertions.assertEquals(strikes.get(0).getScore(), strikes.get(2).getScore());
 
-        strikes = searchService.queryPhraseByTermOnDocName(INDEX, "2018 fx pic");
+        strikes = searchService.queryByTermPhraseOnDocName(INDEX, "2018 fx pic");
         expectedStrikes =
                 strikes.stream().flatMap(strike -> strike.getHighlights().stream()).collect(Collectors.toList());
         Assertions.assertTrue(expectedStrikes.contains("<b>2018</b>_mandel_<b>fx</b>_threads_concurrent_<b>pic</b>"));
@@ -275,7 +275,7 @@ class SearchServiceTest {
         List<SearchStrike> strikes;
         List<String> expectedStrikes;
 
-        strikes = searchService.queryFuzzyByTermOnDocName(new String[] { INDEX, INDEX + "-2" }, "2018");
+        strikes = searchService.queryByTermFuzzyOnDocName(new String[] { INDEX, INDEX + "-2" }, "2018");
         indexService.deleteIndex(index2);
         indexService.deleteIndex(index3);
 
@@ -310,7 +310,7 @@ class SearchServiceTest {
         TimeUnit.SECONDS.sleep(2);
         List<SearchStrike> strikes;
 
-        strikes = searchService.queryFuzzyAndPhraseByTermOnDocNameAndDocContent(INDEX, "treads");
+        strikes = searchService.queryByTermFuzzyPhraseOnDocNameAndContent(INDEX, "treads");
         Assertions.assertEquals(strikes.get(0).getScore(), strikes.get(1).getScore());
         Assertions.assertNotEquals(strikes.get(0).getScore(), strikes.get(2).getScore());
 
@@ -319,7 +319,7 @@ class SearchServiceTest {
         Assertions.assertNotEquals(strikes.get(0).getDocumentName(), strikes.get(2).getDocumentName());
         Assertions.assertNotEquals(strikes.get(0).getDocumentContent(), strikes.get(2).getDocumentContent());
 
-        strikes = searchService.queryFuzzyAndPhraseByTermOnDocNameAndDocContent(INDEX, "mandel threads");
+        strikes = searchService.queryByTermFuzzyPhraseOnDocNameAndContent(INDEX, "mandel threads");
 
         Assertions.assertEquals(doc1.getDocumentName(), strikes.get(0).getDocumentName());
         Assertions.assertEquals(doc1.getDocumentContent(), strikes.get(0).getDocumentContent());

@@ -128,7 +128,7 @@ public class SearchService extends AbstractIndex {
         return getSearchStrikes(searchResponse);
     }
 
-    public List<SearchStrike> queryFuzzyAndPhraseByTermOnDocNameAndDocContent(String index, String term) throws
+    public List<SearchStrike> queryByTermFuzzyPhraseOnDocNameAndContent(String index, String term) throws
             IOException {
         Objects.requireNonNull(index);
         Objects.requireNonNull(term);
@@ -152,14 +152,14 @@ public class SearchService extends AbstractIndex {
         return query(new String[] { index }, query, FIELD_SECASIGN_DOC_NAME, FIELD_SECASIGN_DOC_CONTENT);
     }
 
-    public List<SearchStrike> queryByTermByDocName(String index, String term) throws IOException {
+    public List<SearchStrike> queryByTermOnDocName(String index, String term) throws IOException {
         Objects.requireNonNull(index);
         Objects.requireNonNull(term);
         QueryBuilder query = QueryBuilders.matchQuery(FIELD_SECASIGN_DOC_NAME, term);
         return query(new String[] { index }, query, FIELD_SECASIGN_DOC_NAME);
     }
 
-    public List<SearchStrike> queryFuzzyByTermOnDocName(String[] indices, String term) throws IOException {
+    public List<SearchStrike> queryByTermFuzzyOnDocName(String[] indices, String term) throws IOException {
         Objects.requireNonNull(indices);
         Objects.requireNonNull(term);
         QueryBuilder query =
@@ -167,14 +167,14 @@ public class SearchService extends AbstractIndex {
         return query(indices, query, FIELD_SECASIGN_DOC_NAME);
     }
 
-    public List<SearchStrike> queryPhraseByTermOnDocName(String index, String term) throws IOException {
+    public List<SearchStrike> queryByTermPhraseOnDocName(String index, String term) throws IOException {
         Objects.requireNonNull(index);
         Objects.requireNonNull(term);
         QueryBuilder query = QueryBuilders.matchPhraseQuery(FIELD_SECASIGN_DOC_NAME, term).slop(10);
         return query(new String[] { index }, query, FIELD_SECASIGN_DOC_NAME);
     }
 
-    public List<SearchStrike> queryPhraseFuzzyByTermOnDocName(String index, String term) throws IOException {
+    public List<SearchStrike> queryByTermFuzzyPhraseOnDocName(String index, String term) throws IOException {
         Objects.requireNonNull(index);
         Objects.requireNonNull(term);
         QueryBuilder phraseQuery = QueryBuilders.matchPhraseQuery(FIELD_SECASIGN_DOC_NAME, term).slop(10);
