@@ -133,13 +133,13 @@ public class SearchService extends AbstractIndex {
         Objects.requireNonNull(index);
         Objects.requireNonNull(term);
         QueryBuilder phraseQuery =
-                QueryBuilders.matchPhraseQuery(FIELD_SECASIGN_DOC_NAME, term).slop(10).boost(BOOST_DOCUMENT_NAME);
+                QueryBuilders.matchPhraseQuery(FIELD_SECASIGN_DOC_NAME, term).slop(10).boost(BOOST_DOCUMENT_NAME + BOOST_PHRASE_SEARCH);
         QueryBuilder fuzzyQuery = QueryBuilders.matchQuery(FIELD_SECASIGN_DOC_NAME, term)
                                                .fuzziness(Fuzziness.AUTO)
                                                .boost(BOOST_DOCUMENT_NAME)
                                                .maxExpansions(50);
 
-        QueryBuilder phraseQuery2 = QueryBuilders.matchPhraseQuery(FIELD_SECASIGN_DOC_CONTENT, term).slop(30);
+        QueryBuilder phraseQuery2 = QueryBuilders.matchPhraseQuery(FIELD_SECASIGN_DOC_CONTENT, term).slop(30).boost(BOOST_PHRASE_SEARCH);
         QueryBuilder fuzzyQuery2 =
                 QueryBuilders.matchQuery(FIELD_SECASIGN_DOC_CONTENT, term).fuzziness(Fuzziness.AUTO).maxExpansions(50);
 

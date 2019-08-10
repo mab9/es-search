@@ -10,7 +10,6 @@ import {SearchQuery} from "../searchQuery";
   selector: 'app-document-search',
   template: `
     <div style="text-align:center">
-      
       <mat-toolbar class="tools-containe" *ngIf="showTools" style="width: 80%; margin: auto">
         <mat-checkbox [(ngModel)]="fuzzySearch" style="margin-right: 15px">fuzzy</mat-checkbox>
         <mat-checkbox [(ngModel)]="documentNameSearch" style="margin-right: 15px">only document name</mat-checkbox>
@@ -31,9 +30,7 @@ import {SearchQuery} from "../searchQuery";
           </mat-form-field>
         </div>
       </mat-toolbar>
-      
       <div class="mat-elevation-z8" style="width: 80%; margin: auto; margin-top: 10px; padding-bottom: 20px;">
-
         <mat-toolbar style="width: 95%; margin: auto">
           <mat-form-field color="accent" class="trm-search-container">
             <input matInput type="text" #newTerm (input)="terms$.next($event.target.value)"
@@ -46,13 +43,15 @@ import {SearchQuery} from "../searchQuery";
         </mat-toolbar>
 
 
-        <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons style="width: 95%; margin: auto" (page)="pageChanged($event)"></mat-paginator>
+        <mat-paginator [pageSizeOptions]="[5, 10, 20]"
+                       showFirstLastButtons
+                       style="width: 95%; margin: auto"
+                       (page)="pageChanged($event)"></mat-paginator>
         <table mat-table [dataSource]="dataSource" style="width: 95%; margin: auto">
-          
           <!-- Name Column -->
           <ng-container matColumnDef="documentName">
             <th mat-header-cell *matHeaderCellDef> Name</th>
-            <td mat-cell *matCellDef="let element"> 
+            <td mat-cell *matCellDef="let element">
               <h3>{{element.documentName}}</h3>
               <p style="line-height: 0.7;" *ngIf="element.highlights" matLine [innerHTML]="element.highlights[0]"></p>
               <p style="line-height: 0.7;" *ngIf="element.highlights" matLine [innerHTML]="element.highlights[1]"></p>
@@ -63,15 +62,13 @@ import {SearchQuery} from "../searchQuery";
           <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
           <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
         </table>
-
       </div>
-
     </div>`,
   styleUrls: ['./document-search.component.scss']
 })
 export class DocumentSearchComponent implements OnInit {
 
-  documents: Observable<Array<Document>>;
+  documents: Observable<Array<Document>> = new Observable<Array<Document>>();
   terms$ = new Subject<string>();
   showTools: boolean = false;
   fuzzySearch: boolean = false;
@@ -85,12 +82,12 @@ export class DocumentSearchComponent implements OnInit {
   dataSource = new MatTableDataSource<Document>();
 
 
-  constructor(private documentService: DocumentService, private eventBusService: EventBusService) {}
+  constructor(private documentService: DocumentService, private eventBusService: EventBusService) {
+  }
 
   ngOnInit() {
     this.eventBusService.emit('appTitleChange', `Documents`);
     this.dataSource.paginator = this.paginator;
-    this.documents = this.documentService.getDocuments();
     this.documents.subscribe(data => this.dataSource.data = data);
   }
 
@@ -98,16 +95,16 @@ export class DocumentSearchComponent implements OnInit {
     this.documents.subscribe(data => this.dataSource.data = data);
     if (newTerm) {
       if (this.showTools) {
-        this.documents = this.searchByQuery(newTerm);
+        this.documents = this.searchBySearchQuery(newTerm);
       } else {
-        this.documents = this.documentService.searchByTermHighlighted(newTerm);
+        this.documents = this.documentService.searchByTerm(newTerm);
       }
     }
   }
 
-  private searchByQuery(newTerm: string) {
+  private searchBySearchQuery(newTerm: string) {
     if (this.showTools) {
-      let searchQuery: SearchQuery = {
+      const searchQuery: SearchQuery = {
         term: newTerm,
         fuzzy: this.fuzzySearch,
         documentName: this.documentNameSearch,
@@ -115,7 +112,7 @@ export class DocumentSearchComponent implements OnInit {
         toDate: this.toDate
       };
 
-      return this.documentService.searchByQueryHighlighted(searchQuery);
+      return this.documentService.searchBySearcQuery(searchQuery);
     }
   }
 

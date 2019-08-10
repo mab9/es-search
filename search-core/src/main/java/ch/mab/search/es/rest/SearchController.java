@@ -51,6 +51,7 @@ public class SearchController {
         return new ResponseEntity<>(service.queryByTermFuzzyPhraseOnDocNameAndContent("secasignbox", term), HttpStatus.OK);
     }
 
+    // todo muss noch zu get umgebaut werden...
     @PostMapping(value = "search/query")
     public ResponseEntity<List<SearchStrike>> findDocumentsBySearchQuery(@RequestBody SearchQuery query) throws Exception {
         return new ResponseEntity<>(service.queryBySearchQuery("secasignbox", query), HttpStatus.OK);

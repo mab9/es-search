@@ -23,18 +23,13 @@ export class DocumentService {
   }
 
   searchByTerm(term: string): Observable<Array<Document>> {
-    let url = `${this.API_ENDPOINT}/documents/search/${term}`;
-    return this.http.get<Document[]>(url).pipe(map((data) => data));
-  }
-
-  searchByTermHighlighted(term: string): Observable<Array<Document>> {
-    let url = `${this.API_ENDPOINT}/documents/search/highlighted/${term}`;
+    const url = `${this.API_ENDPOINT}/documents/search/${term}`;
     return this.http.get<Document[]>(url).pipe(map((data) => data));
   }
 
   // todo check get method instead post
-  searchByQueryHighlighted(query: SearchQuery): Observable<Array<Document>> {
-    let url = `${this.API_ENDPOINT}/documents/search/highlighted/query`;
+  searchBySearcQuery(query: SearchQuery): Observable<Array<Document>> {
+    const url = `${this.API_ENDPOINT}/documents/search/query`;
     return this.http.post<Document[]>(url, query).pipe(map((data) => data));
   }
 }
