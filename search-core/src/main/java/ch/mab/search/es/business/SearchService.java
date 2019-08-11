@@ -109,8 +109,7 @@ public class SearchService extends AbstractIndex {
         Objects.requireNonNull(index);
         Objects.requireNonNull(searchQuery);
         QueryBuilder query = searchQueryService.composeQuery(searchQuery);
-        return query(new String[] { index }, query, FIELD_SECASIGN_DOC_NAME, FIELD_SECASIGN_DOC_CONTENT,
-                     FIELD_SECASIGN_DOC_UPLOAD_DATE);
+        return query(new String[] { index }, query, FIELD_SECASIGN_DOC_NAME, FIELD_SECASIGN_DOC_CONTENT);
     }
 
     private List<SearchStrike> query(String[] indices, QueryBuilder query, String... highlightings) throws IOException {
@@ -187,7 +186,9 @@ public class SearchService extends AbstractIndex {
 
     private HighlightBuilder createHighlighter(String... fields) {
         HighlightBuilder highlightBuilder = new HighlightBuilder();
-
+        highlightBuilder.order("sort");
+        highlightBuilder.preTags("<b>");
+        highlightBuilder.postTags("</b>");
         Arrays.stream(fields).forEach(field -> {
             HighlightBuilder.Field hgField2 = new HighlightBuilder.Field(field);
             hgField2.highlighterType("unified");
@@ -206,7 +207,6 @@ public class SearchService extends AbstractIndex {
             List<String> highlights = new ArrayList<>();
             highlights.addAll(getHighlights(highlightFields, FIELD_SECASIGN_DOC_CONTENT));
             highlights.addAll(0, getHighlights(highlightFields, FIELD_SECASIGN_DOC_NAME));
-            highlights.addAll(0, getHighlights(highlightFields, FIELD_SECASIGN_DOC_UPLOAD_DATE));
 
             SecasignboxDocument document = objectMapper.convertValue(hit.getSourceAsMap(), SecasignboxDocument.class);
             SearchStrike dto = new SearchStrike();
@@ -214,7 +214,7 @@ public class SearchService extends AbstractIndex {
             dto.setDocumentId(document.getDocumentId());
             dto.setDocumentName(document.getDocumentName());
             dto.setDocumentContent(document.getDocumentContent());
-            dto.setHighlights(replaceHighlihtCursivByBold(highlights));
+            dto.setHighlights(highlights);
             dtos.add(dto);
         }
 
@@ -228,23 +228,5 @@ public class SearchService extends AbstractIndex {
         }
         Text[] fragments = highlight.fragments();
         return Arrays.stream(fragments).map(Text::string).collect(Collectors.toList());
-    }
-
-    private List<String> replaceHighlihtCursivByBold(List<String> highlights) {
-        return highlights.stream().map(highlight -> {
-            highlight = highlight.replace("<em>", "<b>");
-            return highlight.replace("</em>", "</b>");
-        }).collect(Collectors.toList());
-    }
-
-    private List<SecasignboxDocument> getSearchResult(SearchResponse response) {
-        SearchHit[] searchHit = response.getHits().getHits();
-        List<SecasignboxDocument> documents = new ArrayList<>();
-
-        for (SearchHit hit : searchHit) {
-            documents.add(objectMapper.convertValue(hit.getSourceAsMap(), SecasignboxDocument.class));
-        }
-
-        return documents;
     }
 }
