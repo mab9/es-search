@@ -4,13 +4,19 @@ import ch.mab.search.es.TestHelperService;
 import ch.mab.search.es.model.ElasticsearchModel;
 import ch.mab.search.es.model.SearchStrike;
 import ch.mab.search.es.model.SecasignboxDocument;
+import org.elasticsearch.action.admin.indices.analyze.AnalyzeRequest;
+import org.elasticsearch.action.admin.indices.analyze.AnalyzeResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.indices.GetIndexRequest;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import javax.validation.constraints.AssertTrue;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
@@ -325,5 +331,36 @@ class SearchServiceTest {
         Assertions.assertEquals(doc1.getDocumentContent(), strikes.get(0).getDocumentContent());
         Assertions.assertEquals(doc2.getDocumentName(), strikes.get(1).getDocumentName());
         Assertions.assertEquals(doc2.getDocumentContent(), strikes.get(1).getDocumentContent());
+    }
+
+    @Test
+    void searchByTerm_symbol_returnCopyRightSymbol() throws IOException, InterruptedException {
+        if (indexService.isIndexExisting(INDEX)) {
+            indexService.deleteIndex(INDEX);
+        }
+
+        indexService.createIndex(INDEX, ElasticsearchModel.mappingAnalyzerSecasignDoc(),
+                                 ElasticsearchModel.settingGermanRebuiltAndUnderscoreAnalyzerSecasignDoc());
+        String analyzedText = "\"Some © text to analyze\", \"Some more text to analyze\"";
+        Thread.sleep(1000);
+        /*
+        AnalyzeRequest request = new AnalyzeRequest(INDEX);
+
+        request.text(analyzedText);
+        request.analyzer("rebuilt_standard_analyzer");
+
+        AnalyzeResponse response = client.indices().analyze(request, RequestOptions.DEFAULT);
+        List<AnalyzeResponse.AnalyzeToken> tokens = response.getTokens();
+
+        System.out.println(analyzedText);
+        tokens.forEach(token -> System.out.println(token.getTerm()));
+
+         */
+        SecasignboxDocument doc1 = testService.createSecasignDocCustomNameAndContent("2018_mandel_fx_threads", analyzedText);
+        searchService.indexDocument(INDEX, doc1);
+
+        Thread.sleep(1000);
+        List<SearchStrike> searchStrikes = searchService.queryByTermFuzzyPhraseOnDocNameAndContent(INDEX, "©");
+        Assertions.assertTrue(searchStrikes.get(0).getDocumentContent().contains("©"));
     }
 }

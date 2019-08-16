@@ -1,9 +1,9 @@
 package ch.mab.search.es.benchmark;
 
 import ch.mab.search.es.TestHelperService;
-import ch.mab.search.es.model.ElasticsearchModel;
 import ch.mab.search.es.business.IndexService;
 import ch.mab.search.es.business.SearchService;
+import ch.mab.search.es.model.ElasticsearchModel;
 import ch.mab.search.es.model.SecasignboxDocument;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.junit.jupiter.api.Test;
@@ -45,16 +45,16 @@ public class BenchmarkTest {
     }
 
     @Test
-    void index_test_set_1() throws  IOException {
-         if (indexService.isIndexExisting(INDEX)) {
+    void index_test_set_1() throws IOException {
+        if (indexService.isIndexExisting(INDEX)) {
             indexService.deleteIndex(INDEX);
         }
 
-        indexService.createIndex(INDEX, ElasticsearchModel.mappingAnalyzerSecasignDoc(), ElasticsearchModel
-                .settingGermanRebuiltAndUnderscoreAnalyzerSecasignDoc());
+        indexService.createIndex(INDEX, ElasticsearchModel.mappingAnalyzerSecasignDoc(),
+                                 ElasticsearchModel.settingGermanRebuiltAndUnderscoreAnalyzerSecasignDoc());
 
-
-        List<Path> files = testService.collectPathsOfPdfTestFiles("/home/mab/Documents/fhnw/sem-6/ip5/ip5-testdatenset");
+        List<Path> files =
+                testService.collectPathsOfPdfTestFiles("/home/mab/Documents/fhnw/sem-6/ip5/ip5-testdatenset");
         long totalFileSize = calculateTotalFileSize(files);
         List<SecasignboxDocument> docs = testService.readSecasignDocumentFromPdfs(files);
 
@@ -70,7 +70,7 @@ public class BenchmarkTest {
     }
 
     @Test
-    void frontend_tests_gen_all_docs() throws  IOException {
+    void frontend_tests_gen_all_docs() throws IOException {
         List<Path> files = testService.collectPathsOfPdfTestFiles();
         //files = files.subList(0, 20);
         long totalFileSize = calculateTotalFileSize(files);

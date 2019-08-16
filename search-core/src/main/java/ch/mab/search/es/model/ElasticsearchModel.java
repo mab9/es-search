@@ -189,7 +189,7 @@ public class ElasticsearchModel {
                             .startObject("underscore_analyzer")
                                 .field("type", "custom")
                                 .field("tokenizer", "underscore_tokenizer")
-                                .field("filter", "lowercase, german_stop, german_stemmer")
+                                .field("filter", "lowercase, german_stemmer")
                             .endObject()
                         .endObject()
                         .startObject("tokenizer")
